@@ -1,0 +1,172 @@
+{
+  "doc": "Academic-Regulations-2023.pdf",
+  "curation_note": "Curated by hand (with Claude's help). 'section' is the regulation clause number; 'page' is the PDF page. Summer-term rules are left out on purpose.",
+  "rules": [
+    {
+      "id": "reg_max_units",
+      "group": "regulations",
+      "description": "A first degree student can register for at most 25 units in a semester (higher degree: 20), excluding audit courses.",
+      "values": {"first_degree_max_units": 25, "higher_degree_max_units": 20},
+      "applies_to_batches": "all batches up to 2025",
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "1.01", "page": 4, "quote": "The maximum number of units, a first degree student can register is twenty-five, a higher degree student can register is twenty, excluding deficiency/Audit course(s)."},
+      "needs_verification": false,
+      "note": "For 2026+ batches (credit-hour framework) the limit is not stated anywhere in the data: treat as null."
+    },
+    {
+      "id": "reg_max_units_2026",
+      "group": "regulations",
+      "description": "Maximum load for 2026+ batches under the credit-hour framework.",
+      "values": {"first_degree_max_units": null},
+      "applies_to_batches": "2026 onwards",
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": null, "page": null, "quote": null},
+      "needs_verification": true,
+      "note": "Not stated in the 2023 regulations or the 2025-26 Bulletin."
+    },
+    {
+      "id": "reg_elective_categories",
+      "group": "regulations",
+      "description": "Electives are Discipline, Humanities or Open electives. Any elective counts as an Open Elective once the DEL and HUEL requirements are met. Dual degree: the DELs of one degree count as OPELs of the other.",
+      "values": {"categories": ["DEL", "HUEL", "OPEL"], "overflow_to": "OPEL", "dual_del_counts_as_opel": true},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "2.05", "page": 9, "quote": "The Elective courses fall under three categories: Discipline Electives, Humanities Electives, and Open Electives. ... Normally any elective course will be treated as an Open Elective once the student's requirements under Discipline Electives and Humanities Electives have been accounted for. Open elective requirement of Dual degree students is met by counting the Discipline electives of one degree as Open Electives of the other degree."},
+      "needs_verification": false,
+      "note": null
+    },
+    {
+      "id": "reg_extra_electives",
+      "group": "regulations",
+      "description": "At most 4 electives beyond the prescribed number (the DCA may increase this in extraordinary cases, within the unit limit).",
+      "values": {"max_extra_electives": 4},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "2.08", "page": 10, "quote": "Over and above the prescribed number of electives, a student of an integrated first degree programme will be allowed to take, on his/her own option, upto a maximum number of four electives. In extraordinary cases, the number may be increased by the DCA without violating limit mentioned in 1.01."},
+      "needs_verification": false,
+      "note": "The timetable repeats this (section VII.2) and adds that registering an extra elective without permission gets an 'RC'."
+    },
+    {
+      "id": "reg_higher_degree_course",
+      "group": "regulations",
+      "description": "Above a CGPA set by the AGC, a first degree student may take at most 1 higher degree course per semester. It counts as an Open Elective unless it is in the student's DEL pool.",
+      "values": {"max_per_semester": 1, "min_cgpa": null, "counts_as": "OPEL unless listed in the programme's DEL pool"},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "2.08", "page": 10, "quote": "Normally, a first degree student above a particular CGPA as prescribed by AGC will be allowed to register in maximum of one higher degree course per semester. This will be counted as an open elective unless the course is listed in the pool of discipline electives for his/her programme."},
+      "needs_verification": true,
+      "note": "The CGPA threshold is not given in any of the documents."
+    },
+    {
+      "id": "reg_prerequisites",
+      "group": "regulations",
+      "description": "Prerequisites must be met before registering in a course.",
+      "values": {"enforce_prerequisites": true},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "3.13", "page": 15, "quote": "Before a student can register in a course, he/she should have fulfilled the prerequisite conditions attached to that this course."},
+      "needs_verification": false,
+      "note": "Prerequisites come from code processed/bulletin.json -> course_descriptions[].prerequisites."
+    },
+    {
+      "id": "reg_prior_preparation",
+      "group": "regulations",
+      "description": "Prior preparation: PS-I needs all courses of earlier semesters; PS-II / thesis needs all named courses (including PS-I); a prescribed semester needs all named courses of earlier semesters. Up to 2 uncleared courses may be allowed by the DCA if they don't bear on core courses.",
+      "values": {
+        "ps1": "all courses in semesters before PS-I",
+        "ps2_or_thesis": "all named courses of the programme including PS-I, other than TS/PS-II",
+        "prescribed_semester": "all named courses in earlier semesters and terms",
+        "max_uncleared_allowed_by_dca": 2,
+        "uncleared_effect": "warning, not a block"
+      },
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "3.14", "page": 15, "quote": "(i) PS I for single/dual degree (i) Normally all courses in the semesters preceding PS I for his/her programme/composite programme. (ii) PSII/TS for single/dual degree (ii) All named courses of his/her programme including PS I, other than TS/PS-II. (iii) For any other prescribed semester of single/dual degree (iii) All named courses in semesters and terms preceding this set of courses in his/her programme. However, in case of (iii) above, the DCA may examine the case of a student who has not cleared at most two courses out of the prior-preparation package and if the \"not cleared courses\" has no direct bearing on the Core courses, a modified semester wise pattern may be recommended"},
+      "needs_verification": false,
+      "note": "'warning, not a block' is how the app should treat the DCA exception; it is our interpretation."
+    },
+    {
+      "id": "reg_other_degree_discipline_course",
+      "group": "regulations",
+      "description": "A discipline (core or elective) course of another degree needs the student's own prior preparation up to the 3rd year, 1st semester.",
+      "values": {"requires_prior_preparation_up_to": {"year": 3, "semester": 1}},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "3.15(b)(i)", "page": 16, "quote": "(i) Discipline (Core or Elective) course of a degree other than student's own degree(s) (i) Must have completed the prior-preparation of the third year first semester of his/her own programme."},
+      "needs_verification": false,
+      "note": null
+    },
+    {
+      "id": "reg_own_higher_degree_course",
+      "group": "regulations",
+      "description": "A higher degree course of the student's own discipline needs the first set of discipline core courses (2nd-year CDCs; dual degree: 2nd year for the first degree, 3rd year for the second).",
+      "values": {"requires_cdc_year": {"single": 2, "dual_first_degree": 2, "dual_second_degree": 3}},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "3.15(b)(ii)", "page": 16, "quote": "(ii) Courses of a higher degree of his/her own discipline(s) (ii) After clearing first set of his/her own Discipline core courses in the case of single degree. After clearing the first set of his/her Discipline core courses of the corresponding degree in the case of dual degree. Note that the first set of Discipline core courses are prescribed in the second year of the semester wise pattern of a single degree student; in the second year for the first degree and in the third year for the second degree of a dual degree student."},
+      "needs_verification": false,
+      "note": "The timetable (section V) adds: 'Students must have cleared or registered in the CDC of respective discipline of the higher degree course.'"
+    },
+    {
+      "id": "reg_over_under_prepared",
+      "group": "regulations",
+      "description": "No registration in a course the student is over- or under-prepared for. The app never recommends a course equivalent to one already done.",
+      "values": {"block_equivalent_of_completed": true},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "3.18", "page": 16, "quote": "Unless specifically permitted by these regulations (see 3.25II) no student can register in a course if He/she is considered to be overprepared or underprepared in relation to the contents of the course."},
+      "needs_verification": false,
+      "note": "Equivalents come from code processed/timetable.json -> courses[].equivalents."
+    },
+    {
+      "id": "reg_no_timetable_conflict",
+      "group": "regulations",
+      "description": "The final semester programme must have no timetable conflicts.",
+      "values": {"allow_clashes": false},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "3.19", "page": 16, "quote": "The semester programme drawn up finally should be free from any Timetable conflict."},
+      "needs_verification": false,
+      "note": null
+    },
+    {
+      "id": "reg_registration_order",
+      "group": "regulations",
+      "description": "Registration order: backlog first, then the current semester's prescribed courses, then higher-level courses / repeats. Electives are removed from BL and PSC before applying this.",
+      "values": {"order": ["backlog (BL)", "prescribed semester courses (PSC)", "higher level courses and electives"]},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "3.25 I(b)", "page": 18, "quote": "Every student in a semester must first register in his/her backlog courses. In other words, (BL) is the first charge on his/her registration. Only when He/she so registers in the full component of (BL) He/she can register in his/her (PSC). And only when He/she is also registered in the full component of (PSC) He/she can register in higher level courses/ repeat a course which He/she has already cleared"},
+      "needs_verification": false,
+      "note": "Clause 3.25 IV(n) lets a student delay or advance electives; their slots are removed from BL/PSC first."
+    },
+    {
+      "id": "reg_thesis_16",
+      "group": "regulations",
+      "description": "A 16-unit thesis is taken alone, with no other course.",
+      "values": {"thesis_units": 16, "max_concurrent_courses": 0},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "Thesis (Section 2)", "page": 11, "quote": "A student pursuing a 16 units Thesis must pursue it exclusively full time throughout the allotted period and there is no provision for taking other courses along with it."},
+      "needs_verification": false,
+      "note": null
+    },
+    {
+      "id": "reg_thesis_9",
+      "group": "regulations",
+      "description": "A 9-unit thesis allows at most 3 concurrent courses (at most 9 units). For a single degree student it raises the Open Elective requirement to at least 7 courses / 21 units.",
+      "values": {"thesis_units": 9, "max_concurrent_courses": 3, "max_concurrent_units": 9, "opel_requirement_single_degree": {"min_courses": 7, "min_units": 21}},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "Thesis (Section 2); 6.16(d)(i)", "page": 37, "quote": "A student pursuing a 9 units Thesis may concurrently pursue at most 3 courses (totaling at most 9 units) and will not be allowed to pursue any other course/component. ... If a single degree student opts for a 9-units Thesis, he/she must complete at least 2 additional elective courses (of at least 6 units) to meet graduation requirements i.e. the Open Electives requirement of such student is assumed to have increased to at least 7 courses and at least 21 units."},
+      "needs_verification": false,
+      "note": "The first sentence is on PDF page 11, the second on page 37."
+    },
+    {
+      "id": "reg_minor_one_only",
+      "group": "minor",
+      "description": "At most one minor; declared at the end of the 2nd year; a minor may exclude some programmes; departments may add CGPA / grade criteria.",
+      "values": {"max_minors": 1, "declare_at": {"year": 2, "when": "end"}, "may_have_exclusion_clause": true, "may_have_extra_criteria": true},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "7.37", "page": null, "quote": "A student may be admitted to at most one minor program. A student – if he/she chooses to pursue a minor – should declare at the end of the 2nd year that he/she will pursue a specific minor. Each minor program may come with an exclusion Clause stating that students from certain programs are not be eligible to pursue that minor. ... In particular, the overall CGPA and/or grades in specific courses relevant to the minor program may be considered for admission to the minor programme."},
+      "needs_verification": false,
+      "note": "Exclusion text per minor: code processed/bulletin.json -> minors[].exclusion_text."
+    },
+    {
+      "id": "reg_minor_cgpa",
+      "group": "minor",
+      "description": "Completing a minor needs a CGPA of at least 4.5 in the courses applied to it.",
+      "values": {"min_cgpa_in_minor_courses": 4.5},
+      "applies_to_batches": null,
+      "source": {"doc": "Academic-Regulations-2023.pdf", "section": "5.03(iv)", "page": 31, "quote": "the completion of a minor program requires the student to maintain a minimum CGPA of 4.5 in the courses applied to the minor."},
+      "needs_verification": false,
+      "note": null
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+# raw source PDFs are not committed (see README for where to put them)
+dataset/raw/
+
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.venv/
+venv/
+
+# task brief, kept local only
+postman_25_r2.pdf

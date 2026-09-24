@@ -1,0 +1,156 @@
+{
+  "doc": "timetable.pdf",
+  "semester_tag": "2026-27 Sem 1",
+  "curation_note": "Curated by hand (with Claude's help) from the timetable's legend (PDF page 6) and rules pages (115-117). The course table itself is in code processed/timetable.json.",
+  "periods": {
+    "id": "tt_periods",
+    "description": "Period number -> clock time. Each period is 50 minutes.",
+    "values": [
+      {"period": 1, "start": "08:00", "end": "08:50"},
+      {"period": 2, "start": "09:00", "end": "09:50"},
+      {"period": 3, "start": "10:00", "end": "10:50"},
+      {"period": 4, "start": "11:00", "end": "11:50"},
+      {"period": 5, "start": "12:00", "end": "12:50"},
+      {"period": 6, "start": "13:00", "end": "13:50"},
+      {"period": 7, "start": "14:00", "end": "14:50"},
+      {"period": 8, "start": "15:00", "end": "15:50"},
+      {"period": 9, "start": "16:00", "end": "16:50"},
+      {"period": 10, "start": "17:00", "end": "17:50"}
+    ],
+    "source": {"doc": "timetable.pdf", "section": "Legend, column 9 HOURS", "page": 6, "quote": "1 2 3 4 5 8-8:50AM 9-9:50AM 10-10:50AM 11-11:50AM 12-12:50PM 6 7 8 9 10 1-1:50PM 2-2:50PM 3-3:50PM 4-4:50PM 5-5:50PM"},
+    "needs_verification": false, "note": null
+  },
+  "days": {
+    "id": "tt_days",
+    "description": "Day codes used in the DAYS column.",
+    "values": {"M": "Monday", "T": "Tuesday", "W": "Wednesday", "Th": "Thursday", "F": "Friday", "S": "Saturday"},
+    "source": {"doc": "timetable.pdf", "section": "Legend, column 8 DAYS", "page": 6, "quote": "M = Monday T = Tuesday W = Wednesday Th = Thursday F = Friday S = Saturday"},
+    "needs_verification": false, "note": null
+  },
+  "midsem_sessions": {
+    "id": "tt_midsem_sessions",
+    "description": "Midsem exam session codes -> clock times.",
+    "values": {
+      "FN1": {"start": "09:00", "end": "10:30"},
+      "FN2": {"start": "11:00", "end": "12:30"},
+      "AN1": {"start": "14:00", "end": "15:30"},
+      "AN2": {"start": "16:00", "end": "17:30"}
+    },
+    "source": {"doc": "timetable.pdf", "section": "Legend, column 10 MIDSEM EXAM DATE (Session)", "page": 6, "quote": "FN1: 9.00 A.M. to 10.30 A.M. FN2: 11:00 A.M. to 12:30 P.M. AN1: 2:00 P.M. to 3:30 P.M. AN2: 4:00 P.M. to 5:30 P.M."},
+    "needs_verification": false, "note": null
+  },
+  "compre_sessions": {
+    "id": "tt_compre_sessions",
+    "description": "Comprehensive exam session codes -> clock times. Lab courses' compre dates are announced by the instructor-in-charge.",
+    "values": {
+      "FN": {"start": "09:00", "end": "12:00"},
+      "AN": {"start": "14:00", "end": "17:00"}
+    },
+    "source": {"doc": "timetable.pdf", "section": "Legend, column 11 COMPRE EXAM DATE (Session)", "page": 6, "quote": "FN: 9.00 A.M. to 12.00 P.M. AN: 2.00 P.M. to 5.00 P.M. Comprehensive examination date for lab courses to be announced by Instructor-in-charge"},
+    "needs_verification": false, "note": null
+  },
+  "credit_columns": {
+    "id": "tt_credit_columns",
+    "description": "Meaning of the credit columns. T, S and CH belong to the credit-hour framework (2026+ admissions).",
+    "values": {
+      "L": "lecture hours per week",
+      "P": "practical hours per week",
+      "T": "tutorial hours per week (credit-hour framework)",
+      "S": "self-study hours per week (credit-hour framework)",
+      "U": "total units of the course",
+      "CH": "total credit hours of the course (credit-hour framework)"
+    },
+    "source": {"doc": "timetable.pdf", "section": "Legend, column 4 CREDIT", "page": 6, "quote": "L = Lecture hours per week P = Practical hours per week T = Tutorial hours per week* S = Self-study hours per week* U = Total units of the course; CH = Total credit hours of the course* ... * Credit Hour framework, part of new curriculum, is approved by the Senate. This applies to all courses introduced for the students admitted in 2026 onwards"},
+    "needs_verification": false, "note": null
+  },
+  "com_code_rule": {
+    "id": "tt_com_code_2026",
+    "description": "Courses with COM COD >= 5000 are only for 2026 admissions into FD, HD and PhD.",
+    "values": {"min_com_code_2026_only": 5000},
+    "source": {"doc": "timetable.pdf", "section": "Footnote on every course-table page", "page": 10, "quote": "Courses with com cod >=5000 are meant only for 2026 admissions into FD, HD and PHD and not for others"},
+    "needs_verification": false, "note": "Already applied in code processed/timetable.json as allowed_for_before_2026_batch."
+  },
+  "rules": [
+    {
+      "id": "tt_lunch_hour",
+      "group": "timetable",
+      "description": "A lunch hour must be free every day, in period 4, 5 or 6.",
+      "values": {"lunch_periods": [4, 5, 6], "need_one_free_per_day": true},
+      "applies_to_batches": null,
+      "source": {"doc": "timetable.pdf", "section": "VII. Instructions regarding registration, 1", "page": 116, "quote": "that they have provision for lunch hour on all days (lunch hours are 4, 5 and 6)."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "tt_compre_no_clash",
+      "group": "timetable",
+      "description": "Comprehensive exam dates must not clash.",
+      "values": {"allow_compre_clash": false},
+      "applies_to_batches": null,
+      "source": {"doc": "timetable.pdf", "section": "VII. Instructions regarding registration, 1", "page": 116, "quote": "Comprehensive Examination Dates are not clashing."},
+      "needs_verification": false, "note": "A clash = same compre_date and compre_session in code processed/timetable.json."
+    },
+    {
+      "id": "tt_include_tests",
+      "group": "timetable",
+      "description": "Students must include common hours / tutorial hours and all test dates in their timetable.",
+      "values": {"check_tutorials": true, "check_midsem": true},
+      "applies_to_batches": null,
+      "source": {"doc": "timetable.pdf", "section": "VII. Instructions regarding registration, 1", "page": 116, "quote": "to include the common hour/tutorial hours of courses in their Timetable. To include test date, day & hour of all courses in their Timetable/Examination Schedule blank."},
+      "needs_verification": false, "note": "Midsem clashes (same date and session) are checked the same way as compre clashes."
+    },
+    {
+      "id": "tt_extra_electives",
+      "group": "timetable",
+      "description": "First degree students may register at most 4 electives more than the programme requires; more needs AUGS permission, otherwise the course gets 'RC'.",
+      "values": {"max_extra_electives": 4},
+      "applies_to_batches": null,
+      "source": {"doc": "timetable.pdf", "section": "VII. Instructions regarding registration, 2", "page": 116, "quote": "First degree students are allowed to register a maximum of four more electives than what is required in the programme. ... If students register for an extra elective without permission, their registration in it will be cancelled unilaterally and they will be awarded 'RC' in the course."},
+      "needs_verification": false, "note": "Same limit as Academic Regulations 2.08."
+    },
+    {
+      "id": "tt_ineligible_registration",
+      "group": "timetable",
+      "description": "Registering in a course the student isn't eligible for gets it cancelled with 'RC'.",
+      "values": {"penalty": "RC"},
+      "applies_to_batches": null,
+      "source": {"doc": "timetable.pdf", "section": "VII. Instructions regarding registration, 5", "page": 116, "quote": "If students register in any course for which they are not eligible, their registration in it will be cancelled unilaterally and they will be awarded 'RC' in such a course unless a request for substitution is made within the prescribed time, and substitution is permitted."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "tt_higher_degree_elective",
+      "group": "timetable",
+      "description": "Integrated first degree students taking a higher degree course as an elective must have cleared or be registered in the CDC of that course's discipline; at most one per semester.",
+      "values": {"max_per_semester": 1, "requires": "cleared or registered in the CDC of the respective discipline"},
+      "applies_to_batches": null,
+      "source": {"doc": "timetable.pdf", "section": "V. Suggestions for choosing electives (A)", "page": 115, "quote": "Students must have cleared or registered in the CDC of respective discipline of the higher degree course. Only one higher degree course can be taken as elective in a semester."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "tt_cdc_as_elective",
+      "group": "timetable",
+      "description": "Another programme's CDC taken as an elective needs the named prior-preparation courses of that CDC (group A & B programmes).",
+      "values": {"requires": "all named prior preparation courses of that discipline's CDC"},
+      "applies_to_batches": null,
+      "source": {"doc": "timetable.pdf", "section": "V. Suggestions for choosing electives, Registration of CDC as Elective", "page": 115, "quote": "CDC which is not a part of the compulsory requirements of the student (single degree or dual degree): For a CDC of group A & B programmers, students must have cleared all the named prior preparation courses of that discipline's CDC."},
+      "needs_verification": true, "note": "Which programmes are in groups A, B and C isn't defined in these documents."
+    }
+  ],
+  "known_gaps": [
+    {
+      "id": "gap_prereqs_not_in_timetable",
+      "description": "The timetable's prerequisites section only points to a website; prerequisites come from the Bulletin's course descriptions instead.",
+      "affected": {"courses": "all"},
+      "user_message": null,
+      "source": {"doc": "timetable.pdf", "section": "VI. Prerequisites/Restrictions", "page": 116, "quote": "Please see the details available at https://academic.bits-pilani..ac.in/"},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "gap_huel_pool_not_in_timetable",
+      "description": "The timetable's HUEL pool section only points to the Bulletin; the pool is extracted from the Bulletin.",
+      "affected": {"courses": "HUEL"},
+      "user_message": null,
+      "source": {"doc": "timetable.pdf", "section": "VIII. Pool of Humanities courses", "page": 117, "quote": "The list of courses which can be taken as Humanities electives to meet the general institutional requirement of eight units under the Humanities category can be found in the Institute Bulletin Part IV."},
+      "needs_verification": false, "note": null
+    }
+  ]
+}

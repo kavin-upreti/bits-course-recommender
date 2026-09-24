@@ -1,0 +1,335 @@
+{
+  "doc": "bulletin.pdf",
+  "edition": "2025-26",
+  "curation_note": "Curated by hand (with Claude's help) from the Bulletin's prose pages. Every value carries the quote it was read from. Pages are PDF page numbers; 'section' gives the Bulletin's own page label.",
+  "category_requirements": [
+    {
+      "id": "cat_humanities_electives",
+      "category": "Humanities Electives",
+      "group": "General Institutional Requirement",
+      "code": "HUEL",
+      "min_units": 8, "max_units": 8, "min_courses": 3, "max_courses": 3,
+      "named_courses": [],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1 The category-wise structure of each program", "page": 209, "quote": "Humanities Electives 8 3"},
+      "needs_verification": false, "note": "Chosen from the HUEL pool (code processed/bulletin.json -> huel_pool)."
+    },
+    {
+      "id": "cat_science_foundation",
+      "category": "Science Foundation",
+      "group": "General Institutional Requirement",
+      "code": null,
+      "min_units": 9, "max_units": 9, "min_courses": 3, "max_courses": 3,
+      "named_courses": [
+        {"title": "Introduction to Biological Sciences", "code": "BIO F101"},
+        {"title": "Fundamentals of Chemistry", "code": "CHEM F101"},
+        {"title": "Oscillations and Waves", "code": "PHY F101", "alternatives": ["PHY F102"]}
+      ],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1 / IV-2", "page": 209, "quote": "Science Foundation 9 3 ... a) Introduction to Biological Sciences, Fundamentals of Chemistry, and Oscillations and Waves, under the head of Science Foundation. For specific programs, Introduction to Oscillations and Waves may replace Oscillations and Waves."},
+      "needs_verification": false, "note": "Codes matched by exact title in the course descriptions (PHY F102 = Introduction to Oscillations and Waves)."
+    },
+    {
+      "id": "cat_mathematics_foundation",
+      "category": "Mathematics Foundation",
+      "group": "General Institutional Requirement",
+      "code": null,
+      "min_units": 12, "max_units": 12, "min_courses": 4, "max_courses": 4,
+      "named_courses": [],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1 The category-wise structure of each program", "page": 209, "quote": "Mathematics Foundation 12 4"},
+      "needs_verification": true, "note": "The Bulletin does not name the Mathematics Foundation courses in prose. The semester charts show MATH F101, MATH F102, MATH F113, MATH F211 (4 courses, 12 units) for most programmes, but the old pattern (MATH F111/F112) and BBA (MATH F114) differ; read them from each programme's chart."
+    },
+    {
+      "id": "cat_engineering_foundation",
+      "category": "Engineering Foundation",
+      "group": "General Institutional Requirement",
+      "code": null,
+      "min_units": 6, "max_units": 6, "min_courses": 2, "max_courses": 2,
+      "named_courses": [
+        {"title": "Electrical Sciences", "code": "EEE F111"},
+        {"title": "Thermodynamics", "code": "BITS F111"},
+        {"title": "Process Engineering", "code": "BITS F219"}
+      ],
+      "source": {"doc": "bulletin.pdf", "section": "IV-2", "page": 210, "quote": "b) Electrical Sciences, Thermodynamics and Process Engineering under the head of Engineering Foundation."},
+      "needs_verification": true, "note": "Three courses are named for a 2-course head; which two apply depends on the programme chart."
+    },
+    {
+      "id": "cat_technical_arts",
+      "category": "Technical Arts",
+      "group": "General Institutional Requirement",
+      "code": null,
+      "min_units": 10, "max_units": 10, "min_courses": 4, "max_courses": 4,
+      "named_courses": [
+        {"title": "Computer Programming", "code": "CS F111"},
+        {"title": "Introduction to Engineering Design and Prototyping", "code": "BITS F103"},
+        {"title": "Technical Report Writing", "code": "BITS F112"}
+      ],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1 / IV-2", "page": 210, "quote": "c) Computer Programming, Introduction to Engineering Design and Prototyping and Technical Report Writing under the head of Technical Arts."},
+      "needs_verification": true, "note": "Only 3 named courses for a 4-course / 10-unit head (4+4+2 = 10 units); the 4th course is not named in the prose. BITS F103 code taken from the semester charts."
+    },
+    {
+      "id": "cat_general_awareness",
+      "category": "General Awareness / Professional Courses",
+      "group": "General Institutional Requirement",
+      "code": null,
+      "min_units": 6, "max_units": 9, "min_courses": 3, "max_courses": 6,
+      "named_courses": [
+        {"title": "Social Conduct", "code": "BITS F101"},
+        {"title": "Innovation and Design Thinking", "code": "BITS F102"},
+        {"title": "Physical Well-being and Creativity", "code": "BITS K101", "non_letter_grade": true},
+        {"title": "Principles of Economics", "code": "ECON F211", "alternatives": ["MGTS F211"]},
+        {"title": "Environmental Studies", "code": "BITS F225", "non_letter_grade": true}
+      ],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1 / IV-2", "page": 210, "quote": "d) Social Conduct, Innovation and Design Thinking, Physical Well-being and Creativity*, Principles of Economics, or Principles of Management, and Environmental Studies* under the head of General Awareness / Professional courses. *[Students completing these courses will be awarded a non-letter grade (GOOD or POOR)]"},
+      "needs_verification": false, "note": "BITS K101 code taken from the semester charts."
+    },
+    {
+      "id": "cat_discipline_core",
+      "category": "Discipline Core",
+      "group": "Discipline Requirement",
+      "code": "CDC",
+      "min_units": 33, "max_units": 48, "min_courses": 10, "max_courses": 16,
+      "named_courses": [],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1", "page": 209, "quote": "Core 33 to 48 10 to 16"},
+      "needs_verification": false, "note": "Exact numbers per programme: programmes[].footer in code processed/bulletin.json."
+    },
+    {
+      "id": "cat_discipline_electives",
+      "category": "Discipline Electives",
+      "group": "Discipline Requirement",
+      "code": "DEL",
+      "min_units": 12, "max_units": 27, "min_courses": 4, "max_courses": 9,
+      "named_courses": [],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1", "page": 209, "quote": "Elective 12 to 27 4 to 9"},
+      "needs_verification": false, "note": "Exact numbers per programme: programmes[].footer."
+    },
+    {
+      "id": "cat_open_electives",
+      "category": "Open Electives",
+      "group": "Open Electives",
+      "code": "OPEL",
+      "min_units": 15, "max_units": 27, "min_courses": 5, "max_courses": 9,
+      "named_courses": [],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1", "page": 209, "quote": "(III) Open Electives 15 to 27 5 to 9"},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "cat_coursework_total",
+      "category": "Course-work Sub-Total",
+      "group": "Totals",
+      "code": null,
+      "min_units": 129, "max_units": null, "min_courses": 41, "max_courses": null,
+      "named_courses": [],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1", "page": 209, "quote": "Course-work Sub-Total 129 (min) 41 (min)"},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "cat_ps_or_thesis",
+      "category": "PS-I and PS-II, or Thesis",
+      "group": "Practice School / Thesis",
+      "code": null,
+      "options": [
+        {"name": "PS-I and PS-II", "units": 25, "courses": 2},
+        {"name": "Thesis", "min_units": 9, "max_units": 20, "courses": 1}
+      ],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1", "page": 209, "quote": "(IV) PS-I and II 25 2 OR OR OR Thesis 9 to 20 1"},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "cat_total",
+      "category": "Total",
+      "group": "Totals",
+      "code": null,
+      "min_units": 144, "max_units": null, "min_courses": 42, "max_courses": null,
+      "named_courses": [],
+      "source": {"doc": "bulletin.pdf", "section": "IV-1 / IV-2", "page": 210, "quote": "A student should complete the minimum number of courses and units required in each category as well as meet the minimum requirements of courses (42) and units (144) in total."},
+      "needs_verification": false, "note": "Requirements are counted in both courses and units; every category AND the totals must be met."
+    }
+  ],
+  "dual_degree_rules": [
+    {
+      "id": "dual_gir_not_repeated", "group": "dual_degree",
+      "description": "General Institutional Requirements are the same for both degrees and are not repeated.",
+      "values": {"gir_shared": true}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-2 Dual Degree Programs", "page": 210, "quote": "General Institute Requirements will remain the same for both the degrees of the composite dual-degree program and therefore need not be repeated."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "dual_discipline_separate", "group": "dual_degree",
+      "description": "Each degree's discipline requirements are met separately; a course meeting both degrees' discipline requirements is not repeated.",
+      "values": {"separate_discipline_requirements": true, "shared_course_counts_for_both": true}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-2 Dual Degree Programs", "page": 210, "quote": "While the Discipline Requirements of each of the two degrees in a dual degree program have to be met separately, any course that meets the discipline requirements of both the degree programs need not be repeated."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "dual_del_as_opel", "group": "dual_degree",
+      "description": "Discipline electives of either degree may fulfil the open elective requirement of the other.",
+      "values": {"del_of_one_counts_as_opel_of_other": true}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-2 Dual Degree Programs", "page": 210, "quote": "In addition the Discipline Elective courses of either of the two degrees in a dual degree program may be used to fulfill the open elective requirement of the other degree."},
+      "needs_verification": false, "note": "Also stated in Academic Regulations 2.08."
+    },
+    {
+      "id": "dual_ps2_or_thesis_each", "group": "dual_degree",
+      "description": "A PS-II or thesis is needed for each degree: 2 PS-II, 2 theses, or 1 PS-II + 1 thesis.",
+      "values": {"options": [["PS-II", "PS-II"], ["Thesis", "Thesis"], ["PS-II", "Thesis"]]}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-2 Dual Degree Programs", "page": 210, "quote": "A PS-II or Thesis must be done to meet the requirements of each degree. Therefore to complete the dual degree program a student must complete one of the following: 2 Practice School-II courses; 2 Thesis courses; 1 Practice School-II course and 1 Thesis course."},
+      "needs_verification": false, "note": null
+    }
+  ],
+  "project_course_rules": [
+    {
+      "id": "project_max_as_del", "group": "project",
+      "description": "At most 3 project courses count towards Discipline Electives, within the degree's discipline (or an allied one if the department says so), with sub-limits.",
+      "values": {"max_total": 3, "max_by_type": {"study": 1, "laboratory": 2, "design": 2, "special": 1}},
+      "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-125 Project Type Courses", "page": 333, "quote": "A student may avail a maximum of 3 Project courses to meet the Discipline Electives Requirement under the head of (Discipline) Electives with the following limitations: (a) All of these Project courses should be (i) within the Discipline (for which the degree is being awarded) or (ii) from an allied Discipline if so specified by the Department offering the degree (b) The projects may be chosen from under these sub-heads. (i) Study Projects (maximum of 1) (ii) Laboratory (maximum of 2) (iii) Design Projects (maximum of 2) (iv) Special Projects (maximum of 1)"},
+      "needs_verification": false, "note": "Project codes: XXX F266 study, F366/F367 laboratory, F376/F377 design, F491 special (code processed/bulletin.json -> project_course_patterns)."
+    },
+    {
+      "id": "project_max_as_opel", "group": "project",
+      "description": "At most 3 project courses (any discipline) as Open Electives.",
+      "values": {"max_total": 3}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-125 Project Type Courses", "page": 333, "quote": "A student may avail a maximum of 3 Project courses (under any of the heads mentioned above offered by any discipline as an Open Elective."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "project_max_total", "group": "project",
+      "description": "At most 5 project courses in total against elective slots of any category.",
+      "values": {"max_total": 5}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-125 Project Type Courses", "page": 333, "quote": "However, in total a student may avail at most 5 Project courses against Electives slots in any category."},
+      "needs_verification": false, "note": null
+    }
+  ],
+  "huel_rules": [
+    {
+      "id": "huel_not_own_discipline", "group": "huel",
+      "description": "A course (or its equivalent) of the student's own discipline(s) can't count as a HUEL, even if it is in the pool.",
+      "values": {"exclude_own_discipline": true, "include_equivalents": true}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-127 Pool of Humanities courses", "page": 335, "quote": "It may be noted that a student cannot count a course (or its equivalent) of his/her own discipline (s) as a humanities elective even if it is listed in this pool of humanities electives."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "huel_pool_only", "group": "huel",
+      "description": "Humanities electives are taken from the listed pool; the pool ends at SANS F111 and the 'Other Courses' after it are not HUELs.",
+      "values": {"pool_ref": "code processed/bulletin.json -> huel_pool"}, "applies_to_batches": ["2011 onwards"],
+      "source": {"doc": "bulletin.pdf", "section": "IV-125 Pool of Humanities courses for first degree programmes", "page": 333, "quote": "The following is the list of courses from which Humanities Electives can be taken by the students in different first degree programs to meet the general institutional requirement of eight units under the Humanities elective category"},
+      "needs_verification": false, "note": "Batch note from timetable.pdf section VIII: 'POOL OF HUMANITIES COURSES FOR STUDENTS ADMITTED IN 2011 ONWARDS'."
+    }
+  ],
+  "minor_rules": [
+    {
+      "id": "minor_units", "group": "minor",
+      "description": "Minor core at most 4 courses / 12 units; electives at least 2 courses / 6 units; total at least 5 courses / 15 units.",
+      "values": {"core_max_courses": 4, "core_max_units": 12, "electives_min_courses": 2, "electives_min_units": 6, "total_min_courses": 5, "total_min_units": 15},
+      "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-129 Requirements for a minor", "page": 337, "quote": "Minor – Core 4 (max) 12 (max) Minor – Electives 2 (min) 6 (min) Minor – Total 5 (min) 15 (min)"},
+      "needs_verification": false, "note": "Some minors ask for more (e.g. 6 courses / 18 units): minors[].min_courses / min_units in code processed/bulletin.json."
+    },
+    {
+      "id": "minor_one_project", "group": "minor",
+      "description": "At most one project / seminar course towards a minor.",
+      "values": {"max_project_courses": 1}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-129 Elective Pool", "page": 337, "quote": "A student may use at most one project / seminar type course to meet the requirements of a minor."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "minor_overlap", "group": "minor",
+      "description": "At most 2 courses (6 units) of a minor may be mandatory courses of the major (GIR excluding Humanities, or discipline core).",
+      "values": {"max_overlap_courses": 2, "max_overlap_units": 6, "overlap_sources": ["General Institutional Requirement (excluding HUEL)", "Discipline Core"]},
+      "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-129 Overlap in requirements", "page": 337, "quote": "At most 2 courses (and at most 6 units) out of the above requirement (of 5 courses and 15 units) may be met by mandatory courses of the student's degree i.e. major (or degrees i.e. majors) : i.e. from the general institutional requirement (excluding Humanities requirement) or the (Major) discipline Core(s)."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "minor_no_double_count", "group": "minor",
+      "description": "No course counts for two minors, or for two majors and a minor.",
+      "values": {"double_count_allowed": false}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-129 Overlap in requirements", "page": 337, "quote": "No course may be used to meet the requirements of two different minors nor may a course be used to the meet the requirements of two majors and a minor."},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "minor_gpa", "group": "minor",
+      "description": "CGPA of at least 4.5 in the courses applied to the minor.",
+      "values": {"min_cgpa_in_minor_courses": 4.5}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-129 GPA requirement", "page": 337, "quote": "A student – on completion of the requirements for a minor – must have maintained a cumulative GPA of 4.5 or above (out of 10) in the courses applied to the minor."},
+      "needs_verification": false, "note": "Also in Academic Regulations 5.03(iv)."
+    },
+    {
+      "id": "minor_declare", "group": "minor",
+      "description": "A minor is declared at the end of the 2nd year.",
+      "values": {"declare_at": {"year": 2, "when": "end"}}, "applies_to_batches": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-129 Process for declaring / obtaining a minor", "page": 337, "quote": "A student – if he/she chooses to pursue a minor – must declare at the end of the 2nd year that he/she will pursue a specific minor."},
+      "needs_verification": false, "note": "At most one minor: Academic Regulations 7.37."
+    }
+  ],
+  "known_gaps": [
+    {
+      "id": "gap_2026_no_structure",
+      "description": "The Bulletin is the 2025-26 edition and has no programme structure for the 2026 batch (new credit-hour framework, U-codes, COM COD >= 5000 courses).",
+      "affected": {"batches": ["2026 onwards"], "courses": "timetable courses with allowed_for_before_2026_batch = false (196 entries) and U-codes (49 entries)"},
+      "user_message": "Your batch (2026) follows the new credit-hour curriculum, which isn't in the 2025-26 Bulletin, so remaining requirements can't be calculated. I can still show course details and this semester's timetable.",
+      "source": {"doc": "timetable.pdf", "section": "Legend, column 4 footnote", "page": 6, "quote": "Credit Hour framework, part of new curriculum, is approved by the Senate. This applies to all courses introduced for the students admitted in 2026 onwards"},
+      "needs_verification": false, "note": null
+    },
+    {
+      "id": "gap_batch_range",
+      "description": "The Bulletin does not state which admission batches each semester-wise pattern applies to. Most programmes show the new first year (BITS F103, MATH F101/F102); B.E. Robotics & Industrial Automation still shows MATH F111/F112; the timetable offers both.",
+      "affected": {"programmes": "all", "example": "B.E. Robotics & Industrial Automation"},
+      "user_message": "The Bulletin doesn't say which batches this programme chart is for, so treat requirement counts as a guide and confirm with your registration advisor.",
+      "source": {"doc": "bulletin.pdf", "section": "IV-3 to IV-33 semester-wise patterns", "page": 227, "quote": null},
+      "needs_verification": true, "note": "Found by comparing the extracted charts (code processed/bulletin.json)."
+    },
+    {
+      "id": "gap_biot_codes",
+      "description": "B.E. Biotechnology lists BIOT course codes that aren't in the timetable or its equivalents list (except BIOT F424). The timetable offers BIO courses with the same titles; see code_mappings.",
+      "affected": {"programmes": ["B.E. Biotechnology", "B.E. Biotechnology with Specialization in Applied Molecular Biology"]},
+      "user_message": "Some Biotechnology courses are listed under BIOT codes in the Bulletin; I've matched them to BIO courses with the same title, which is an inference, not an official equivalence.",
+      "source": {"doc": "bulletin.pdf", "section": "IV-106 BIOTECHNOLOGY", "page": 314, "quote": null},
+      "needs_verification": true, "note": null
+    },
+    {
+      "id": "gap_eee_footer",
+      "description": "B.E. Electrical & Electronics footer gives a range for core units.",
+      "affected": {"programmes": ["B.E. Electrical & Electronics"]},
+      "user_message": "The Bulletin gives EEE's discipline-core requirement as 47 or 48 units; I use 48 to be safe.",
+      "source": {"doc": "bulletin.pdf", "section": "IV-10", "page": 218, "quote": "Discipline Core -47 or 48 Units (14 Courses)"},
+      "needs_verification": true, "note": "The '48 to be safe' choice is a suggestion for the app, not from the Bulletin."
+    },
+    {
+      "id": "gap_min_footers",
+      "description": "M.Sc. Biological Sciences and both M.Sc. Physics programmes give discipline electives as minimums ('15 Units (min) - 4 Courses (min)'); M.Sc. Semiconductor and Nanoscience says '15 Units (4 Courses (min)'. The extractor reads them as 15 units / 4 courses.",
+      "affected": {"programmes": ["M.Sc. Biological Sciences", "M.Sc. Physics", "M.Sc. Physics specialization in Space Science and Technology", "M.Sc. Semiconductor and Nanoscience"]},
+      "user_message": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-21 / IV-25 / IV-27", "page": 229, "quote": "*Discipline Electives - 15 Units (min)-(4 Courses (min))"},
+      "needs_verification": false, "note": "The ideation said these footers were missing; they exist, in a '(min)' form."
+    },
+    {
+      "id": "gap_bba_heading",
+      "description": "The course list heading for the BBA programme isn't in the PDF's text layer; its list is stored with discipline = null (core department BBA).",
+      "affected": {"programmes": ["Bachelor of Business Administration (Honours)"]},
+      "user_message": null,
+      "source": {"doc": "bulletin.pdf", "section": "IV-124", "page": 332, "quote": null},
+      "needs_verification": true, "note": "Link it to the BBA programme by its core department."
+    },
+    {
+      "id": "gap_pilani_only",
+      "description": "The timetable covers Pilani campus only; the Bulletin covers all campuses.",
+      "affected": {"campuses": ["Goa", "Hyderabad", "Dubai"]},
+      "user_message": "Course offerings and timings are for Pilani campus only.",
+      "source": {"doc": "timetable.pdf", "section": "Academic calendar heading", "page": 2, "quote": "ACADEMIC CALENDAR FOR BITS, PILANI – PILANI CAMPUS"},
+      "needs_verification": false, "note": null
+    }
+  ],
+  "code_mappings": [
+    {"id": "map_biot_f211", "from": "BIOT F211", "to": "BIO F211", "title": "Biological Chemistry", "inferred": true, "offered_this_semester": true, "reason": "exact title match with a Bulletin course description", "needs_verification": true},
+    {"id": "map_biot_f212", "from": "BIOT F212", "to": "BIO F212", "title": "Microbiology", "inferred": true, "offered_this_semester": true, "reason": "exact title match", "needs_verification": true},
+    {"id": "map_biot_f213", "from": "BIOT F213", "to": "BIO F213", "title": "Cell Biology", "inferred": true, "offered_this_semester": true, "reason": "exact title match", "needs_verification": true},
+    {"id": "map_biot_f215", "from": "BIOT F215", "to": "BIO F215", "title": "Biophysics", "inferred": true, "offered_this_semester": false, "reason": "exact title match", "needs_verification": true},
+    {"id": "map_biot_f241", "from": "BIOT F241", "to": "BIO F418", "title": "Genetic Engineering Techniques", "inferred": true, "offered_this_semester": true, "reason": "exact title match, but the course numbers differ (F241 vs F418)", "needs_verification": true},
+    {"id": "map_biot_f242", "from": "BIOT F242", "to": "BIO F242", "title": "Introduction to Bioinformatics", "inferred": true, "offered_this_semester": false, "reason": "exact title match", "needs_verification": true},
+    {"id": "map_biot_f243", "from": "BIOT F243", "to": "BIO F243", "title": "Genetics", "inferred": true, "offered_this_semester": false, "reason": "exact title match", "needs_verification": true},
+    {"id": "map_biot_f244", "from": "BIOT F244", "to": "BIO F244", "title": "Instrumental Methods of Analysis", "inferred": true, "offered_this_semester": false, "reason": "exact title match", "needs_verification": true},
+    {"id": "map_biot_f311", "from": "BIOT F311", "to": "BIO F311", "title": "Recombinant DNA Technology", "inferred": true, "offered_this_semester": true, "reason": "exact title match; BIO G517 has the same title but is a higher-degree course, so the same-number match was chosen", "needs_verification": true},
+    {"id": "map_biot_f342", "from": "BIOT F342", "to": "BIO F342", "title": "Immunology", "inferred": true, "offered_this_semester": false, "reason": "exact title match", "needs_verification": true},
+    {"id": "map_biot_f352", "from": "BIOT F352", "to": "BIO F352", "title": "Cell and Tissue Culture Technology", "inferred": true, "offered_this_semester": false, "reason": "exact title match", "needs_verification": true}
+  ],
+  "code_mappings_note": "BIOT codes with no BIO course of the same title (F245, F314, F343, F344, F345, F346, F347, F413, F416, F417, F420, F422, F423) are left unmapped; BIOT F424 is offered under its own code."
+}

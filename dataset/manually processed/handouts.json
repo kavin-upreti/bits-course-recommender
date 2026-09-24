@@ -1,0 +1,176 @@
+{
+  "doc": "handouts/",
+  "curation_note": "Hand-typed records for handouts the extractor cannot read (scanned PDFs). extractors/handouts.py uses these records instead of parsing the listed files. Keys match the Handout record in code processed/handouts.json.",
+  "handouts": [
+    {
+      "title": "Elementary Real Analysis",
+      "description": "Countable and uncountable sets, Real numbers and their properties, Sequence of real numbers, Continuous functions of real variable, Metric space, Compact set, Connected set, Completeness, Continuous function on a metric space, Riemann integration, Sequence and series of functions.\nThis course aims to discuss several properties of real numbers and functions of real variables. The notions of metric spaces will be introduced and a few concepts in analysis, such as continuity, the convergence of sequences, the convergence of sequences and series of functions, will be discussed. We will also discuss the rigorous theory of Riemann integration. Students will also learn to read and write rigorous proofs so that they can communicate mathematical ideas effectively. This course is also a basic course to build background for other advanced courses in mathematics.",
+      "learning_outcomes": [
+        "CLO1. Students will learn about real numbers and their elementary properties, sequences of real numbers, and the generalization of distance to abstract sets.",
+        "CLO2. Students will be introduced to the notion of convergence of series and sequence of functions.",
+        "CLO3. Students will study the rigorous theory of integration."
+      ],
+      "topics": [
+        "Preliminaries and Logic: revision of functions, sets, and logic, some methods of proofs",
+        "Real numbers: construction of real numbers, real numbers as an ordered field, extended real numbers, Infimum and Supremum, Archimedean property",
+        "Cardinality of a set: countable and uncountable sets",
+        "Sequences and series: sequences, limits of a sequence, monotone and Cauchy sequences, subsequence, limsup and liminf, series, decimal expansion of real numbers",
+        "Metric Spaces: metric spaces, compact sets, perfect sets, connected sets, Cantor set; sequences in metric spaces, Cauchy sequence, complete metric space; continuous functions, uniform continuity, continuity and compactness, continuity and connectedness",
+        "Sequence and Series of functions: point-wise and uniform convergence of sequence and series of functions and related properties, integrability",
+        "Integration: the Riemann integral and its properties"
+      ],
+      "textbooks": [
+        "Walter Rudin, Principles of Mathematical Analysis, McGraw Hill Education (India), 3rd Edition, 2023.",
+        "Kenneth A. Ross, Elementary Analysis: The Theory of Calculus, Undergraduate text in Mathematics, Springer, 2nd Edition, 2013."
+      ],
+      "references": [
+        "Robert G. Bartle, Donald R. Sherbert, Introduction to Real Analysis, Wiley India Edition, 4th Edition, 2011.",
+        "Tom M. Apostal, Mathematical Analysis, Narosa, 2nd Edition, 2002.",
+        "Terrence Tao, Analysis I and II, Hindustan Book Agency, 2017.",
+        "Paul Zorn, Understanding Analysis, CRC Press, 2nd Edition, 2018."
+      ],
+      "evaluation": [
+        {
+          "name": "Continuous Evaluation",
+          "kind": "quiz",
+          "weightage_percent": 21.0,
+          "duration": null,
+          "date": "TBA",
+          "nature": "CB",
+          "remarks": "4 announced quizzes each of 7% weightage; the best three are considered for grading"
+        },
+        {
+          "name": "Mid-Semester Test",
+          "kind": "midsem",
+          "weightage_percent": 34.0,
+          "duration": "90 Min.",
+          "date": "As announced by AUGSD",
+          "nature": "CB",
+          "remarks": null
+        },
+        {
+          "name": "Comprehensive Examination",
+          "kind": "compre",
+          "weightage_percent": 45.0,
+          "duration": "180 Min.",
+          "date": "As announced by AUGSD",
+          "nature": "CB/OB",
+          "remarks": null
+        }
+      ],
+      "has_midsem": true,
+      "attendance": {
+        "text": "Each student is expected to attend all classes and participate in all evaluation components.",
+        "required": true,
+        "percent": null
+      },
+      "makeup": {
+        "text": "Make-up for mid-semester test and comprehensive exam will be granted only in genuine cases. There is no makeup for the quizzes under any circumstances.",
+        "allowed": true
+      },
+      "consultation_hours": "Saturday 11:00 AM--12:00 PM.",
+      "printed_course_no": "MATH F214/ MAC F214",
+      "source_pages": {
+        "title": 1,
+        "description": 1,
+        "learning_outcomes": 1,
+        "textbooks": 1,
+        "references": 1,
+        "topics": 1,
+        "evaluation": 2,
+        "attendance": 2,
+        "makeup": 2,
+        "consultation_hours": 2
+      },
+      "needs_verification": false,
+      "note": "Scanned PDF (no text layer): typed in by hand from the page images. Topic cells are cut off at the right edge in the scan; the visible text was completed from the handout's own module titles.",
+      "file": "348_MAC_F214.pdf",
+      "course_no": "MAC F214"
+    },
+    {
+      "title": "Elementary Real Analysis",
+      "description": "Countable and uncountable sets, Real numbers and their properties, Sequence of real numbers, Continuous functions of real variable, Metric space, Compact set, Connected set, Completeness, Continuous function on a metric space, Riemann integration, Sequence and series of functions.\nThis course aims to discuss several properties of real numbers and functions of real variables. The notions of metric spaces will be introduced and a few concepts in analysis, such as continuity, the convergence of sequences, the convergence of sequences and series of functions, will be discussed. We will also discuss the rigorous theory of Riemann integration. Students will also learn to read and write rigorous proofs so that they can communicate mathematical ideas effectively. This course is also a basic course to build background for other advanced courses in mathematics.",
+      "learning_outcomes": [
+        "CLO1. Students will learn about real numbers and their elementary properties, sequences of real numbers, and the generalization of distance to abstract sets.",
+        "CLO2. Students will be introduced to the notion of convergence of series and sequence of functions.",
+        "CLO3. Students will study the rigorous theory of integration."
+      ],
+      "topics": [
+        "Preliminaries and Logic: revision of functions, sets, and logic, some methods of proofs",
+        "Real numbers: construction of real numbers, real numbers as an ordered field, extended real numbers, Infimum and Supremum, Archimedean property",
+        "Cardinality of a set: countable and uncountable sets",
+        "Sequences and series: sequences, limits of a sequence, monotone and Cauchy sequences, subsequence, limsup and liminf, series, decimal expansion of real numbers",
+        "Metric Spaces: metric spaces, compact sets, perfect sets, connected sets, Cantor set; sequences in metric spaces, Cauchy sequence, complete metric space; continuous functions, uniform continuity, continuity and compactness, continuity and connectedness",
+        "Sequence and Series of functions: point-wise and uniform convergence of sequence and series of functions and related properties, integrability",
+        "Integration: the Riemann integral and its properties"
+      ],
+      "textbooks": [
+        "Walter Rudin, Principles of Mathematical Analysis, McGraw Hill Education (India), 3rd Edition, 2023.",
+        "Kenneth A. Ross, Elementary Analysis: The Theory of Calculus, Undergraduate text in Mathematics, Springer, 2nd Edition, 2013."
+      ],
+      "references": [
+        "Robert G. Bartle, Donald R. Sherbert, Introduction to Real Analysis, Wiley India Edition, 4th Edition, 2011.",
+        "Tom M. Apostal, Mathematical Analysis, Narosa, 2nd Edition, 2002.",
+        "Terrence Tao, Analysis I and II, Hindustan Book Agency, 2017.",
+        "Paul Zorn, Understanding Analysis, CRC Press, 2nd Edition, 2018."
+      ],
+      "evaluation": [
+        {
+          "name": "Continuous Evaluation",
+          "kind": "quiz",
+          "weightage_percent": 21.0,
+          "duration": null,
+          "date": "TBA",
+          "nature": "CB",
+          "remarks": "4 announced quizzes each of 7% weightage; the best three are considered for grading"
+        },
+        {
+          "name": "Mid-Semester Test",
+          "kind": "midsem",
+          "weightage_percent": 34.0,
+          "duration": "90 Min.",
+          "date": "As announced by AUGSD",
+          "nature": "CB",
+          "remarks": null
+        },
+        {
+          "name": "Comprehensive Examination",
+          "kind": "compre",
+          "weightage_percent": 45.0,
+          "duration": "180 Min.",
+          "date": "As announced by AUGSD",
+          "nature": "CB/OB",
+          "remarks": null
+        }
+      ],
+      "has_midsem": true,
+      "attendance": {
+        "text": "Each student is expected to attend all classes and participate in all evaluation components.",
+        "required": true,
+        "percent": null
+      },
+      "makeup": {
+        "text": "Make-up for mid-semester test and comprehensive exam will be granted only in genuine cases. There is no makeup for the quizzes under any circumstances.",
+        "allowed": true
+      },
+      "consultation_hours": "Saturday 11:00 AM--12:00 PM.",
+      "printed_course_no": "MATH F214/ MAC F214",
+      "source_pages": {
+        "title": 1,
+        "description": 1,
+        "learning_outcomes": 1,
+        "textbooks": 1,
+        "references": 1,
+        "topics": 1,
+        "evaluation": 2,
+        "attendance": 2,
+        "makeup": 2,
+        "consultation_hours": 2
+      },
+      "needs_verification": false,
+      "note": "Scanned PDF (no text layer): typed in by hand from the page images. Topic cells are cut off at the right edge in the scan; the visible text was completed from the handout's own module titles.",
+      "file": "362_MATH_F214.pdf",
+      "course_no": "MATH F214"
+    }
+  ]
+}
