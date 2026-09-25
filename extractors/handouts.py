@@ -322,6 +322,7 @@ def minutes(text: str) -> int | None:
 
 
 def component(name: str, weight: float | None, duration: str, date: str, remarks: str) -> dict:
+    name = re.sub(r"^[\uf000-\uf8ff•▪●◦➢*#\s]+", "", name).strip()  # PDF bullet glyphs before the name
     lowered = f"{name} {remarks}".lower()
     closed, opened = re.search(r"closed?[\s-]*book|\bcb\b", lowered), re.search(r"open[\s-]*book|\bob\b", lowered)
     group, individual = re.search(r"\bgroup|\bteam", lowered), re.search(r"individual", lowered)

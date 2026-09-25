@@ -410,7 +410,9 @@ def parse_course_lists(lines_by_page: list[tuple[int, list[str]]]) -> tuple[list
             course = re.match(r"^\*?\s*([A-Z]{2,5})\s+([A-Z])\s?(\d{3}[A-Z]?)\s+(.*)$", line)
             if course:
                 title, units = split_units(course[4])
-                listed = ListedCourse(normalise_code(course[1], course[2], course[3]), title, **units, pool=pool,
+                # why: pools belong to discipline electives only; the last pool label must not leak into later lists
+                listed = ListedCourse(normalise_code(course[1], course[2], course[3]), title, **units,
+                                      pool=pool if section == "electives" else None,
                                       non_letter_grade=line.startswith("*") or bool(re.search(r"\d\*\s*$", line)))
                 destination = target()
                 if pending_alternative and last is not None:

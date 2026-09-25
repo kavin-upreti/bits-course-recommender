@@ -21693,7 +21693,7 @@
     ],
     "evaluation": [
       {
-        "name": "*Quiz 1",
+        "name": "Quiz 1",
         "kind": "quiz",
         "weightage_percent": 10.0,
         "duration_minutes": 40,
@@ -21703,7 +21703,7 @@
         "remarks": null
       },
       {
-        "name": "*Quiz 2",
+        "name": "Quiz 2",
         "kind": "quiz",
         "weightage_percent": 10.0,
         "duration_minutes": 40,
@@ -21713,7 +21713,7 @@
         "remarks": null
       },
       {
-        "name": "*Quiz 3",
+        "name": "Quiz 3",
         "kind": "quiz",
         "weightage_percent": 10.0,
         "duration_minutes": 40,
@@ -21845,7 +21845,7 @@
         "remarks": "Open book"
       },
       {
-        "name": " Tutorial Test – 1",
+        "name": "Tutorial Test – 1",
         "kind": "tutorial_test",
         "weightage_percent": 12.0,
         "duration_minutes": 60,
@@ -21855,7 +21855,7 @@
         "remarks": "Closed book"
       },
       {
-        "name": " Tutorial Test – 2",
+        "name": "Tutorial Test – 2",
         "kind": "tutorial_test",
         "weightage_percent": 13.0,
         "duration_minutes": 60,
@@ -26166,7 +26166,7 @@
         "remarks": "Closed Book"
       },
       {
-        "name": "*Class participation and attendance",
+        "name": "Class participation and attendance",
         "kind": "class_participation",
         "weightage_percent": 10.0,
         "duration_minutes": 10,
@@ -38557,7 +38557,7 @@
         "remarks": "Close Book/Open Book"
       },
       {
-        "name": "*Class participation and attendance",
+        "name": "Class participation and attendance",
         "kind": "class_participation",
         "weightage_percent": 10.0,
         "duration_minutes": null,
@@ -38673,7 +38673,7 @@
         "remarks": "Close Book/ Open Book"
       },
       {
-        "name": "*Class participation and attendance",
+        "name": "Class participation and attendance",
         "kind": "class_participation",
         "weightage_percent": 10.0,
         "duration_minutes": null,
@@ -38805,7 +38805,7 @@
         "remarks": "Open book"
       },
       {
-        "name": "*Class participation and attendance",
+        "name": "Class participation and attendance",
         "kind": "class_participation",
         "weightage_percent": null,
         "duration_minutes": null,
@@ -39078,7 +39078,7 @@
         "remarks": "Open book/Close book"
       },
       {
-        "name": "*Class participation and attendance",
+        "name": "Class participation and attendance",
         "kind": "class_participation",
         "weightage_percent": 10.0,
         "duration_minutes": null,
@@ -49482,7 +49482,7 @@
         "remarks": "Open Book*"
       },
       {
-        "name": "* For open book in midsem/comprehensive exam, you can bring only textbook and hand-written class notes.",
+        "name": "For open book in midsem/comprehensive exam, you can bring only textbook and hand-written class notes.",
         "kind": "midsem",
         "weightage_percent": null,
         "duration_minutes": null,
@@ -54191,7 +54191,7 @@
         "remarks": null
       },
       {
-        "name": "*Quiz",
+        "name": "Quiz",
         "kind": "quiz",
         "weightage_percent": 10.0,
         "duration_minutes": 15,
@@ -54201,7 +54201,7 @@
         "remarks": null
       },
       {
-        "name": "**Assignments",
+        "name": "Assignments",
         "kind": "assignment",
         "weightage_percent": 20.0,
         "duration_minutes": null,
@@ -54327,7 +54327,7 @@
         "remarks": null
       },
       {
-        "name": "*Quiz",
+        "name": "Quiz",
         "kind": "quiz",
         "weightage_percent": 10.0,
         "duration_minutes": 15,
@@ -54337,7 +54337,7 @@
         "remarks": null
       },
       {
-        "name": "**Assignments",
+        "name": "Assignments",
         "kind": "assignment",
         "weightage_percent": 20.0,
         "duration_minutes": null,
@@ -63962,7 +63962,7 @@
         "remarks": "CB + OB"
       },
       {
-        "name": "*Continuous Assessment",
+        "name": "Continuous Assessment",
         "kind": "other",
         "weightage_percent": 30.0,
         "duration_minutes": null,
@@ -64066,7 +64066,7 @@
         "remarks": "CB + OB"
       },
       {
-        "name": "*Continuous Assessment",
+        "name": "Continuous Assessment",
         "kind": "other",
         "weightage_percent": 30.0,
         "duration_minutes": null,
@@ -66173,7 +66173,7 @@
         "remarks": "CB + OB"
       },
       {
-        "name": "*Continuous Assessment",
+        "name": "Continuous Assessment",
         "kind": "other",
         "weightage_percent": 30.0,
         "duration_minutes": null,
@@ -66277,7 +66277,7 @@
         "remarks": "CB + OB"
       },
       {
-        "name": "*Continuous Assessment",
+        "name": "Continuous Assessment",
         "kind": "other",
         "weightage_percent": 30.0,
         "duration_minutes": null,
