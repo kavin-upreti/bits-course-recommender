@@ -11,7 +11,9 @@ Run order: `.venv/bin/python extractors/timetable.py`, `.venv/bin/python extract
 
 Each handout record has two lists:
 
-- `issues`: things a person should check. `needs_verification` is true exactly when `issues` is non-empty (129 of 540 handouts).
+- `issues`: things a person should check. `needs_verification` is true exactly when `issues` is non-empty (3 of 540 handouts: PDFs that are really another course's handout).
 - `notes`: things noticed and handled, so not flagged: `printed_code_differs` (a cross-listed or old/new code whose title matches the timetable's title for the file's code), `weightage_in_marks_converted`, `no_course_plan_in_handout` (project/thesis/study courses).
 
-Scanned handouts (`348_MAC_F214.pdf`, `362_MATH_F214.pdf`) have no text layer; their pages were typed into `dataset/manually processed/handouts.json` and go through the same code. `course_no` always comes from the file name. Flagged handouts (unusual table layouts, weights that don't add up, plans without table lines) are left for manual review or the LLM pass on flagged handouts; nothing is guessed.
+Scanned handouts (`348_MAC_F214.pdf`, `362_MATH_F214.pdf`) have no text layer; their pages were typed into `dataset/manually processed/handouts.json` and go through the same code. `course_no` always comes from the file name. Handouts the rules couldn't read (113: unusual table layouts, plans without table lines, project-course templates) were checked by hand. Their values are written in `extractors/build_handout_overrides.py` and `extractors/handout_overrides_text.py`, built into `dataset/manually processed/handout_overrides.json` (`.venv/bin/python extractors/build_handout_overrides.py`), and applied by the extractor; those records carry the note `manually_checked`. Where a handout's own printed weights don't add up to 100, they are kept as printed with the note `handout_weights_add_up_to: <total>`.
+
+Still flagged: `017_BIO_G523.pdf` (really the BIO F212 handout), `160_CS_F111.pdf` (the CS U111 handout), `344_INSTR_F491.pdf` (the ECE F366 lab-project handout). The right PDFs are needed for these courses.

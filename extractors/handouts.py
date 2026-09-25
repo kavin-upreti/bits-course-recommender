@@ -57,10 +57,11 @@ for noisy in ("pdfminer", "httpx", "sentence_transformers", "huggingface_hub"):
 HANDOUTS_DIR = PROJECT_ROOT / "dataset" / "raw" / "handouts"
 OUTPUT_PATH = PROJECT_ROOT / "dataset" / "code processed" / "handouts.json"
 MANUAL_PATH = PROJECT_ROOT / "dataset" / "manually processed" / "handouts.json"  # typed-in scanned handouts
+OVERRIDES_PATH = PROJECT_ROOT / "dataset" / "manually processed" / "handout_overrides.json"  # hand-checked values
 TIMETABLE_PATH = PROJECT_ROOT / "dataset" / "code processed" / "timetable.json"
 
 SECTIONS = {  # section -> heading text (the part before ':'), matched at the start of a line
-    "description": r"(course )?description",
+    "description": r"((course|catalog|general) )?description",
     "objectives": r"(course )?(scope|objectives?|aims?)\b.*",
     "outcomes": r"(course )?(learning )?outcomes?",
     "plan": r"(course|lecture) plan.*|modules|plan of work|list of experiments",
@@ -70,7 +71,8 @@ SECTIONS = {  # section -> heading text (the part before ':'), matched at the st
     "consultation": r"(chamber )?consultation.*",
     "other": r"text ?books?.*|reference.*|notices?.*|method of .*|nc .*|criterion.*|grading.*|note.*",
 }
-HEADING = re.compile(r"^(?:\d{1,2}(?:\.\d)?\s*[.):]?\s*)?([A-Za-z][A-Za-z &/-]{2,40}?)\s*(?::|$)(.*)$")
+# "5. Evaluation:", "I. Course Description:", "1. 2. Scope ...", "2. a) Objective:", "Course Description (Scope and Objective):"
+HEADING = re.compile(r"^(?:(?:\d{1,2}(?:\.\d)?|[IVX]{1,4})\s*[.):]?\s*)*(?:[a-z]\)\s*)?([A-Za-z][A-Za-z &/-]{2,40}?)\s*(?:\([^)]*\))?\s*(?::|$)(.*)$")
 KINDS = {  # evaluation component name -> kind; first match wins; \b because "tut" is inside "institute"
     "midsem": r"\bmid", "compre": r"\bcompre|\bfinal exam|\bend ?-?sem", "viva": r"\bviva", "tutorial_test": r"\btut",
     "quiz": r"\bquiz|\bclass tests?", "lab": r"\blab|\bpractical|\bexperiment", "assignment": r"\bassign|\bhome ?work",
@@ -118,11 +120,16 @@ def load_pdf(path: Path) -> Document | None:
         with pdfplumber.open(path) as pdf:
             pages = [page.dedupe_chars() for page in pdf.pages]  # dedupe: "fake bold" letters are drawn twice
             lines = [(p.page_number, clean(t)) for p in pages for t in (p.extract_text(x_tolerance=1.5) or "").splitlines() if clean(t)]
-            tables = [(p.page_number, [[clean(c or "") for c in row] for row in t]) for p in pages for t in p.extract_tables() if t]
+            tables = [(p.page_number, [[cell_lines(c) for c in row] for row in t]) for p in pages for t in p.extract_tables() if t]
         return Document(lines, tables)
     except Exception:
         log.exception("Could not read %s", path.name)
         return None
+
+
+def cell_lines(cell: str | None) -> str:
+    """Table cell with its line breaks kept (instructor cells list one name per line)."""
+    return "\n".join(clean(part) for part in (cell or "").split("\n") if clean(part))
 
 
 def load_manual() -> dict[str, Document]:
@@ -163,8 +170,13 @@ def split_sections(lines: list[Line]) -> dict[str, list[Line]]:
     return sections
 
 
-def label_value(lines: list[Line], label: str) -> tuple[str | None, int | None]:
-    """Value after 'label :' in the first 40 lines (the header block)."""
+def label_value(lines: list[Line], label: str, tables=()) -> tuple[str | None, int | None]:
+    """Value after 'label :' in the first 40 lines, or next to a 'label' cell in a page-1 header table."""
+    for page, rows in tables:
+        for row in rows if page == 1 else []:
+            cells = [c for c in row if c]
+            if len(cells) >= 2 and re.fullmatch(rf"(?:{label})\W*", cells[0], re.I):
+                return clean(cells[1]), page
     for page, line in lines[:40]:
         match = re.search(rf"\b(?:{label})\s*[:\-]\s*(.+)", line, re.I)
         if match and match[1].strip(" []"):
@@ -172,21 +184,43 @@ def label_value(lines: list[Line], label: str) -> tuple[str | None, int | None]:
     return None, None
 
 
-def extract_instructors(lines: list[Line]) -> tuple[list[str], int | None]:
-    """Names on 'Instructor-in-charge : ...' / 'Instructors : ...' lines, IC first."""
-    names, page_found = [], None
+INSTRUCTOR_LABEL = r"\W*(?:\d+\s*)?(?:team of |tutorial |lab |practical |course |lecture )?instructors?(?:[\s–-]*in[\s–-]*charge)?(?:\s*\([\w ]+\))?(?:\s*names?)?\W*"
+
+
+NOT_A_NAME = r"^(na|n/a|tba|nil|none|name|-)$|time ?table|dean|agsr|supervisor|mentor|in-?charge|\bhod\b|building"
+
+
+def extract_instructors(lines: list[Line], tables=()) -> tuple[list[str], int | None]:
+    """Names on 'Instructor-in-charge : ...' lines, or next to an instructor label cell in a page-1 header table."""
+    values = []  # (page, text holding names)
+    for page, rows in tables:
+        for row in rows if page == 1 else []:
+            cells = [c for c in row if c]
+            if len(cells) >= 2 and re.fullmatch(INSTRUCTOR_LABEL, cells[0], re.I):
+                for cell in cells[1:]:  # one name per line; a one-word line is a wrapped surname
+                    parts = cell.split("\n")
+                    joined = [p for i, p in enumerate(parts) if i == 0 or len(p.split()) > 1 or "(" in p]
+                    for i, part in enumerate(parts[1:], 1):
+                        if len(part.split()) == 1 and "(" not in part:
+                            joined[[j for j, q in enumerate(joined) if parts.index(q) < i][-1]] += f" {part}"
+                    values.append((page, ", ".join(joined)))
     for page, line in lines[:40]:
-        match = re.match(r"^\W*((?:team of |tutorial |lab |practical |course )?instructors?(?:[\s–-]*in[\s–-]*charge)?)\s*[:\-–]\s*(.+)", line, re.I)
-        if not match:
-            continue
-        page_found = page_found or page
-        value = re.sub(r"[\w.+-]+@[\w.-]+|\(.*?\)|\[|\]|https?://\S+", " ", match[2])
+        match = re.match(rf"^({INSTRUCTOR_LABEL}?)\s*[:\-–]?\s+(.+)", line, re.I)  # the colon is often missing
+        if match and re.search(r"instructor", match[1], re.I):
+            values.append((page, match[2]))
+    names, page_found = [], min((page for page, _ in values), default=None)
+    for page, text in values:
+        value = re.sub(r"[\w.+-]+\s?@[\w.-]+|\([^)]*(?:\)|$)|\[|\]|https?://\S+|\b(?:lecture|tutorial|lab|practical)s?\s*:|\bI/?C\b", " ", text, flags=re.I)
+        value = re.sub(rf"{INSTRUCTOR_LABEL}\s*:", ",", value, flags=re.I)  # "A Practical Instructors : B" on one line
         for name in re.split(r",|;|\band\b|&", value):
             name = clean(name).strip(" .:-")
-            if name and len(name.split()) <= 5 and not re.search(r"\d|\b(is|are|the|of|for|to|course)\b", name, re.I) \
-                    and name.lower() not in ("na", "n/a", "tba", "nil"):
+            if name[:1].isupper() and len(name.split()) <= 5 and not re.search(r"\d|\b(is|are|the|of|for|to|course)\b", name, re.I) \
+                    and not re.search(NOT_A_NAME, name, re.I):
                 names.append(name)
-    return list(dict.fromkeys(names)), page_found
+    unique = {}  # case-insensitive: "SHASHI PRAKASH SINGH" and "Shashi Prakash Singh" are one person
+    for name in names:
+        unique.setdefault(re.sub(r"\W", "", name.lower()), name)
+    return list(unique.values()), page_found
 
 
 def title_matches(title: str | None, timetable_title: str | None) -> bool:
@@ -227,8 +261,10 @@ def table_groups(tables, header_test) -> list[tuple[list[list[str]], int]]:
     (same width, and either the same header again or no header of its own)."""
     groups, current = [], None
     for page, rows in tables:
-        head = [c.lower() for c in rows[0]]
-        repeated = current is not None and head == [c.lower() for c in current[0]]
+        head = [clean(c).lower() for c in rows[0]]
+        if current is not None and len(current) == 1 and len(rows[0]) == len(current[0]) + 1:
+            current[0] = [""] + current[0]  # why: a header-only table whose empty first cell pdfplumber dropped
+        repeated = current is not None and head == [clean(c).lower() for c in current[0]]
         if current and len(rows[0]) == len(current[0]) and (repeated or not (is_plan_header(head) or is_eval_header(head))):
             current.extend(rows[1:] if repeated else rows)
         elif header_test(head):
@@ -249,7 +285,7 @@ def value_at(head: list[str], row: list[str], index: int | None) -> str:
         return ""
     for i in (index, index - 1, index + 1):
         if 0 <= i < len(row) and row[i] and (i == index or (i < len(head) and not head[i])):
-            return row[i]
+            return clean(row[i])
     return ""
 
 
@@ -257,11 +293,12 @@ def extract_topics(tables) -> tuple[list[str], int | None, bool]:
     """(topics, page, plan table found): the module column + the best topic column of every plan table."""
     topics, first_page = [], None
     for rows, page in table_groups(tables, is_plan_header):
-        head = [c.lower() for c in rows[0]]
+        head = [clean(c).lower() for c in rows[0]]
         numbers = tuple(i for i, n in enumerate(head) if re.search(r"\bno\.?$|number|^s\.? ?n", n))
         module = column(head, r"modul")  # "Module Number" columns hold the module names
-        topic = next((column(head, p, (module, *numbers)) for p in (r"topic", r"descri|content", r"session|lecture", r"experiment|title")
-                      if column(head, p, (module, *numbers)) is not None), None)
+        # why: "Lectures" may be a column of lecture numbers next to "Lecture session"; the wordiest candidate wins
+        candidates = [i for i, n in enumerate(head) if i != module and re.search(r"topic|descri|content|session|lecture|experiment|title", n)]
+        topic = max(candidates, key=lambda i: sum(len(re.findall(r"[A-Za-z]{3,}", value_at(head, r, i))) for r in rows[1:]), default=None)
         first_page = first_page or page
         for row in rows[1:]:
             for col in (module, topic):
@@ -301,7 +338,7 @@ def extract_evaluation(tables) -> tuple[list[dict], int | None, list[str], list[
     if not groups:
         return [], None, ["evaluation_not_found"], []
     rows, page = groups[0]
-    head = [c.lower() for c in rows[0]]
+    head = [clean(c).lower() for c in rows[0]]
     weight = column(head, r"weigh|%|percent") if column(head, r"weigh|%|percent") is not None else column(head, r"marks")
     name = column(head, r"component|evaluation|modules", (weight,))
     name = name if name is not None else next((i for i in range(len(head)) if i != weight), None)
@@ -408,19 +445,19 @@ def printed_code_issue(name: str, course_no: str, printed: str | None, title: st
     return f"printed_code_{'differs' if same else 'mismatch'}: {'/'.join(codes)}", not same
 
 
-def extract_handout(name: str, doc: Document, models, titles: dict[str, str]) -> Handout:
+def extract_handout(name: str, doc: Document, models, titles: dict[str, str], overrides: dict | None = None) -> Handout:
     match = re.match(r"\d+_([A-Z]+)_([A-Z]\d{3}[A-Z]?)", name)
     course_no = f"{match[1]} {match[2]}"
-    issues, notes = [], []
+    issues, notes, overrides = [], [], overrides or {}
     sections = split_sections(doc.lines)
 
-    title, title_page = label_value(doc.lines, r"course\s*(?:title|name)|title of the course|name of the course")
+    title, title_page = label_value(doc.lines, r"course\s*(?:title|name)|title of the course|name of the course", doc.tables)
     if not title:
         issues.append("title_not_found")
-    printed, printed_page = label_value(doc.lines, r"course\s*(?:no\.?|number|code)")
+    printed, printed_page = label_value(doc.lines, r"course\s*(?:no\.?|number|code)", doc.tables)
     if code := printed_code_issue(name, course_no, printed, title, titles):
         (issues if code[1] else notes).append(code[0])
-    instructors, instructors_page = extract_instructors(doc.lines)
+    instructors, instructors_page = extract_instructors(doc.lines, doc.tables)
     about, about_page = build_about(sections)
     if not about:
         issues.append("about_not_found")
@@ -434,6 +471,18 @@ def extract_handout(name: str, doc: Document, models, titles: dict[str, str]) ->
         (notes if individual else issues).append("no_course_plan_in_handout" if individual else "topics_not_found")
     evaluation, evaluation_page, eval_issues, eval_notes = extract_evaluation(doc.tables)
     issues, notes = issues + eval_issues, notes + eval_notes
+
+    # Hand-checked values (build_handout_overrides.py) replace what the rules couldn't read, and clear their issues.
+    override = overrides.get(name, {})
+    fixed = {"evaluation": ("evaluation", "weightage"), "topics": ("topics",), "title": ("title",), "about": ("about",)}
+    for key, prefixes in fixed.items():
+        if key in override:
+            issues = [i for i in issues if not i.startswith(prefixes)]
+            notes = [n for n in notes if not (key == "topics" and n == "no_course_plan_in_handout") and
+                     not (key == "evaluation" and n.startswith("weightage"))]
+    evaluation = override.get("evaluation", evaluation)
+    topics, title, about = override.get("topics", topics), override.get("title", title), override.get("about", about)
+    notes += override.get("notes", []) + (["manually_checked"] if override else [])
 
     attendance, attendance_method = extract_attendance(models, doc, sections.get("attendance"), issues)
     kinds = list(dict.fromkeys(c["kind"] for c in evaluation))
@@ -452,6 +501,13 @@ def extract_handout(name: str, doc: Document, models, titles: dict[str, str]) ->
 
 
 # ------------------------------ run
+def load_overrides() -> dict:
+    try:
+        return json.loads(OVERRIDES_PATH.read_text())
+    except FileNotFoundError:
+        return {}
+
+
 def load_titles() -> dict[str, str]:
     try:
         return {c["course_no"]: c["title"] for c in json.loads(TIMETABLE_PATH.read_text())["courses"]}
@@ -481,7 +537,8 @@ def main(selected: list[str]) -> None:
     with multiprocessing.Pool(8) as pool:  # why: table detection is ~1 s per PDF; 8 processes cut the run to minutes
         docs.update(zip([f.name for f in to_read], pool.map(load_pdf, to_read)))
     models, titles = Models(EMBEDDING_MODEL, NLI_MODEL), load_titles()  # after the pool: don't fork torch state
-    records = [extract_handout(f.name, docs[f.name], models, titles) for f in files if docs.get(f.name)]
+    overrides = load_overrides()
+    records = [extract_handout(f.name, docs[f.name], models, titles, overrides) for f in files if docs.get(f.name)]
     output = OUTPUT_PATH.with_name("handouts_sample.json") if selected else OUTPUT_PATH
     if not selected and OUTPUT_PATH.exists():
         OUTPUT_PATH.replace(OUTPUT_PATH.with_name("handouts_old.json"))

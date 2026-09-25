@@ -1,0 +1,5872 @@
+{
+ "018_BIO_G524.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid Semester test",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": 90,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "CB/OB"
+   },
+   {
+    "name": "Surprise and announced Quizzes",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 15,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "CB"
+   },
+   {
+    "name": "Experiments and Lab quiz",
+    "kind": "quiz",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "CB & OB"
+   },
+   {
+    "name": "Seminars/ Assignment",
+    "kind": "assignment",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": null,
+    "remarks": "OB"
+   },
+   {
+    "name": "Comprehensive",
+    "kind": "compre",
+    "weightage_percent": 30,
+    "duration_minutes": 120,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "CB & OB"
+   }
+  ]
+ },
+ "019_BIO_G524.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid Semester test",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": 90,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "CB/OB"
+   },
+   {
+    "name": "Surprise and announced Quizzes",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 15,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "CB"
+   },
+   {
+    "name": "Experiments and Lab quiz",
+    "kind": "quiz",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "CB & OB"
+   },
+   {
+    "name": "Seminars/ Assignment",
+    "kind": "assignment",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": null,
+    "remarks": "OB"
+   },
+   {
+    "name": "Comprehensive",
+    "kind": "compre",
+    "weightage_percent": 30,
+    "duration_minutes": 120,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "CB & OB"
+   }
+  ]
+ },
+ "029_BITS_E574.pdf": {
+  "evaluation": [
+   {
+    "name": "Seminar I",
+    "kind": "seminar",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced",
+    "remarks": null
+   },
+   {
+    "name": "Seminar II",
+    "kind": "seminar",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced",
+    "remarks": null
+   },
+   {
+    "name": "Seminar III",
+    "kind": "seminar",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced by the DCA",
+    "remarks": null
+   },
+   {
+    "name": "Final Project Report",
+    "kind": "project",
+    "weightage_percent": 35,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   }
+  ]
+ },
+ "033_BITS_F103.pdf": {
+  "evaluation": [
+   {
+    "name": "Attendance-associated discussion - Workshop",
+    "kind": "class_participation",
+    "weightage_percent": 6,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Workshop",
+    "remarks": "18 marks"
+   },
+   {
+    "name": "Lab Assignments (Evaluatives)",
+    "kind": "lab",
+    "weightage_percent": 23.33,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "As announced by IC",
+    "remarks": "70 marks; best 4 out of 6; no makeup"
+   },
+   {
+    "name": "Project",
+    "kind": "project",
+    "weightage_percent": 17.33,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Two design review meetings",
+    "remarks": "52 marks"
+   },
+   {
+    "name": "Mid-semester test (On prototyping)",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "As announced by AUGSD",
+    "remarks": "60 marks"
+   },
+   {
+    "name": "Comprehensive exam (written + computer-based test)",
+    "kind": "compre",
+    "weightage_percent": 33.33,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "As announced by AUGSD",
+    "remarks": "100 marks"
+   }
+  ]
+ },
+ "069_BITS_U103.pdf": {
+  "evaluation": [
+   {
+    "name": "Attendance-associated discussion - Workshop",
+    "kind": "class_participation",
+    "weightage_percent": 6,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Workshop",
+    "remarks": "18 marks"
+   },
+   {
+    "name": "Lab Assignments (Evaluatives)",
+    "kind": "lab",
+    "weightage_percent": 23.33,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "As announced by IC",
+    "remarks": "70 marks; best 4 out of 6; no makeup"
+   },
+   {
+    "name": "Project",
+    "kind": "project",
+    "weightage_percent": 17.33,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Two design review meetings",
+    "remarks": "52 marks"
+   },
+   {
+    "name": "Mid-semester test (On prototyping)",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "As announced by AUGSD",
+    "remarks": "60 marks"
+   },
+   {
+    "name": "Comprehensive exam (written + computer-based test)",
+    "kind": "compre",
+    "weightage_percent": 33.33,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "As announced by AUGSD",
+    "remarks": "100 marks"
+   }
+  ]
+ },
+ "039_BITS_F219.pdf": {
+  "evaluation": [
+   {
+    "name": "Continuous Evaluation",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Best 3 of 4, Closed book"
+   },
+   {
+    "name": "Lab component",
+    "kind": "lab",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "In lab",
+    "remarks": null
+   },
+   {
+    "name": "Mid Semester",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As announced in the timetable",
+    "remarks": "Open/Closed book"
+   },
+   {
+    "name": "Comprehensive",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As announced in the timetable",
+    "remarks": "Closed book"
+   }
+  ]
+ },
+ "043_BITS_F314.pdf": {
+  "evaluation": [
+   {
+    "name": "Quiz – 1",
+    "kind": "quiz",
+    "weightage_percent": 7.5,
+    "duration_minutes": 45,
+    "nature": "CB",
+    "is_group": null,
+    "date": "23 Sept 2026",
+    "remarks": "Closed Book; best two of three quizzes count (30% together)"
+   },
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "OB",
+    "is_group": null,
+    "date": "06 Oct 2026 (AN1)",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Quiz – 2",
+    "kind": "quiz",
+    "weightage_percent": 7.5,
+    "duration_minutes": 45,
+    "nature": "CB",
+    "is_group": null,
+    "date": "06 Nov 2026",
+    "remarks": "Closed Book; best two of three"
+   },
+   {
+    "name": "Quiz – 3",
+    "kind": "quiz",
+    "weightage_percent": 7.5,
+    "duration_minutes": 45,
+    "nature": "CB",
+    "is_group": null,
+    "date": "23 Nov 2026",
+    "remarks": "Closed Book; best two of three"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "07 Dec 2026 (FN)",
+    "remarks": "Closed Book"
+   }
+  ]
+ },
+ "053_BITS_F437.pdf": {
+  "evaluation": [
+   {
+    "name": "Midsemester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Assignments & Classroom Participation",
+    "kind": "assignment",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Open Book; printed as 20+10"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Closed Book"
+   }
+  ]
+ },
+ "056_BITS_F463.pdf": {
+  "evaluation": [
+   {
+    "name": "Quizzes Q1-Q4 (best 2 of 4)",
+    "kind": "quiz",
+    "weightage_percent": 20,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Closed Book; 10% each, best two count"
+   },
+   {
+    "name": "Programming Assignment",
+    "kind": "assignment",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "TBA",
+    "remarks": null
+   },
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "07-10-2026, FN1",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": "OB",
+    "is_group": null,
+    "date": "08-12-2026, FN",
+    "remarks": "Open Book"
+   }
+  ]
+ },
+ "059_BITS_F468.pdf": {
+  "evaluation": [
+   {
+    "name": "Mentor-Mentee Engagement",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Class Participation",
+    "kind": "class_participation",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Key Deliverables (customer discovery, market validation, go-to-market)",
+    "kind": "other",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Investor Documents and Pitch Presentations",
+    "kind": "presentation",
+    "weightage_percent": 50,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "evaluated by external jury members"
+   }
+  ],
+  "topics": [
+   "Orientation Session for Founders, Mentors and SMEs",
+   "Workshop: The Entrepreneurial Mindset",
+   "Workshop: Design Thinking",
+   "Workshop: BMC/LMC",
+   "Workshop: Customer Discovery & Market Insights",
+   "Workshop: Building Your Team and HR Fundamentals",
+   "Workshop: Funding the Venture",
+   "Workshop: Finance Fundamentals",
+   "Workshop: Operations Management",
+   "Workshop: Other People's Technology",
+   "Workshop: Impactful Pitching",
+   "Elevator Pitch",
+   "Pitching - Mock Round",
+   "Pitching - Semi-Finals",
+   "Pitching Finals",
+   "1:1 Mentoring + Chamber Hours"
+  ]
+ },
+ "229_ECON_F415.pdf": {
+  "evaluation": [
+   {
+    "name": "Mentor-Mentee Engagement",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Class Participation",
+    "kind": "class_participation",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Key Deliverables (customer discovery, market validation, go-to-market)",
+    "kind": "other",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Investor Documents and Pitch Presentations",
+    "kind": "presentation",
+    "weightage_percent": 50,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "evaluated by external jury members"
+   }
+  ],
+  "topics": [
+   "Orientation Session for Founders, Mentors and SMEs",
+   "Workshop: The Entrepreneurial Mindset",
+   "Workshop: Design Thinking",
+   "Workshop: BMC/LMC",
+   "Workshop: Customer Discovery & Market Insights",
+   "Workshop: Building Your Team and HR Fundamentals",
+   "Workshop: Funding the Venture",
+   "Workshop: Finance Fundamentals",
+   "Workshop: Operations Management",
+   "Workshop: Other People's Technology",
+   "Workshop: Impactful Pitching",
+   "Elevator Pitch",
+   "Pitching - Mock Round",
+   "Pitching - Semi-Finals",
+   "Pitching Finals",
+   "1:1 Mentoring + Chamber Hours"
+  ]
+ },
+ "061_BITS_F482.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid Semester Exam",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "08/10 AN1",
+    "remarks": "Close Book"
+   },
+   {
+    "name": "Surprise Quizzes",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Close Book; 1 quiz in buffer"
+   },
+   {
+    "name": "Assignments/Exercises",
+    "kind": "assignment",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced in the class",
+    "remarks": "1 assignment in buffer"
+   },
+   {
+    "name": "Business Plan Preparation and Presentation",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced in the class",
+    "remarks": null
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 30,
+    "duration_minutes": 180,
+    "nature": "OB",
+    "is_group": null,
+    "date": "12/12 FN",
+    "remarks": "Partially Close and Open Book"
+   }
+  ]
+ },
+ "228_ECON_F414.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid Semester Exam",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "08/10 AN1",
+    "remarks": "Close Book"
+   },
+   {
+    "name": "Surprise Quizzes",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Close Book; 1 quiz in buffer"
+   },
+   {
+    "name": "Assignments/Exercises",
+    "kind": "assignment",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced in the class",
+    "remarks": "1 assignment in buffer"
+   },
+   {
+    "name": "Business Plan Preparation and Presentation",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced in the class",
+    "remarks": null
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 30,
+    "duration_minutes": 180,
+    "nature": "OB",
+    "is_group": null,
+    "date": "12/12 FN",
+    "remarks": "Partially Close and Open Book"
+   }
+  ]
+ },
+ "063_BITS_G511.pdf": {
+  "evaluation": [
+   {
+    "name": "Research Plan",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Format, objectives, literature survey and presentation"
+   },
+   {
+    "name": "Development related activities",
+    "kind": "other",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Report (5+5), viva/presentation (5+5)"
+   },
+   {
+    "name": "Research related activities",
+    "kind": "other",
+    "weightage_percent": 70,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Day-to-day observation 20, reports 30, seminar/viva 20"
+   }
+  ]
+ },
+ "064_BITS_G540.pdf": {
+  "evaluation": [
+   {
+    "name": "Research Proposal",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Format/contents 5, presentation 20"
+   },
+   {
+    "name": "Development related activities",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Report 15, viva/presentation 10"
+   },
+   {
+    "name": "Research related activities",
+    "kind": "other",
+    "weightage_percent": 50,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Reports 30, seminar/presentation 20"
+   }
+  ]
+ },
+ "065_BITS_G562T.pdf": {
+  "evaluation": [
+   {
+    "name": "Viva-I",
+    "kind": "viva",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "5th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid-sem written report",
+    "kind": "midsem",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid-sem presentation",
+    "kind": "midsem",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th week",
+    "remarks": null
+   },
+   {
+    "name": "Viva-II",
+    "kind": "viva",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "15th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Dissertation",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Last day of class work",
+    "remarks": "evaluated jointly with the DRC examiner"
+   },
+   {
+    "name": "Final viva-voce",
+    "kind": "viva",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Actual date announced by DRC",
+    "remarks": "evaluated jointly with the DRC examiner"
+   }
+  ]
+ },
+ "066_BITS_G563T.pdf": {
+  "evaluation": [
+   {
+    "name": "Viva-I",
+    "kind": "viva",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "5th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid-sem written report",
+    "kind": "midsem",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid-sem presentation",
+    "kind": "midsem",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th week",
+    "remarks": null
+   },
+   {
+    "name": "Viva-II",
+    "kind": "viva",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "15th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Dissertation",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Last day of class work",
+    "remarks": "evaluated jointly with the DRC examiner"
+   },
+   {
+    "name": "Final viva-voce",
+    "kind": "viva",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Actual date announced by DRC",
+    "remarks": "evaluated jointly with the DRC examiner"
+   }
+  ]
+ },
+ "067_BITS_G564T.pdf": {
+  "evaluation": [
+   {
+    "name": "Viva-I",
+    "kind": "viva",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "5th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid-sem written report",
+    "kind": "midsem",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid-sem presentation",
+    "kind": "midsem",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th week",
+    "remarks": null
+   },
+   {
+    "name": "Viva-II",
+    "kind": "viva",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "15th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Dissertation",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Last day of class work",
+    "remarks": "evaluated jointly with the DRC examiner"
+   },
+   {
+    "name": "Final viva-voce",
+    "kind": "viva",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Actual date announced by DRC",
+    "remarks": "evaluated jointly with the DRC examiner"
+   }
+  ]
+ },
+ "075_CE_F211.pdf": {
+  "evaluation": [
+   {
+    "name": "Tutorials (best 4 of 5)",
+    "kind": "tutorial_test",
+    "weightage_percent": 20,
+    "duration_minutes": 50,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Aug 17, Sep 7, Sep 21, Oct 26, Nov 16 (Tut hour)",
+    "remarks": "Open book; 5% each"
+   },
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 35,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 45,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Closed book"
+   }
+  ]
+ },
+ "076_CE_F213.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid-semester Exam",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As per the timetable",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As per the timetable",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Tutorials (Best 3 out of 5)",
+    "kind": "tutorial_test",
+    "weightage_percent": 15,
+    "duration_minutes": 50,
+    "nature": "CB",
+    "is_group": null,
+    "date": "Will be notified",
+    "remarks": "Open/Closed Book"
+   },
+   {
+    "name": "Lab Quiz",
+    "kind": "quiz",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": "CB",
+    "is_group": null,
+    "date": "Will be notified",
+    "remarks": "Open/Closed Book"
+   },
+   {
+    "name": "Lab component with Lab Record (handwritten)",
+    "kind": "lab",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Each week",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Class Quizzes",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "CB",
+    "is_group": null,
+    "date": "Every class",
+    "remarks": "Open/Closed Book"
+   }
+  ],
+  "topics": [
+   "Introduction to the Basic Concepts of Surveying",
+   "Linear Measurements and Instruments",
+   "Chain Survey",
+   "Compass Survey",
+   "Traversing",
+   "Levelling",
+   "Contouring",
+   "Plane Table Survey",
+   "Tacheometric Surveying",
+   "Curve Ranging",
+   "Trigonometrical Levelling",
+   "Computation of Areas",
+   "Computation of Volumes",
+   "Advanced Topics in surveying: total stations, errors & adjustments, photogrammetry, remote sensing",
+   "Practical aspects of field work"
+  ]
+ },
+ "115_CE_G619.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As per timetable",
+    "remarks": "CB"
+   },
+   {
+    "name": "Project, Assignments, Computer Programs, Seminars, Take Home Tests, Class Test",
+    "kind": "quiz",
+    "weightage_percent": 35,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "OB"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 45,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As per timetable",
+    "remarks": "CB"
+   }
+  ]
+ },
+ "123_CHE_F312.pdf": {
+  "evaluation": [
+   {
+    "name": "Experiment Reports (data analysis & visualization, critical thinking, discussion)",
+    "kind": "lab",
+    "weightage_percent": 40,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Regular Laboratory Hours",
+    "remarks": "Open Book; 120 marks"
+   },
+   {
+    "name": "Cycle 1 (or 2) Lab Exam",
+    "kind": "lab",
+    "weightage_percent": 15,
+    "duration_minutes": 120,
+    "nature": "CB",
+    "is_group": null,
+    "date": "29.09.2026 and 30.09.2026",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Cycle 2 (or 1) Lab Exam",
+    "kind": "lab",
+    "weightage_percent": 15,
+    "duration_minutes": 120,
+    "nature": "CB",
+    "is_group": null,
+    "date": "23.11.2026 and 25.11.2026",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Comprehensive Quiz",
+    "kind": "compre",
+    "weightage_percent": 15,
+    "duration_minutes": 60,
+    "nature": "CB",
+    "is_group": null,
+    "date": "20.11.2026",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Comprehensive Viva-Voce Exam",
+    "kind": "compre",
+    "weightage_percent": 15,
+    "duration_minutes": 10,
+    "nature": "CB",
+    "is_group": null,
+    "date": "26.11.2026 and 27.11.2026",
+    "remarks": "Closed Book"
+   }
+  ]
+ },
+ "143_CHEM_F242.pdf": {
+  "evaluation": [
+   {
+    "name": "Laboratory Work & Reports",
+    "kind": "lab",
+    "weightage_percent": 84,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "252 marks"
+   },
+   {
+    "name": "Lab tests I and II",
+    "kind": "lab",
+    "weightage_percent": 16,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced",
+    "remarks": "48 marks"
+   }
+  ],
+  "topics": [
+   "Chemoselective reduction of an organic compound",
+   "Multicomponent reaction (Biginelli Reaction)",
+   "Oxidation of an organic compound (benzil from benzoin)",
+   "Synthesis of benzilic acid from benzil using grinding technique",
+   "Nucleophilic aromatic substitution",
+   "Separation/purification using column chromatography",
+   "Fischer indole synthesis",
+   "Coumarin synthesis using microwave irradiation",
+   "Isolation of curcumin from turmeric",
+   "Photodimerization of benzophenone",
+   "Elemental analysis of known organic compounds",
+   "Functional group analysis of known compounds",
+   "Complete analysis of unknown compounds",
+   "Separation of mixtures (techniques I-V) and their analysis"
+  ]
+ },
+ "156_CHEM_G553.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "06/10 FN2",
+    "remarks": null
+   },
+   {
+    "name": "Assignments + Seminars + Term Papers",
+    "kind": "assignment",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": null
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "05/12 AN",
+    "remarks": null
+   }
+  ]
+ },
+ "157_CHEM_G553.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "06/10 FN2",
+    "remarks": null
+   },
+   {
+    "name": "Assignments + Seminars + Term Papers",
+    "kind": "assignment",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": null
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "05/12 AN",
+    "remarks": null
+   }
+  ]
+ },
+ "164_CS_F301.pdf": {
+  "evaluation": [
+   {
+    "name": "Quiz 1",
+    "kind": "quiz",
+    "weightage_percent": 12.5,
+    "duration_minutes": 40,
+    "nature": "CB",
+    "is_group": null,
+    "date": "2nd September 2026",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Quiz 2",
+    "kind": "quiz",
+    "weightage_percent": 12.5,
+    "duration_minutes": 40,
+    "nature": "CB",
+    "is_group": null,
+    "date": "30th September 2026",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "OB",
+    "is_group": null,
+    "date": "8th October 2026 (FN)",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 45,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "1st December 2026 (FN)",
+    "remarks": "Closed Book"
+   }
+  ]
+ },
+ "176_CS_G525.pdf": {
+  "evaluation": [
+   {
+    "name": "Research Paper Debate",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Throughout semester",
+    "remarks": null
+   },
+   {
+    "name": "Research Project (proposal 5, progress reviews 5+5, final work & presentation 15+5)",
+    "kind": "project",
+    "weightage_percent": 35,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": true,
+    "date": "Throughout semester",
+    "remarks": "group"
+   },
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": false,
+    "date": "09/10 FN2",
+    "remarks": "Individual; Closed Book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": false,
+    "date": "13/12 AN",
+    "remarks": "Individual; Closed Book"
+   }
+  ],
+  "topics": [
+   "Internet Architecture & Principles: design philosophy of the DARPA Internet, end-to-end principle, layers and protocols",
+   "Software Defined Networking: SDN architecture, controllers, network programmability, NFV, SDN frameworks",
+   "Congestion Control & Traffic Management: TCP congestion control, QUIC, BBR, multipath and QoS routing, FIFO, FQ, RED, CoDel",
+   "Wireless & Mobile Networks: Wi-Fi, Mobile IP and micro-mobility protocols, TCP over wireless",
+   "Overlay Networks & Data Center Networks: DHT-based overlays, data center architectures, data center TCP"
+  ]
+ },
+ "208_ECE_F314.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid-sem Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Quizzes",
+    "kind": "quiz",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": "CB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": "OB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Closed/Open Book"
+   }
+  ]
+ },
+ "218_ECON_F213.pdf": {
+  "evaluation": [
+   {
+    "name": "Assignment & Class Participation",
+    "kind": "assignment",
+    "weightage_percent": 5,
+    "duration_minutes": 15,
+    "nature": "OB",
+    "is_group": true,
+    "date": "See Weekly Workflow",
+    "remarks": "Open Book; group presentation"
+   },
+   {
+    "name": "Quiz – 1",
+    "kind": "quiz",
+    "weightage_percent": 7.5,
+    "duration_minutes": 45,
+    "nature": "CB",
+    "is_group": null,
+    "date": "8th Sept 2026",
+    "remarks": "Closed Book; best two of three quizzes count"
+   },
+   {
+    "name": "Mid-Semester Exam",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "OB",
+    "is_group": null,
+    "date": "8 Oct 2026 (AN1)",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Quiz – 2",
+    "kind": "quiz",
+    "weightage_percent": 7.5,
+    "duration_minutes": 45,
+    "nature": "CB",
+    "is_group": null,
+    "date": "5th Nov 2026",
+    "remarks": "Closed Book; best two of three quizzes count"
+   },
+   {
+    "name": "Quiz – 3",
+    "kind": "quiz",
+    "weightage_percent": 7.5,
+    "duration_minutes": 45,
+    "nature": "CB",
+    "is_group": null,
+    "date": "26th Nov 2026",
+    "remarks": "Closed Book; best two of three quizzes count"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "12 Dec 2026 (FN)",
+    "remarks": "Closed Book"
+   }
+  ]
+ },
+ "219_ECON_F214.pdf": {
+  "evaluation": [
+   {
+    "name": "Quiz-1",
+    "kind": "quiz",
+    "weightage_percent": 5,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "21st August, 2026",
+    "remarks": "CB; best two of three quizzes count"
+   },
+   {
+    "name": "Quiz-2",
+    "kind": "quiz",
+    "weightage_percent": 5,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "18th September, 2026",
+    "remarks": "CB; best two of three"
+   },
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "See the timetable",
+    "remarks": "CB"
+   },
+   {
+    "name": "Quiz-3",
+    "kind": "quiz",
+    "weightage_percent": 5,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "6th November, 2026",
+    "remarks": "CB; best two of three"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 50,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "See the timetable",
+    "remarks": "CB/OB"
+   }
+  ]
+ },
+ "222_ECON_F313.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "06-10-2026",
+    "remarks": "CB"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "05-12-2026",
+    "remarks": "CB/OB"
+   },
+   {
+    "name": "Class participation/attendance; Homework/ Assignments",
+    "kind": "assignment",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "23-11-2026",
+    "remarks": "OB"
+   },
+   {
+    "name": "Tut Test 1",
+    "kind": "tutorial_test",
+    "weightage_percent": 6.67,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "24-09-2026",
+    "remarks": "CB; best two of three tut tests count (20%)"
+   },
+   {
+    "name": "Tut Test 2",
+    "kind": "tutorial_test",
+    "weightage_percent": 6.67,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "12-11-2026",
+    "remarks": "CB; best two of three"
+   },
+   {
+    "name": "Tut Test 3",
+    "kind": "tutorial_test",
+    "weightage_percent": 6.67,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "19-11-2026",
+    "remarks": "CB; best two of three"
+   }
+  ]
+ },
+ "265_EEE_G516.pdf": {
+  "evaluation": [
+   {
+    "name": "Quiz",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 40,
+    "nature": "CB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "Oct. 6th (FN2)",
+    "remarks": "CB"
+   },
+   {
+    "name": "Labs & Class tasks",
+    "kind": "lab",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open book; printed as 10% + 5%"
+   },
+   {
+    "name": "Team project",
+    "kind": "project",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": true,
+    "date": "TBA",
+    "remarks": "OB; seminar 5%, work done and report 10%"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "Dec. 5th (AN)",
+    "remarks": "OB/OB+CB"
+   }
+  ]
+ },
+ "266_EEE_G516.pdf": {
+  "evaluation": [
+   {
+    "name": "Quiz",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 40,
+    "nature": "CB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "Oct. 6th (FN2)",
+    "remarks": "CB"
+   },
+   {
+    "name": "Labs & Class tasks",
+    "kind": "lab",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open book; printed as 10% + 5%"
+   },
+   {
+    "name": "Team project",
+    "kind": "project",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": true,
+    "date": "TBA",
+    "remarks": "OB; seminar 5%, work done and report 10%"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "Dec. 5th (AN)",
+    "remarks": "OB/OB+CB"
+   }
+  ]
+ },
+ "312_GS_F366.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Outline & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Literature Survey",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Lab Related Activities – 1",
+    "kind": "lab",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "6th week",
+    "remarks": null
+   },
+   {
+    "name": "Midsem Report",
+    "kind": "midsem",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Midsem Seminar",
+    "kind": "midsem",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Lab Related Activities – 2",
+    "kind": "lab",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "313_GS_F367.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Outline & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Literature Survey",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Lab Related Activities – 1",
+    "kind": "lab",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "6th week",
+    "remarks": null
+   },
+   {
+    "name": "Midsem Report",
+    "kind": "midsem",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Midsem Seminar",
+    "kind": "midsem",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Lab Related Activities – 2",
+    "kind": "lab",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "314_GS_F376.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title and Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd Week",
+    "remarks": null
+   },
+   {
+    "name": "Viva I and II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th Week",
+    "remarks": null
+   },
+   {
+    "name": "MidSem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th Week",
+    "remarks": "printed as 10+10"
+   },
+   {
+    "name": "Viva III and IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th Week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th Week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th Week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th Week",
+    "remarks": null
+   }
+  ]
+ },
+ "315_GS_F377.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title and Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd Week",
+    "remarks": null
+   },
+   {
+    "name": "Viva I and II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th Week",
+    "remarks": null
+   },
+   {
+    "name": "MidSem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th Week",
+    "remarks": "printed as 10+10"
+   },
+   {
+    "name": "Viva III and IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th Week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th Week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th Week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th Week",
+    "remarks": null
+   }
+  ]
+ },
+ "324_HSS_F323.pdf": {
+  "evaluation": [
+   {
+    "name": "Attendance & Classroom Interaction",
+    "kind": "class_participation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "All Lectures",
+    "remarks": "10 of 200 marks"
+   },
+   {
+    "name": "Lab component/ Opinionnaires/ Assignment/ Case study",
+    "kind": "lab",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Will be announced",
+    "remarks": "10x2 = 20 of 200 marks"
+   },
+   {
+    "name": "Quiz 1",
+    "kind": "quiz",
+    "weightage_percent": 15,
+    "duration_minutes": 50,
+    "nature": "CB",
+    "is_group": null,
+    "date": "September (2nd Week)",
+    "remarks": "CB; 30 of 200 marks"
+   },
+   {
+    "name": "Quiz 2",
+    "kind": "quiz",
+    "weightage_percent": 15,
+    "duration_minutes": 50,
+    "nature": "CB",
+    "is_group": null,
+    "date": "November (2nd Week)",
+    "remarks": "CB; 30 of 200 marks"
+   },
+   {
+    "name": "Mid Sem Exam",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "CB; 50 of 200 marks"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 30,
+    "duration_minutes": 180,
+    "nature": "OB",
+    "is_group": null,
+    "date": null,
+    "remarks": "OB; 60 of 200 marks"
+   }
+  ]
+ },
+ "326_HSS_F328.pdf": {
+  "evaluation": [
+   {
+    "name": "Attendance & Classroom Interaction",
+    "kind": "class_participation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "All Lectures",
+    "remarks": "10 of 200 marks"
+   },
+   {
+    "name": "Lab component/ Opinionnaires/ Assignment/ Case study",
+    "kind": "lab",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Will be announced",
+    "remarks": "10x2 = 20 of 200 marks"
+   },
+   {
+    "name": "Quiz 1",
+    "kind": "quiz",
+    "weightage_percent": 15,
+    "duration_minutes": 50,
+    "nature": "CB",
+    "is_group": null,
+    "date": "September (2nd Week)",
+    "remarks": "CB; 30 of 200 marks"
+   },
+   {
+    "name": "Quiz 2",
+    "kind": "quiz",
+    "weightage_percent": 15,
+    "duration_minutes": 50,
+    "nature": "CB",
+    "is_group": null,
+    "date": "November (2nd Week)",
+    "remarks": "CB; 30 of 200 marks"
+   },
+   {
+    "name": "Mid Sem Exam",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "CB; 50 of 200 marks"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 30,
+    "duration_minutes": 180,
+    "nature": "OB",
+    "is_group": null,
+    "date": null,
+    "remarks": "OB; 60 of 200 marks"
+   }
+  ]
+ },
+ "327_HSS_F329.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid Sem",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "OB",
+    "is_group": null,
+    "date": "10/10/2026 AN1",
+    "remarks": "OB"
+   },
+   {
+    "name": "Practical Test",
+    "kind": "lab",
+    "weightage_percent": 20,
+    "duration_minutes": 50,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced",
+    "remarks": null
+   },
+   {
+    "name": "Quiz",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 15,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced",
+    "remarks": null
+   },
+   {
+    "name": "Home Assignment",
+    "kind": "assignment",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced",
+    "remarks": null
+   },
+   {
+    "name": "Comprehensive",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "15/12/2026 FN",
+    "remarks": null
+   }
+  ],
+  "topics": [
+   "Introduction (Art and Fine Arts)",
+   "Melody and Rhythm",
+   "Tonal Sequences",
+   "Musical Scales",
+   "Principles of Thaat, Raga and Taal",
+   "Voice Culture",
+   "Speed and Multiple speeds",
+   "Acoustics",
+   "Philosophy and psychology of music",
+   "Aesthetics of music",
+   "Musical Pedagogy",
+   "Notation system",
+   "Compositional trends",
+   "Merits and demerits of performer",
+   "Study of Raga and Tala"
+  ]
+ },
+ "329_HSS_F343.pdf": {
+  "evaluation": [
+   {
+    "name": "Assignment",
+    "kind": "assignment",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "To be announced",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Mid Semester Exam",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Close Book"
+   },
+   {
+    "name": "Case Study",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": 50,
+    "nature": "OB",
+    "is_group": null,
+    "date": "To be announced",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Close Book"
+   }
+  ],
+  "topics": [
+   "Introduction: Foundations of Ethics, the Profession and Professional Ethics",
+   "Ethical Theories",
+   "Professional Codes and Employment Relations",
+   "Business Ethics",
+   "Management Ethics",
+   "Education Ethics",
+   "Engineering Ethics",
+   "Computer Ethics"
+  ]
+ },
+ "351_MAC_F312.pdf": {
+  "evaluation": [
+   {
+    "name": "Quizzes Q1-Q3 (best 2 of 3)",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 15,
+    "nature": "CB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Closed Book; 5% each"
+   },
+   {
+    "name": "Lab Assignment",
+    "kind": "lab",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "TBA",
+    "remarks": null
+   },
+   {
+    "name": "Self Study Report",
+    "kind": "other",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "October 28, 2026",
+    "remarks": null
+   },
+   {
+    "name": "Mid-Semester Exam",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "10 October FN1",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "15 December FN",
+    "remarks": "Closed Book"
+   }
+  ]
+ },
+ "383_ME_F316.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "8/10 FN1",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "1/12 FN",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Tutorials and Quiz",
+    "kind": "tutorial_test",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Tutorial Class",
+    "remarks": "Open Book; printed as 20 + 10; best four tutorial tests count"
+   }
+  ]
+ },
+ "391_ME_F428.pdf": {
+  "evaluation": [
+   {
+    "name": "Quizzes 1, 2 and 3",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 20,
+    "nature": "CB",
+    "is_group": null,
+    "date": "Two announced, one unannounced",
+    "remarks": "Closed book; best two count, 5% each"
+   },
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As per the timetable",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Demonstrations, Experiments, Project and Assignments",
+    "kind": "lab",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "As per the timetable",
+    "remarks": "Closed book/open book as announced"
+   }
+  ],
+  "topics": [
+   "Introduction and historical perspective of smart materials and structures",
+   "Smart and intelligent structural systems and applications",
+   "Review of major smart-material families",
+   "Shape-memory alloys",
+   "Electro- and magnetorheological fluids",
+   "Laminated composites and bonded smart structures",
+   "Piezoelectric materials",
+   "Fibre-optic and FBG sensors",
+   "Magnetostrictive and electrostrictive materials",
+   "Applications of smart materials in integrated technologies"
+  ]
+ },
+ "409_ME_U428.pdf": {
+  "evaluation": [
+   {
+    "name": "Quizzes 1, 2 and 3",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 20,
+    "nature": "CB",
+    "is_group": null,
+    "date": "Two announced, one unannounced",
+    "remarks": "Closed book; best two count, 5% each"
+   },
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As per the timetable",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Demonstrations, Experiments, Project and Assignments",
+    "kind": "lab",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "As per the timetable",
+    "remarks": "Closed book/open book as announced"
+   }
+  ],
+  "topics": [
+   "Introduction and historical perspective of smart materials and structures",
+   "Smart and intelligent structural systems and applications",
+   "Review of major smart-material families",
+   "Shape-memory alloys",
+   "Electro- and magnetorheological fluids",
+   "Laminated composites and bonded smart structures",
+   "Piezoelectric materials",
+   "Fibre-optic and FBG sensors",
+   "Magnetostrictive and electrostrictive materials",
+   "Applications of smart materials in integrated technologies"
+  ]
+ },
+ "431_MF_F418.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "10.10.2026 AN1",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Quizzes (Surprise) (best n-2)",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 15,
+    "nature": "CB",
+    "is_group": null,
+    "date": "Lecture session",
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Case Study/group Assignments/Project",
+    "kind": "assignment",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": true,
+    "date": null,
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "16.12.2026 FN",
+    "remarks": "Closed Book/Open Book"
+   }
+  ],
+  "topics": [
+   "Birth of lean production",
+   "Lean production system",
+   "Stability and standardized work",
+   "Just-In-Time and Jidoka",
+   "Value Stream Mapping",
+   "Involvement and customer focus; hoshin planning",
+   "14 principles of the Toyota way"
+  ]
+ },
+ "439_MPBA_G504.pdf": {
+  "evaluation": [
+   {
+    "name": "Class discussions (linked to attendance, class assignment/quiz)",
+    "kind": "quiz",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Every class",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Project (participation + report)",
+    "kind": "project",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Case Study/Simulation",
+    "kind": "other",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Mid Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "05/10/2026 FN2",
+    "remarks": "Close Book"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "11/12/2026 FN",
+    "remarks": "Close Book"
+   }
+  ],
+  "topics": [
+   "Introduction to Organizational Behaviour",
+   "Managing Individuals: attitudes and job satisfaction",
+   "Individual & Group Dynamics - Motivation",
+   "Managing Groups: Leadership",
+   "Managing Groups: Organizational Structure",
+   "Introduction to Human Resource Management",
+   "Job Analysis and Workforce Planning",
+   "Employee Testing and Selection",
+   "Learning and Development",
+   "Managing Performance",
+   "Managing Groups: Power, Influence and Politics",
+   "Organization System: Managing Culture",
+   "Organization System: Managing Change",
+   "Compensation Management",
+   "Managing Future Workforce: career and talent management",
+   "Project and Course Review"
+  ]
+ },
+ "440_MPBA_G504.pdf": {
+  "evaluation": [
+   {
+    "name": "Class discussions (linked to attendance, class assignment/quiz)",
+    "kind": "quiz",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Every class",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Project (participation + report)",
+    "kind": "project",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Case Study/Simulation",
+    "kind": "other",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Mid Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "05/10/2026 FN2",
+    "remarks": "Close Book"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "11/12/2026 FN",
+    "remarks": "Close Book"
+   }
+  ],
+  "topics": [
+   "Introduction to Organizational Behaviour",
+   "Managing Individuals: attitudes and job satisfaction",
+   "Individual & Group Dynamics - Motivation",
+   "Managing Groups: Leadership",
+   "Managing Groups: Organizational Structure",
+   "Introduction to Human Resource Management",
+   "Job Analysis and Workforce Planning",
+   "Employee Testing and Selection",
+   "Learning and Development",
+   "Managing Performance",
+   "Managing Groups: Power, Influence and Politics",
+   "Organization System: Managing Culture",
+   "Organization System: Managing Change",
+   "Compensation Management",
+   "Managing Future Workforce: career and talent management",
+   "Project and Course Review"
+  ]
+ },
+ "443_MPBA_G506.pdf": {
+  "evaluation": [
+   {
+    "name": "Pre mid-sem Quizzes",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA in Class",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Assignments",
+    "kind": "assignment",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA in Class",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Pre-Mid Lab tests",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA in Class",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Mid-term exam",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "9th October 2026 4:00-5:30 PM",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "In-class/lab Post-Mid Assignment",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Weekly once",
+    "remarks": "Open book/notes/Internet"
+   },
+   {
+    "name": "Post-MID Sem Quiz",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "1st Week of November",
+    "remarks": "TBA"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 30,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "14th December 2026 2-5 PM",
+    "remarks": "Closed book"
+   }
+  ]
+ },
+ "444_MPBA_G506.pdf": {
+  "evaluation": [
+   {
+    "name": "Pre mid-sem Quizzes",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA in Class",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Assignments",
+    "kind": "assignment",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA in Class",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Pre-Mid Lab tests",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA in Class",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Mid-term exam",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "9th October 2026 4:00-5:30 PM",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "In-class/lab Post-Mid Assignment",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Weekly once",
+    "remarks": "Open book/notes/Internet"
+   },
+   {
+    "name": "Post-MID Sem Quiz",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "1st Week of November",
+    "remarks": "TBA"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 30,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "14th December 2026 2-5 PM",
+    "remarks": "Closed book"
+   }
+  ]
+ },
+ "445_MPBA_G507.pdf": {
+  "evaluation": [
+   {
+    "name": "R module: In-class/lab Assignment",
+    "kind": "lab",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Weekly once",
+    "remarks": "Open book; 10% of the R module"
+   },
+   {
+    "name": "R module: Group Project",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": true,
+    "date": "28th Sept",
+    "remarks": "Open book; 10% of the R module"
+   },
+   {
+    "name": "R module: Pre-MID Sem Quiz",
+    "kind": "midsem",
+    "weightage_percent": 5,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "3rd Week of September",
+    "remarks": "Closed book; 10% of the R module"
+   },
+   {
+    "name": "R module: Mid Semester",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "2nd Week of October",
+    "remarks": "Closed book; 20% of the R module"
+   },
+   {
+    "name": "Python module: Comprehensive exam",
+    "kind": "compre",
+    "weightage_percent": 22.5,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "TBD",
+    "remarks": "45% of the Python module"
+   },
+   {
+    "name": "Python module: Quiz (Post-Mid)",
+    "kind": "midsem",
+    "weightage_percent": 7.5,
+    "duration_minutes": 15,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week of Nov",
+    "remarks": "15% of the Python module"
+   },
+   {
+    "name": "Python module: In-Class Assignments & Group Project",
+    "kind": "assignment",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": true,
+    "date": "TBD",
+    "remarks": "40% of the Python module"
+   }
+  ]
+ },
+ "446_MPBA_G507.pdf": {
+  "evaluation": [
+   {
+    "name": "R module: In-class/lab Assignment",
+    "kind": "lab",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Weekly once",
+    "remarks": "Open book; 10% of the R module"
+   },
+   {
+    "name": "R module: Group Project",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": true,
+    "date": "28th Sept",
+    "remarks": "Open book; 10% of the R module"
+   },
+   {
+    "name": "R module: Pre-MID Sem Quiz",
+    "kind": "midsem",
+    "weightage_percent": 5,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "3rd Week of September",
+    "remarks": "Closed book; 10% of the R module"
+   },
+   {
+    "name": "R module: Mid Semester",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "2nd Week of October",
+    "remarks": "Closed book; 20% of the R module"
+   },
+   {
+    "name": "Python module: Comprehensive exam",
+    "kind": "compre",
+    "weightage_percent": 22.5,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "TBD",
+    "remarks": "45% of the Python module"
+   },
+   {
+    "name": "Python module: Quiz (Post-Mid)",
+    "kind": "midsem",
+    "weightage_percent": 7.5,
+    "duration_minutes": 15,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week of Nov",
+    "remarks": "15% of the Python module"
+   },
+   {
+    "name": "Python module: In-Class Assignments & Group Project",
+    "kind": "assignment",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": true,
+    "date": "TBD",
+    "remarks": "40% of the Python module"
+   }
+  ]
+ },
+ "451_MPBA_G517.pdf": {
+  "evaluation": [
+   {
+    "name": "Lab Evaluation",
+    "kind": "lab",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Class participation",
+    "kind": "class_participation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Mid-semester evaluation",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": null,
+    "is_group": null,
+    "date": "09/10 AN2",
+    "remarks": null
+   },
+   {
+    "name": "Mid-semester Group Project",
+    "kind": "midsem",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": true,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "End-semester Group Project",
+    "kind": "compre",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": true,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "14/12 AN",
+    "remarks": null
+   }
+  ]
+ },
+ "513_PHY_F312.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": null,
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open/Closed; 60 marks"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open/Closed; 80 marks"
+   },
+   {
+    "name": "Class Tests/Assignments (best 3 of 4)",
+    "kind": "quiz",
+    "weightage_percent": 30,
+    "duration_minutes": 40,
+    "nature": null,
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open/Closed; 60 marks"
+   }
+  ]
+ },
+ "531_SCM_G515.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "8/10 2:00-3:30 PM",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Article Presentations",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Case Study",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Class surprise quizzes (n-2)",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 10,
+    "nature": "OB",
+    "is_group": null,
+    "date": "In class hour",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "10/12 FN",
+    "remarks": "Closed book"
+   }
+  ]
+ },
+ "532_SCM_G515.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "8/10 2:00-3:30 PM",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Article Presentations",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Case Study",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Continuous",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Class surprise quizzes (n-2)",
+    "kind": "quiz",
+    "weightage_percent": 10,
+    "duration_minutes": 10,
+    "nature": "OB",
+    "is_group": null,
+    "date": "In class hour",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "10/12 FN",
+    "remarks": "Closed book"
+   }
+  ]
+ },
+ "206_ECE_F266.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation-I",
+    "kind": "presentation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar-I / Viva-I",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation II",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar II / Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "215_ECE_F491.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation-I",
+    "kind": "presentation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar-I / Viva-I",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation II",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar II / Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "240_EEE_F266.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation-I",
+    "kind": "presentation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar-I / Viva-I",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation II",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar II / Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "256_EEE_F491.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation-I",
+    "kind": "presentation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar-I / Viva-I",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation II",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar II / Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "303_GS_F266.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation-I",
+    "kind": "presentation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar-I / Viva-I",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation II",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar II / Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "316_GS_F491.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation-I",
+    "kind": "presentation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar-I / Viva-I",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation II",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar II / Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "322_HSS_F266.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation-I",
+    "kind": "presentation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar-I / Viva-I",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation II",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar II / Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "336_INSTR_F266.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation-I",
+    "kind": "presentation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar-I / Viva-I",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Written Presentation II",
+    "kind": "presentation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Seminar II / Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "210_ECE_F366.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "211_ECE_F367.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "212_ECE_F376.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "213_ECE_F377.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "245_EEE_F366.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "246_EEE_F367.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "247_EEE_F376.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "248_EEE_F377.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "340_INSTR_F366.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "341_INSTR_F367.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "342_INSTR_F376.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "343_INSTR_F377.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "344_INSTR_F491.pdf": {
+  "evaluation": [
+   {
+    "name": "Project Title & Plan of Work",
+    "kind": "project",
+    "weightage_percent": null,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "2nd week",
+    "remarks": "no weightage printed"
+   },
+   {
+    "name": "Viva I & Viva II",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "4th week",
+    "remarks": null
+   },
+   {
+    "name": "Mid sem Seminar / Report",
+    "kind": "midsem",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly report submission",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "every week",
+    "remarks": null
+   },
+   {
+    "name": "Viva III / Viva IV",
+    "kind": "viva",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "10th, 12th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar",
+    "kind": "seminar",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Report",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   },
+   {
+    "name": "Weekly Interaction and Diary",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "8th, 16th week",
+    "remarks": null
+   },
+   {
+    "name": "Final Seminar and Viva",
+    "kind": "viva",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "16th week",
+    "remarks": null
+   }
+  ]
+ },
+ "177_CS_G525.pdf": {
+  "evaluation": [
+   {
+    "name": "Research Paper Debate",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "Throughout semester",
+    "remarks": null
+   },
+   {
+    "name": "Research Project (proposal 5, progress reviews 5+5, final work & presentation 15+5)",
+    "kind": "project",
+    "weightage_percent": 35,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": true,
+    "date": "Throughout semester",
+    "remarks": "group"
+   },
+   {
+    "name": "Mid-Semester Examination",
+    "kind": "midsem",
+    "weightage_percent": 20,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": false,
+    "date": "09/10 FN2",
+    "remarks": "Individual; Closed Book"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": false,
+    "date": "13/12 AN",
+    "remarks": "Individual; Closed Book"
+   }
+  ],
+  "topics": [
+   "Internet Architecture & Principles: design philosophy of the DARPA Internet, end-to-end principle, layers and protocols",
+   "Software Defined Networking: SDN architecture, controllers, network programmability, NFV, SDN frameworks",
+   "Congestion Control & Traffic Management: TCP congestion control, QUIC, BBR, multipath and QoS routing, FIFO, FQ, RED, CoDel",
+   "Wireless & Mobile Networks: Wi-Fi, Mobile IP and micro-mobility protocols, TCP over wireless",
+   "Overlay Networks & Data Center Networks: DHT-based overlays, data center architectures, data center TCP"
+  ]
+ },
+ "137_CHE_G554.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "CB"
+   },
+   {
+    "name": "Final Project",
+    "kind": "project",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "To be announced in the class",
+    "remarks": "Take home"
+   },
+   {
+    "name": "Case Studies/Simulations/Assignments/lecture tests (4)",
+    "kind": "assignment",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Take Home"
+   },
+   {
+    "name": "Comprehensive Examination",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "CB & OB"
+   }
+  ],
+  "notes": [
+   "handout_weights_add_up_to: 95"
+  ]
+ },
+ "301_GS_F243.pdf": {
+  "evaluation": [
+   {
+    "name": "Homework Assignment",
+    "kind": "assignment",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "By 15th November 2026",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Mid Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "7/10 AN1",
+    "remarks": "Close Book"
+   },
+   {
+    "name": "Class Assignments",
+    "kind": "assignment",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Second/Third week of September 2026",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "10/12 FN",
+    "remarks": "Close Book"
+   },
+   {
+    "name": "Class participation",
+    "kind": "class_participation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "up to 5%, from the note under the table"
+   }
+  ],
+  "notes": [
+   "handout_weights_add_up_to: 95 + up to 5% class participation"
+  ]
+ },
+ "318_HSS_F222.pdf": {
+  "evaluation": [
+   {
+    "name": "Homework Assignment",
+    "kind": "assignment",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "By 15 November 2026",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Mid Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": "CB",
+    "is_group": null,
+    "date": "6/10 FN1",
+    "remarks": "Close Book"
+   },
+   {
+    "name": "Class Assignments",
+    "kind": "assignment",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "Second/third week of September 2026",
+    "remarks": "Open Book"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 40,
+    "duration_minutes": null,
+    "nature": "CB",
+    "is_group": null,
+    "date": "7/12 FN",
+    "remarks": "Close Book"
+   },
+   {
+    "name": "Class participation",
+    "kind": "class_participation",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "up to 5%, from the note under the table"
+   }
+  ],
+  "notes": [
+   "handout_weights_add_up_to: 95 + up to 5% class participation"
+  ]
+ },
+ "309_GS_F331.pdf": {
+  "evaluation": [
+   {
+    "name": "Assignment 1",
+    "kind": "assignment",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "TBA",
+    "remarks": null
+   },
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As announced",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Assignment 2",
+    "kind": "assignment",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "TBA",
+    "remarks": null
+   },
+   {
+    "name": "Comprehensive",
+    "kind": "compre",
+    "weightage_percent": 45,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "As announced",
+    "remarks": "Closed book"
+   }
+  ],
+  "notes": [
+   "handout_weights_add_up_to: 105"
+  ]
+ },
+ "332_HSS_U141.pdf": {
+  "evaluation": [
+   {
+    "name": "Portfolio Evaluative 1",
+    "kind": "other",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "CCE",
+    "remarks": "Closed & open book"
+   },
+   {
+    "name": "Portfolio Evaluative 2",
+    "kind": "other",
+    "weightage_percent": 20,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "CCE",
+    "remarks": "Closed & open book"
+   },
+   {
+    "name": "Portfolio Evaluative 3",
+    "kind": "other",
+    "weightage_percent": 25,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "CCE",
+    "remarks": "Closed & open book"
+   },
+   {
+    "name": "Portfolio Evaluative 4",
+    "kind": "other",
+    "weightage_percent": 30,
+    "duration_minutes": null,
+    "nature": "OB",
+    "is_group": null,
+    "date": "CCE",
+    "remarks": "Closed & open book"
+   },
+   {
+    "name": "Class participation and laboratory engagement",
+    "kind": "lab",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "from the text above the table"
+   }
+  ],
+  "notes": [
+   "handout_weights_add_up_to: 90 in the table + 10% class participation in the text"
+  ]
+ },
+ "433_MGTS_U102.pdf": {
+  "evaluation": [
+   {
+    "name": "Tut 1 (attendance)",
+    "kind": "tutorial_test",
+    "weightage_percent": 5,
+    "duration_minutes": 50,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "for attending"
+   },
+   {
+    "name": "Tut 2-4: Posters 1-3 (best 3 of 4 posters)",
+    "kind": "tutorial_test",
+    "weightage_percent": 60,
+    "duration_minutes": 50,
+    "nature": "OB",
+    "is_group": null,
+    "date": null,
+    "remarks": "OB; 20% each"
+   },
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 30,
+    "duration_minutes": 40,
+    "nature": "CB",
+    "is_group": null,
+    "date": "14/03",
+    "remarks": "CB"
+   },
+   {
+    "name": "Tut 5: Brainstorming session (attendance)",
+    "kind": "tutorial_test",
+    "weightage_percent": 5,
+    "duration_minutes": 50,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "for attending"
+   },
+   {
+    "name": "Tut 6-8: Group presentations",
+    "kind": "tutorial_test",
+    "weightage_percent": 20,
+    "duration_minutes": 50,
+    "nature": null,
+    "is_group": true,
+    "date": null,
+    "remarks": "plus 5% for attending 2 of the others"
+   }
+  ],
+  "notes": [
+   "handout_weights_add_up_to: unclear (best-of rules on tutorials)"
+  ]
+ },
+ "434_MPBA_G501.pdf": {
+  "evaluation": [
+   {
+    "name": "Mid semester test",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 120,
+    "nature": "CB",
+    "is_group": null,
+    "date": "10/10",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Case studies (2/3)",
+    "kind": "other",
+    "weightage_percent": 10,
+    "duration_minutes": 50,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Excel based exercise (1)",
+    "kind": "other",
+    "weightage_percent": 5,
+    "duration_minutes": 50,
+    "nature": "OB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open book"
+   },
+   {
+    "name": "Announced Quiz",
+    "kind": "quiz",
+    "weightage_percent": 7,
+    "duration_minutes": 30,
+    "nature": "CB",
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Closed book"
+   },
+   {
+    "name": "Project: poster & viva",
+    "kind": "viva",
+    "weightage_percent": 8,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": "TBA",
+    "remarks": "Open book; viva CB"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "CB",
+    "is_group": null,
+    "date": "16/12",
+    "remarks": "Partly Closed book"
+   }
+  ],
+  "notes": [
+   "handout_weights_add_up_to: 90"
+  ]
+ },
+ "452_MPBA_G520.pdf": {
+  "evaluation": [
+   {
+    "name": "Case study participation",
+    "kind": "class_participation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Offline"
+   },
+   {
+    "name": "Quiz",
+    "kind": "quiz",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Offline"
+   },
+   {
+    "name": "Course Project",
+    "kind": "project",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Class participation",
+    "kind": "class_participation",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "OB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Open Book"
+   }
+  ],
+  "notes": [
+   "handout_weights_add_up_to: 105"
+  ]
+ },
+ "453_MPBA_G520.pdf": {
+  "evaluation": [
+   {
+    "name": "Case study participation",
+    "kind": "class_participation",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Offline"
+   },
+   {
+    "name": "Quiz",
+    "kind": "quiz",
+    "weightage_percent": 5,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": "Offline"
+   },
+   {
+    "name": "Course Project",
+    "kind": "project",
+    "weightage_percent": 15,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Class participation",
+    "kind": "class_participation",
+    "weightage_percent": 10,
+    "duration_minutes": null,
+    "nature": null,
+    "is_group": null,
+    "date": null,
+    "remarks": null
+   },
+   {
+    "name": "Mid-Semester Test",
+    "kind": "midsem",
+    "weightage_percent": 25,
+    "duration_minutes": 90,
+    "nature": "CB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Closed Book"
+   },
+   {
+    "name": "Comprehensive Exam",
+    "kind": "compre",
+    "weightage_percent": 35,
+    "duration_minutes": 180,
+    "nature": "OB",
+    "is_group": null,
+    "date": null,
+    "remarks": "Open Book"
+   }
+  ],
+  "notes": [
+   "handout_weights_add_up_to: 105"
+  ]
+ },
+ "032_BITS_F101-1.pdf": {
+  "evaluation": [],
+  "notes": [
+   "pass_fail_course"
+  ]
+ },
+ "540_SW_E101.pdf": {
+  "evaluation": [],
+  "notes": [
+   "pass_fail_course"
+  ]
+ },
+ "030_BITS_E584.pdf": {
+  "topics": [],
+  "notes": [
+   "no_course_plan_in_handout"
+  ]
+ },
+ "068_BITS_G661.pdf": {
+  "topics": [],
+  "notes": [
+   "no_course_plan_in_handout"
+  ]
+ },
+ "524_PHY_U110.pdf": {
+  "topics": [],
+  "notes": [
+   "no_course_plan_in_handout"
+  ]
+ },
+ "058_BITS_F467.pdf": {
+  "topics": [
+   "Introduction to the need and issues governing biosafety",
+   "Legal, ethical and social implications including issues related to human reproduction, gene manipulation, genetic testing",
+   "Guidelines for research in transgenic organisms and plants such as cloning, stem cell research, gene therapy",
+   "Ethics in stem cell research",
+   "Animal cloning and organ transplants",
+   "Biosafety guidelines, regulations, public participation",
+   "Socio-economic impacts of biotechnological experiments",
+   "Environmental pollution - hazards and control (including disinfection, sterilization, sanitation methods)",
+   "CPSEA guidelines",
+   "GLP and GMP guidelines",
+   "Introduction to IPR and Patent processing (self study)"
+  ]
+ },
+ "074_BITS_U467.pdf": {
+  "topics": [
+   "Introduction to the need and issues governing biosafety",
+   "Legal, ethical and social implications including issues related to human reproduction, gene manipulation, genetic testing",
+   "Guidelines for research in transgenic organisms and plants such as cloning, stem cell research, gene therapy",
+   "Ethics in stem cell research",
+   "Animal cloning and organ transplants",
+   "Biosafety guidelines, regulations, public participation",
+   "Socio-economic impacts of biotechnological experiments",
+   "Environmental pollution - hazards and control (including disinfection, sterilization, sanitation methods)",
+   "CPSEA guidelines",
+   "GLP and GMP guidelines",
+   "Introduction to IPR and Patent processing (self study)"
+  ]
+ },
+ "084_CE_F423.pdf": {
+  "topics": [
+   "Overview of GBEC, climate zones and sun path diagram",
+   "Thermal comfort, heat flow through building materials, energy efficient building design",
+   "Site planning, plan form and orientation, construction techniques, materials and finishes",
+   "Natural day lighting and ventilation strategies, thermal performance of building elements",
+   "Efficient water management in buildings",
+   "Green building rating systems (GRIHA, LEED)",
+   "Vernacular architecture in contemporary design; case studies of contemporary green buildings"
+  ]
+ },
+ "120_CHE_F214.pdf": {
+  "topics": [
+   "Important functional groups and their reactions",
+   "Named reactions (Friedel-Crafts acylation, Beckmann, Aldol, Cannizzaro, Hofmann, Pinacol-Pinacolone, Diels-Alder)",
+   "Thermodynamics",
+   "Catalysis",
+   "Electrochemistry",
+   "Adsorption",
+   "Chemical methods of analysis (volumetric titrations)",
+   "Instrumental methods of analysis (IR, UV-Visible spectroscopy, chromatography)",
+   "Fuels and fuel analysis",
+   "Water and its impurities",
+   "Polymers",
+   "Corrosion"
+  ]
+ },
+ "151_CHEM_F337.pdf": {
+  "topics": [
+   "Introduction and Tools of Green Chemistry",
+   "Factors for Green Process",
+   "Alternative modes for chemical activation",
+   "Case studies: Green chemistry",
+   "Basics of Catalysis",
+   "Homogeneous Catalysis - Principles",
+   "Homogeneous Catalysis - Discussions and Case Studies",
+   "Homogeneous Catalysis - Emerging trends",
+   "Heterogeneous Catalysts - Principles, Synthesis and Characterizations",
+   "Heterogeneous Catalysts - Illustrations and Case Studies",
+   "Heterogeneous Catalysts - Emerging Trends"
+  ]
+ },
+ "159_CHEM_U110.pdf": {
+  "topics": [
+   "Determination of total hardness of water with EDTA",
+   "Estimation of copper by iodometry",
+   "Determination of the pH curve of an acid-base titration",
+   "Synthesis of dibenzalacetone",
+   "Colorimetric determination of unknown concentration of K2Cr2O7 solution",
+   "Dissociation constant of a weak electrolyte by conductometry",
+   "Validation of Heisenberg's Uncertainty Principle using single-slit diffraction",
+   "Identification of some organic compounds"
+  ]
+ },
+ "162_CS_F215.pdf": {
+  "topics": [
+   "Working in Binary",
+   "Combinational Building Blocks",
+   "Sequential Design and Building Blocks",
+   "HDL (Verilog)",
+   "Algorithmic State Machines",
+   "Digital Logic Families",
+   "Computer Arithmetic"
+  ]
+ },
+ "205_ECE_F215.pdf": {
+  "topics": [
+   "Working in Binary",
+   "Combinational Building Blocks",
+   "Sequential Design and Building Blocks",
+   "HDL (Verilog)",
+   "Algorithmic State Machines",
+   "Digital Logic Families",
+   "Computer Arithmetic"
+  ]
+ },
+ "238_EEE_F215.pdf": {
+  "topics": [
+   "Working in Binary",
+   "Combinational Building Blocks",
+   "Sequential Design and Building Blocks",
+   "HDL (Verilog)",
+   "Algorithmic State Machines",
+   "Digital Logic Families",
+   "Computer Arithmetic"
+  ]
+ },
+ "335_INSTR_F215.pdf": {
+  "topics": [
+   "Working in Binary",
+   "Combinational Building Blocks",
+   "Sequential Design and Building Blocks",
+   "HDL (Verilog)",
+   "Algorithmic State Machines",
+   "Digital Logic Families",
+   "Computer Arithmetic"
+  ]
+ },
+ "227_ECON_F413.pdf": {
+  "topics": [
+   "Financial engineering: concepts, tools and techniques",
+   "Fixed income securities, term structures, interest rate forwards and futures",
+   "Pricing bonds, convexity and yield volatility",
+   "Swaps and swap engineering",
+   "Options pricing, option mechanics and options engineering",
+   "Value at Risk; Monte-Carlo simulation in financial engineering"
+  ]
+ },
+ "365_MATH_F311.pdf": {
+  "topics": [
+   "Revision of metric spaces, definition of topology and examples",
+   "Constructing new topological spaces",
+   "Hausdorff axiom",
+   "Continuity and continuous functions",
+   "Methods for imposing topologies on sets",
+   "Connectedness",
+   "Compactness",
+   "Countability and separation axioms"
+  ]
+ },
+ "386_ME_F323.pdf": {
+  "topics": [
+   "Introduction and overview of energy storage",
+   "Mechanical energy storage systems",
+   "Thermal energy storage systems",
+   "Thermochemical energy storage systems",
+   "Electrochemical energy storage",
+   "Battery technologies",
+   "Chemical energy storage and fuel cells",
+   "Supercapacitors",
+   "Emerging technologies and CFD modeling"
+  ]
+ },
+ "427_MF_F218.pdf": {
+  "topics": [
+   "Introduction to transport phenomena",
+   "Fluid statics",
+   "Fluid kinematics",
+   "Reynolds transport theorem; mass, momentum and energy conservation",
+   "Steady and transient heat conduction",
+   "Convective heat transfer (external, internal, natural convection)",
+   "Radiation heat transfer",
+   "Heat transfer with phase change; simultaneous heat and mass transfer"
+  ]
+ },
+ "463_MPBA_G532.pdf": {
+  "topics": [
+   "Basis and need for valuation; approaches to valuation (DCF, relative, contingent)",
+   "Economics of a firm; industry, competitive and strategy analysis",
+   "Accounting analysis: recasting financial statements, undoing accounting distortions",
+   "Financial analysis: ratio analysis, cash flow analysis, sustainable growth",
+   "FCFF vs FCFE",
+   "Cost of capital (WACC): risk and return models, beta",
+   "Forecasting cash flows and growth rates, terminal value",
+   "Equity valuation using DCF models (dividends and FCFE)",
+   "Firm valuation using DCF",
+   "Relative valuation: multiples",
+   "Mergers and acquisitions"
+  ]
+ },
+ "464_MPBA_G532.pdf": {
+  "topics": [
+   "Basis and need for valuation; approaches to valuation (DCF, relative, contingent)",
+   "Economics of a firm; industry, competitive and strategy analysis",
+   "Accounting analysis: recasting financial statements, undoing accounting distortions",
+   "Financial analysis: ratio analysis, cash flow analysis, sustainable growth",
+   "FCFF vs FCFE",
+   "Cost of capital (WACC): risk and return models, beta",
+   "Forecasting cash flows and growth rates, terminal value",
+   "Equity valuation using DCF models (dividends and FCFE)",
+   "Firm valuation using DCF",
+   "Relative valuation: multiples",
+   "Mergers and acquisitions"
+  ]
+ },
+ "465_MPBA_G534.pdf": {
+  "topics": [
+   "Getting started with People Analytics",
+   "People Analytics Frameworks",
+   "HR Metrics",
+   "People Analytics as a better tool for HR Decisions",
+   "HR Dashboards",
+   "HR Scorecards",
+   "Statistics in HR",
+   "Insights into Data - HR data and data quality",
+   "Descriptive Analytics (Tableau)",
+   "Understanding Predictive Analytics",
+   "Reporting & Data Visualization",
+   "People Analytics and Digital HR"
+  ]
+ },
+ "466_MPBA_G534.pdf": {
+  "topics": [
+   "Getting started with People Analytics",
+   "People Analytics Frameworks",
+   "HR Metrics",
+   "People Analytics as a better tool for HR Decisions",
+   "HR Dashboards",
+   "HR Scorecards",
+   "Statistics in HR",
+   "Insights into Data - HR data and data quality",
+   "Descriptive Analytics (Tableau)",
+   "Understanding Predictive Analytics",
+   "Reporting & Data Visualization",
+   "People Analytics and Digital HR"
+  ]
+ },
+ "180_CS_G527.pdf": {
+  "title": "Cloud Computing"
+ },
+ "181_CS_G527.pdf": {
+  "title": "Cloud Computing"
+ },
+ "224_ECON_F354.pdf": {
+  "title": "Derivatives & Risk Management"
+ }
+}
