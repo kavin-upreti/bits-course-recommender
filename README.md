@@ -1,6 +1,3 @@
-manually processed was not extracted using an LLM call (owing to the large wsize of the bulletin and academic regulations) but the data from all the handouts, timetable and a lot of the bulletin was extracted using the code which has been written in extractors
-
-
 ## Data curation notes
 
 Setup: `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt` (the handout extractor runs two small local models, all-MiniLM-L6-v2 and nli-deberta-v3-small, on Apple MPS or CPU; they are downloaded once and cached; no API calls).

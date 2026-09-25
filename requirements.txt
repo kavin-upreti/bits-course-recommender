@@ -2,3 +2,4 @@ pdfplumber
 sentence-transformers
 torch
 pytest  # tests/ only
+django
