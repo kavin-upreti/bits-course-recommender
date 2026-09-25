@@ -10,3 +10,7 @@ venv/
 
 # task brief, kept local only
 postman_25_r2.pdf
+
+# handout extractor side outputs (sample runs, previous output kept for comparison)
+dataset/code processed/handouts_sample.json
+dataset/code processed/handouts_old.json
