@@ -434,6 +434,9 @@
           "Discipline Electives-12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "ARCHITECTURAL AND URBAN ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -855,6 +858,9 @@
           "Discipline Electives 15 Units (5 Courses)"
         ]
       },
+      "cdc_lists": [
+        "BIOTECHNOLOGY"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -1268,6 +1274,9 @@
           "Discipline Electives-15 Units(5 Courses)"
         ]
       },
+      "cdc_lists": [
+        "BIOTECHNOLOGY WITH SPECIALIZATION IN APPLIED MOLECULAR BIOLOGY"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -1705,6 +1714,9 @@
           "Discipline Electives-15 Units (5 Courses)"
         ]
       },
+      "cdc_lists": [
+        "CHEMICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -2126,6 +2138,9 @@
           "Discipline Electives-15 Units(5 Courses)"
         ]
       },
+      "cdc_lists": [
+        "CHEMICAL ENGINEERING WITH SPECIALIZATION IN ENERGY, ENVIRONMENT, AND SUSTAINABILITY"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -2547,6 +2562,9 @@
           "Discipline Electives-12 Units(4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "CIVIL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -2976,6 +2994,9 @@
           "Discipline Electives-12 Units(4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "COMPUTER SCIENCE"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -3407,6 +3428,9 @@
           "Discipline Electives-12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "ELECTRICAL AND ELECTRONICS ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -3828,6 +3852,9 @@
           "Discipline Electives-12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "ELECTRONICS AND COMMUNICATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -4257,6 +4284,9 @@
           "Discipline Electives-12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "ELECTRONICS AND COMPUTER ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -4686,6 +4716,9 @@
           "Discipline Electives-12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "ELECTRONICS AND INSTRUMENTATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -4877,7 +4910,7 @@
             {
               "slot_type": "named",
               "code": "BITS F240",
-              "title": "Introduction to Environmental and Sus-",
+              "title": "Introduction to Environmental & Sustainable Systems Engineering",
               "alternatives": [],
               "category": null,
               "units_text": null
@@ -5047,7 +5080,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F323",
-              "title": "Sustainable Urban Design and",
+              "title": "Sustainable Urban Design and Smart Cities",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -5055,7 +5088,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F324",
-              "title": "Environmental Economics and",
+              "title": "Environmental Economics and Governance",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -5147,6 +5180,9 @@
           "Discipline Electives - 12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "ENVIRONMENTAL AND SUSTAINABILITY ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -5584,6 +5620,9 @@
           "Discipline Electives - 12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "MECHANICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -6021,6 +6060,9 @@
           "Discipline Electives - 12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "MECHANICAL ENGINEERING WITH SPECIALIZATION IN AEROSPACE"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -6450,6 +6492,9 @@
           "Discipline Electives - 12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "MANUFACTURING ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -6895,6 +6940,9 @@
           "Discipline Electives-12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "MATHEMATICS AND COMPUTING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -7336,6 +7384,9 @@
           "Discipline Electives - 12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "ROBOTICS AND INDUSTRIAL AUTOMATION"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -7803,6 +7854,9 @@
           "Discipline Electives- 12 Units (4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "PHARMACY"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -8216,6 +8270,9 @@
           "*Discipline Electives - 15 Units (min)-(4 Courses (min))"
         ]
       },
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -8637,6 +8694,9 @@
           "Discipline Electives-12 Units(4 Courses)"
         ]
       },
+      "cdc_lists": [
+        "CHEMISTRY"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -9056,6 +9116,9 @@
           "Discipline Electives -18 Units(6 Courses)"
         ]
       },
+      "cdc_lists": [
+        "ECONOMICS"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -9469,6 +9532,9 @@
           "Discipline Electives -15 Units (5 Courses)"
         ]
       },
+      "cdc_lists": [
+        "MATHEMATICS"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -9896,6 +9962,9 @@
           "*Discipline Electives - 15 Units (min)-4 Courses(min)"
         ]
       },
+      "cdc_lists": [
+        "PHYSICS"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -10325,6 +10394,9 @@
           "Discipline Electives - 15 Units (min)-4 Courses(min)"
         ]
       },
+      "cdc_lists": [
+        "PHYSICS WITH SPECIALIZATION IN SPACE SCIENCE AND TECHNOLOGY"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -10746,6 +10818,9 @@
           "Discipline elective – 15 Units (4 Courses (min)"
         ]
       },
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -11159,6 +11234,9 @@
           "Discipline Electives - 21 Units (7 Courses)"
         ]
       },
+      "cdc_lists": [
+        "GENERAL STUDIES – COMMUNICATION AND MEDIA STUDIES STREAM"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -11570,6 +11648,9 @@
           "Discipline Electives - 15 Units (5 Courses)"
         ]
       },
+      "cdc_lists": [
+        "GENERAL STUDIES – DEVELOPMENT STUDIES STREAM"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -11935,6 +12016,9 @@
           "Discipline Electives - 18 Units (6 Courses)"
         ]
       },
+      "cdc_lists": [
+        "BUSINESS ADMINISTRATION"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -12225,6 +12309,7 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -12517,6 +12602,7 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -12825,6 +12911,7 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -13095,6 +13182,10 @@
       },
       "final_year_options": [],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "CHEMICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -13540,6 +13631,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "CIVIL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -13977,6 +14072,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "COMPUTER SCIENCE"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -14416,6 +14515,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "ELECTRICAL AND ELECTRONICS ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -14853,6 +14956,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "ELECTRONICS AND COMPUTER ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -15298,6 +15405,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "ELECTRONICS AND COMMUNICATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -15743,6 +15854,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "ELECTRONICS AND INSTRUMENTATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -15951,7 +16066,7 @@
             {
               "slot_type": "named",
               "code": "BITS F240",
-              "title": "Introduction to Environmental and Sus-",
+              "title": "Introduction to Environmental & Sustainable Systems Engineering",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -16103,7 +16218,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F323",
-              "title": "Sustainable Urban Design and",
+              "title": "Sustainable Urban Design and Smart Cities",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -16111,7 +16226,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F324",
-              "title": "Environmental Economics and",
+              "title": "Environmental Economics and Governance",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -16202,6 +16317,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "ENVIRONMENTAL AND SUSTAINABILITY ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -16655,6 +16774,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "MANUFACTURING ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -17108,6 +17231,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "MATHEMATICS AND COMPUTING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -17569,6 +17696,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "MECHANICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -18004,6 +18135,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "BIOLOGICAL SCIENCES",
+        "ROBOTICS AND INDUSTRIAL AUTOMATION"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -18457,6 +18592,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "CHEMICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -18910,6 +19049,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "CIVIL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -19363,6 +19506,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "COMPUTER SCIENCE"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -19802,6 +19949,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "ELECTRICAL AND ELECTRONICS ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -20247,6 +20398,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "ELECTRONICS AND COMMUNICATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -20700,6 +20855,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "ELECTRONICS AND COMPUTER ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -21151,6 +21310,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "ELECTRONICS AND INSTRUMENTATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -21369,7 +21532,7 @@
             {
               "slot_type": "named",
               "code": "BITS F240",
-              "title": "Introduction to Environmental and Sus-",
+              "title": "Introduction to Environmental & Sustainable Systems Engineering",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -21513,7 +21676,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F323",
-              "title": "Sustainable Urban Design and",
+              "title": "Sustainable Urban Design and Smart Cities",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -21521,7 +21684,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F324",
-              "title": "Environmental Economics and",
+              "title": "Environmental Economics and Governance",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -21612,6 +21775,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "ENVIRONMENTAL AND SUSTAINABILITY ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -22073,6 +22240,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "MANUFACTURING ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -22534,6 +22705,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "MATHEMATICS AND COMPUTING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -23003,6 +23178,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "MECHANICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -23448,6 +23627,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "CHEMISTRY",
+        "ROBOTICS AND INDUSTRIAL AUTOMATION"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -23915,6 +24098,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "CHEMICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -24358,6 +24545,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "CIVIL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -24801,6 +24992,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "COMPUTER SCIENCE"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -25056,6 +25251,10 @@
       },
       "final_year_options": [],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "ELECTRICAL AND ELECTRONICS ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -25499,6 +25698,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "ELECTRONICS AND COMMUNICATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -25942,6 +26145,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "ELECTRONICS AND COMPUTER ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -26385,6 +26592,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "ELECTRONICS AND INSTRUMENTATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -26593,7 +26804,7 @@
             {
               "slot_type": "named",
               "code": "BITS F240",
-              "title": "Introduction to Environmental and Sus-",
+              "title": "Introduction to Environmental & Sustainable Systems Engineering",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -26745,7 +26956,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F323",
-              "title": "Sustainable Urban Design and",
+              "title": "Sustainable Urban Design and Smart Cities",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -26753,7 +26964,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F324",
-              "title": "Environmental Economics and",
+              "title": "Environmental Economics and Governance",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -26852,6 +27063,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "ENVIRONMENTAL AND SUSTAINABILITY ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -27311,6 +27526,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "MANUFACTURING ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -27762,6 +27981,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "MATHEMATICS AND COMPUTING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -28221,6 +28444,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "MECHANICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -28672,6 +28899,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "ECONOMICS",
+        "ROBOTICS AND INDUSTRIAL AUTOMATION"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -29125,6 +29356,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "CHEMICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -29570,6 +29805,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "CIVIL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -30007,6 +30246,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "COMPUTER SCIENCE"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -30452,6 +30695,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "ELECTRICAL AND ELECTRONICS ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -30897,6 +31144,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "ELECTRONICS AND COMMUNICATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -31342,6 +31593,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "ELECTRONICS AND COMPUTER ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -31787,6 +32042,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "ELECTRONICS AND INSTRUMENTATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -31997,7 +32256,7 @@
             {
               "slot_type": "named",
               "code": "BITS F240",
-              "title": "Introduction to Environmental and Sus-",
+              "title": "Introduction to Environmental & Sustainable Systems Engineering",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -32149,7 +32408,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F323",
-              "title": "Sustainable Urban Design and",
+              "title": "Sustainable Urban Design and Smart Cities",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -32157,7 +32416,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F324",
-              "title": "Environmental Economics and",
+              "title": "Environmental Economics and Governance",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -32248,6 +32507,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "ENVIRONMENTAL AND SUSTAINABILITY ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -32701,6 +32964,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "MANUFACTURING ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -33146,6 +33413,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "MATHEMATICS AND COMPUTING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -33607,6 +33878,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "MECHANICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -34044,6 +34319,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "MATHEMATICS",
+        "ROBOTICS AND INDUSTRIAL AUTOMATION"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -34505,6 +34784,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "CHEMICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -34958,6 +35241,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "CIVIL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -35401,6 +35688,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "COMPUTER SCIENCE"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -35848,6 +36139,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "ELECTRICAL AND ELECTRONICS ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -36293,6 +36588,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "ELECTRONICS AND COMMUNICATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -36746,6 +37045,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "ELECTRONICS AND COMPUTER ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -37207,6 +37510,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "ELECTRONICS AND INSTRUMENTATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -37417,7 +37724,7 @@
             {
               "slot_type": "named",
               "code": "BITS F240",
-              "title": "Introduction to Environmental and Sus-",
+              "title": "Introduction to Environmental & Sustainable Systems Engineering",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -37569,7 +37876,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F323",
-              "title": "Sustainable Urban Design and",
+              "title": "Sustainable Urban Design and Smart Cities",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -37577,7 +37884,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F324",
-              "title": "Environmental Economics and",
+              "title": "Environmental Economics and Governance",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -37676,6 +37983,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "ENVIRONMENTAL AND SUSTAINABILITY ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -38137,6 +38448,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "MANUFACTURING ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -38590,6 +38905,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "MATHEMATICS AND COMPUTING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -39059,6 +39378,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "MECHANICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -39504,6 +39827,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "PHYSICS",
+        "ROBOTICS AND INDUSTRIAL AUTOMATION"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -39965,6 +40292,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "CHEMICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -40418,6 +40749,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "CIVIL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -40871,6 +41206,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "COMPUTER SCIENCE"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -41326,6 +41665,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "ELECTRICAL AND ELECTRONICS ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -41779,6 +42122,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "ELECTRONICS AND COMPUTER ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -42232,6 +42579,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "ELECTRONICS AND COMMUNICATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -42685,6 +43036,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "ELECTRONICS AND INSTRUMENTATION ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -42895,7 +43250,7 @@
             {
               "slot_type": "named",
               "code": "BITS F240",
-              "title": "Introduction to Environmental and Sus-",
+              "title": "Introduction to Environmental & Sustainable Systems Engineering",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -43047,7 +43402,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F323",
-              "title": "Sustainable Urban Design and",
+              "title": "Sustainable Urban Design and Smart Cities",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -43055,7 +43410,7 @@
             {
               "slot_type": "named",
               "code": "ENVS F324",
-              "title": "Environmental Economics and",
+              "title": "Environmental Economics and Governance",
               "alternatives": [],
               "category": null,
               "units_text": "3"
@@ -43154,6 +43509,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "ENVIRONMENTAL AND SUSTAINABILITY ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -43615,6 +43974,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "MANUFACTURING ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -44076,6 +44439,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "MATHEMATICS AND COMPUTING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -44545,6 +44912,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "MECHANICAL ENGINEERING"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -44998,6 +45369,10 @@
         }
       ],
       "footer": {},
+      "cdc_lists": [
+        "SEMICONDUCTOR AND NANOSCIENCE",
+        "ROBOTICS AND INDUSTRIAL AUTOMATION"
+      ],
       "source": {
         "doc": "bulletin.pdf",
         "section": "Semester-wise pattern",
@@ -48976,16 +49351,6 @@
           "non_letter_grade": false
         },
         {
-          "code": "ECE F331",
-          "title": "Microwave Engineering",
-          "L": 3,
-          "P": 1,
-          "U": 4,
-          "alternatives": [],
-          "pool": null,
-          "non_letter_grade": false
-        },
-        {
           "code": "ECE F341",
           "title": "Analog Electronics",
           "L": 3,
@@ -49021,6 +49386,16 @@
           "L": 3,
           "P": 1,
           "U": 4,
+          "alternatives": [],
+          "pool": null,
+          "non_letter_grade": false
+        },
+        {
+          "code": "ECE F314",
+          "title": "Electromagnetic Fields & Microwave Engineering",
+          "L": null,
+          "P": null,
+          "U": 3,
           "alternatives": [],
           "pool": null,
           "non_letter_grade": false
@@ -49495,7 +49870,7 @@
         "page": 319
       },
       "needs_verification": false,
-      "note": "project course prefix 'ECE' inferred as the most common core-course department"
+      "note": "project course prefix 'ECE' inferred as the most common core-course department; corrected by hand: course list prints ECE F331 (4 units); every ECE chart uses ECE F314 (3 units), which gives the footer's 48 units"
     },
     {
       "discipline": "ELECTRONICS AND COMPUTER ENGINEERING",
@@ -50918,10 +51293,40 @@
           "non_letter_grade": false
         },
         {
-          "code": "ENVS F232",
+          "code": "CHE F211",
+          "title": "Chemical Process Calculations",
+          "L": null,
+          "P": null,
+          "U": 3,
+          "alternatives": [],
+          "pool": null,
+          "non_letter_grade": false
+        },
+        {
+          "code": "BITS F240",
+          "title": "Introduction to Environmental & Sustainable Systems Engineering",
+          "L": null,
+          "P": null,
+          "U": 3,
+          "alternatives": [],
+          "pool": null,
+          "non_letter_grade": false
+        },
+        {
+          "code": "ENVS F323",
           "title": "Sustainable Urban Design and Smart Cities",
-          "L": 3,
-          "P": 0,
+          "L": null,
+          "P": null,
+          "U": 3,
+          "alternatives": [],
+          "pool": null,
+          "non_letter_grade": false
+        },
+        {
+          "code": "ENVS F324",
+          "title": "Environmental Economics and Governance",
+          "L": null,
+          "P": null,
           "U": 3,
           "alternatives": [],
           "pool": null,
@@ -51064,7 +51469,7 @@
         "page": 322
       },
       "needs_verification": false,
-      "note": "project course prefix 'ENVS' inferred as the most common core-course department"
+      "note": "project course prefix 'ENVS' inferred as the most common core-course department; corrected by hand: course list (p.322) prints 13 core courses; the chart (p.222) and its footer have 16 (48 units): adds CHE F211, BITS F240, ENVS F324 and numbers Sustainable Urban Design ENVS F323 (list: ENVS F232)"
     },
     {
       "discipline": "MANUFACTURING ENGINEERING",
@@ -53220,16 +53625,6 @@
           "non_letter_grade": false
         },
         {
-          "code": "PHA F243",
-          "title": "Industrial Pharmacy",
-          "L": 2,
-          "P": 1,
-          "U": 3,
-          "alternatives": [],
-          "pool": null,
-          "non_letter_grade": false
-        },
-        {
           "code": "PHA F244",
           "title": "Physical Pharmacy",
           "L": 2,
@@ -53506,7 +53901,7 @@
         "page": 325
       },
       "needs_verification": false,
-      "note": "project course prefix 'PHA' inferred as the most common core-course department"
+      "note": "project course prefix 'PHA' inferred as the most common core-course department; corrected by hand: course list footnote: PHA F215 is offered in place of PHA F243 for students admitted 2014 onwards (footer: 16 courses)"
     },
     {
       "discipline": "BIOLOGICAL SCIENCES",
@@ -58469,7 +58864,7 @@
       "note": "project course prefix 'SNS' inferred as the most common core-course department"
     },
     {
-      "discipline": null,
+      "discipline": "BUSINESS ADMINISTRATION",
       "core": [
         {
           "code": "BBA F121",

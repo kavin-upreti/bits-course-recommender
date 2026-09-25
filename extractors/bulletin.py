@@ -160,6 +160,7 @@ class Programme:
     summer: dict | None = None
     final_year_options: list[Slot] = field(default_factory=list)
     footer: dict = field(default_factory=dict)
+    cdc_lists: list[str] = field(default_factory=list)  # discipline(s) in course_lists whose core = this programme's CDCs
     source: dict = field(default_factory=dict)
     needs_verification: bool = True  # always: batch_range is unknown
     note: str | None = "batch_range not stated in the Bulletin"
@@ -627,6 +628,66 @@ def attach_titles(programmes: list[Programme], known_titles: dict[str, str]) -> 
                     slot.title = known_titles[slot.code]
 
 
+# Where the Bulletin contradicts itself, checked by hand against its own chart footers ("Discipline Core - 48 Units
+# (16 Courses)"). Each fix: discipline -> (courses to remove, courses to add, reason).
+CDC_CORRECTIONS = {
+    "ENVIRONMENTAL AND SUSTAINABILITY ENGINEERING": (
+        ["ENVS F232"],
+        [("CHE F211", "Chemical Process Calculations", 3), ("BITS F240", "Introduction to Environmental & Sustainable Systems Engineering", 3),
+         ("ENVS F323", "Sustainable Urban Design and Smart Cities", 3), ("ENVS F324", "Environmental Economics and Governance", 3)],
+        "course list (p.322) prints 13 core courses; the chart (p.222) and its footer have 16 (48 units): "
+        "adds CHE F211, BITS F240, ENVS F324 and numbers Sustainable Urban Design ENVS F323 (list: ENVS F232)"),
+    "ELECTRONICS AND COMMUNICATION ENGINEERING": (
+        ["ECE F331"], [("ECE F314", "Electromagnetic Fields & Microwave Engineering", 3)],
+        "course list prints ECE F331 (4 units); every ECE chart uses ECE F314 (3 units), which gives the footer's 48 units"),
+    "PHARMACY": (
+        ["PHA F243"], [],
+        "course list footnote: PHA F215 is offered in place of PHA F243 for students admitted 2014 onwards (footer: 16 courses)"),
+}
+
+
+def apply_cdc_corrections(course_lists: list[CourseList]) -> None:
+    for course_list in course_lists:
+        if course_list.discipline is None and any(course.code.startswith("BBA") for course in course_list.core):
+            course_list.discipline = "BUSINESS ADMINISTRATION"  # the heading is an image in the PDF; the courses are BBA's
+        fix = CDC_CORRECTIONS.get(course_list.discipline or "")
+        if fix:
+            removed, added, reason = fix
+            course_list.core = [course for course in course_list.core if course.code not in removed]
+            course_list.core += [ListedCourse(code, title, None, None, units) for code, title, units in added]
+            course_list.note = f"{course_list.note}; corrected by hand: {reason}" if course_list.note else f"corrected by hand: {reason}"
+
+
+def name_words(name: str) -> set[str]:
+    """'B.E. Mathematic and Computing' / 'MATHEMATICS AND COMPUTING' -> {'mathematic', 'computing'} (for matching)."""
+    name = re.sub(r"^(b\.\s?e\.|m\.\s?sc\.|b\.\s?pharm\.?|bachelor of)\s*", "", name.lower())
+    words = re.findall(r"[a-z]+", name.replace("&", " and "))
+    return {w.rstrip("s") for w in words if w not in {"and", "engineering", "in", "with", "specialization", "of", "the", "honour", "honours", "b", "e"}}
+
+
+def best_list(name: str, course_lists: list[CourseList], charted: set[str]) -> CourseList | None:
+    """The course list whose discipline name matches best; ties broken by shared chart courses."""
+    wanted = name_words(name)
+    scored = [(len(wanted & name_words(cl.discipline)) / len(wanted | name_words(cl.discipline)),
+               len(charted & {c.code for c in cl.core}), cl) for cl in course_lists if cl.discipline]
+    score, overlap, found = max(scored, key=lambda item: (item[0], item[1]))
+    return found if score >= 0.5 or overlap >= 5 else None
+
+
+def link_cdc_lists(programmes: list[Programme], course_lists: list[CourseList]) -> None:
+    """programme.cdc_lists: the course list(s) whose core courses are this programme's CDCs
+    (dual degrees: one per component)."""
+    for programme in programmes:
+        if programme.type == "single":
+            charted = {slot.code for chart in programme.semesters for slot in chart.slots if slot.code}
+            found = best_list(programme.name, course_lists, charted)
+            programme.cdc_lists = [found.discipline] if found else []
+        elif programme.type == "dual":
+            programme.cdc_lists = [found.discipline for name in programme.components if (found := best_list(name, course_lists, set()))]
+        if programme.type != "dual_template" and len(programme.cdc_lists) < max(1, len(programme.components)):
+            flag(programme, "a course list for this programme (or one of its components) was not found")
+
+
 def extract_all(pdf_path: Path) -> dict:
     with pdfplumber.open(pdf_path) as pdf:
         log.info("Reading %d pages to find the sections...", len(pdf.pages))
@@ -655,6 +716,8 @@ def extract_all(pdf_path: Path) -> dict:
         description_lines = [(number, column_lines(pdf.pages[number - 1])) for number in range(descriptions_start, descriptions_end)]
         descriptions = parse_descriptions(description_lines)
 
+    apply_cdc_corrections(course_lists)
+    link_cdc_lists(programmes, course_lists)
     known_titles = {course.code: course.title for course in descriptions}
     known_titles.update({course.code: course.title for course_list in course_lists for course in course_list.core + course_list.discipline_electives})
     attach_titles(programmes, known_titles)
