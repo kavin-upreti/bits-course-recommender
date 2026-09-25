@@ -1,0 +1,25 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}BITS Course Planner{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'students/app.css' %}">
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="wordmark" href="{% url 'home' %}">BITS Course Planner</a>
+  {% if user.is_authenticated %}
+  <form class="who" method="post" action="{% url 'logout' %}">{% csrf_token %}
+    <span>{{ user.first_name }} <span class="code">{{ user.username }}</span></span>
+    <button class="btn link">Log out</button>
+  </form>
+  {% endif %}
+</div></header>
+<main class="{% block main_class %}{% endblock %}">
+  {% for message in messages %}<p class="toast" role="status">{{ message }}</p>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

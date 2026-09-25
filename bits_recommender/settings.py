@@ -135,3 +135,7 @@ MAILERS = {
 
 # Extractor outputs read by `manage.py ingest`: <DATA_DIR>/code processed/ and <DATA_DIR>/manually processed/
 DATA_DIR = Path(os.environ.get('BITS_DATA_DIR', BASE_DIR / 'dataset'))
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'

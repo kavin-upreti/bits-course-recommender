@@ -1,0 +1,24 @@
+{% extends "students/base.html" %}
+{% block title %}Register · BITS Course Planner{% endblock %}
+{% block content %}
+<div class="auth">
+  <section>
+    <h1>Plan next semester from what you've already done.</h1>
+    <p class="lede">Your ID tells us your batch, campus and degree, so you won't have to fill those in. You'll only add the electives you've taken.</p>
+    <dl class="id-decode id-example" aria-label="How an ID is read">
+      <div><dt>2024</dt><dd>batch</dd></div>
+      <div class="branch"><dt>B3</dt><dd>first degree</dd></div>
+      <div class="branch"><dt>A7</dt><dd>second degree, if dual</dd></div>
+      <div><dt>PS</dt><dd>practice school</dd></div>
+      <div><dt>0832</dt><dd>your number</dd></div>
+      <div><dt>P</dt><dd>campus</dd></div>
+    </dl>
+  </section>
+  <form class="panel stack" method="post" novalidate>{% csrf_token %}
+    <h2 style="margin-bottom:16px">Create your account</h2>
+    {{ form.non_field_errors }}
+    {% for field in form %}<div>{{ field.as_field_group }}</div>{% endfor %}
+    <div class="actions"><button class="btn">Create account</button><span class="muted small">Have one? <a href="{% url 'login' %}">Log in</a></span></div>
+  </form>
+</div>
+{% endblock %}

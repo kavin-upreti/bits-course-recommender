@@ -178,6 +178,9 @@ class Minor(Flagged):
     min_units = models.PositiveSmallIntegerField(null=True, blank=True)
     exclusion_text = models.TextField(blank=True, default="")
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class MinorCourse(models.Model):
     minor = models.ForeignKey(Minor, on_delete=models.CASCADE, related_name="courses")

@@ -1,0 +1,17 @@
+{% extends "students/base.html" %}
+{% block title %}Log in · BITS Course Planner{% endblock %}
+{% block content %}
+<div class="auth">
+  <section>
+    <h1>Welcome back.</h1>
+    <p class="lede">Log in with your BITS ID and password.</p>
+  </section>
+  <form class="panel stack" method="post">{% csrf_token %}
+    <h2 style="margin-bottom:16px">Log in</h2>
+    {% if form.non_field_errors %}<ul class="errorlist nonfield"><li>Wrong BITS ID or password.</li></ul>{% endif %}
+    <div><label for="id_username">BITS ID</label>{{ form.username }}</div>
+    <div><label for="id_password">Password</label>{{ form.password }}</div>
+    <div class="actions"><button class="btn">Log in</button><span class="muted small">New here? <a href="{% url 'register' %}">Create an account</a></span></div>
+  </form>
+</div>
+{% endblock %}

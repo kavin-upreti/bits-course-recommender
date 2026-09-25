@@ -113,7 +113,10 @@ class Command(BaseCommand):
         for c in timetable["courses"]:
             seen(c["course_no"], c["title"].title() if c["title"].isupper() else c["title"], "timetable.pdf")
             credits, record = c["credits"], records[c["course_no"]]
-            record.update(com_code=c["com_code"], only_2026_batch=not c["allowed_for_before_2026_batch"],
+            # why AND: a code can have several timetable entries (a 2026-only com code next to a normal one);
+            # it's 2026-only only if every entry is
+            only_2026 = record.get("only_2026_batch", True) and not c["allowed_for_before_2026_batch"]
+            record.update(com_code=c["com_code"], only_2026_batch=only_2026,
                           T=credits.get("tutorial"), S=credits.get("self_study"))
             for key, field in (("lecture", "L"), ("practical", "P"), ("units", "units")):
                 if record.get(field) is None:

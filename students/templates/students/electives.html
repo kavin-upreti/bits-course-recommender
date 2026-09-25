@@ -1,0 +1,62 @@
+{% extends "students/base.html" %}
+{% block title %}Your electives · BITS Course Planner{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<h1>Courses you've taken</h1>
+<p class="lede">Your compulsory courses are already filled in. {% if alternatives %}Tell us which option you took where your chart gives a choice, then add{% else %}Add{% endif %} your electives, semester by semester.</p>
+{% if error %}<p class="notice" role="alert" style="margin-top:16px">{{ error }}</p>{% endif %}
+
+{% for category, courses in choices.items %}
+<datalist id="dl-{{ category }}">{% for course in courses %}<option value="{{ course.code }}">{{ course.title }}</option>{% endfor %}</datalist>
+{% endfor %}
+
+<form method="post" style="margin-top:24px">{% csrf_token %}
+{% if alternatives %}
+  <section class="sem-block">
+    <h3>Choices in your chart</h3>
+    {% for label, slots in alternatives %}
+      {% include "students/_or_pick.html" with prompt="In "|add:label|add:", which one did you take?" %}
+    {% endfor %}
+  </section>
+{% endif %}
+{% if formsets %}<h2 style="margin:32px 0 4px">Electives</h2><p class="muted small" style="margin:0 0 16px">Pick the kind first and the course list narrows to match.</p>{% endif %}
+{% for semester, formset in formsets %}
+  <section class="sem-block">
+    <h3>{{ semester }} <span class="muted">leave rows empty if you took none</span></h3>
+    {{ formset.management_form }}
+    {{ formset.non_form_errors }}
+    <div class="col-heads"><span>Kind</span><span>Course code</span><span>Grade (optional)</span><span>How comfortable were you?</span></div>
+    <div class="rows">
+    {% for form in formset %}
+      <div class="erow" data-cat="{{ form.category.value|default:'' }}">
+        {{ form.category }}{{ form.course }}{{ form.grade }}{{ form.comfort }}
+        {% for field in form %}{{ field.errors }}{% endfor %}{{ form.non_field_errors }}
+      </div>
+    {% endfor %}
+    </div>
+    <template><div class="erow" data-cat="">{{ formset.empty_form.category }}{{ formset.empty_form.course }}{{ formset.empty_form.grade }}{{ formset.empty_form.comfort }}</div></template>
+    <button type="button" class="btn quiet add-row" data-prefix="{{ formset.prefix }}">Add another course</button>
+  </section>
+{% endfor %}
+<div class="actions"><button class="btn">Save courses</button><a class="btn link" href="{% url 'home' %}">Skip for now</a></div>
+</form>
+
+<script>
+  // why: one shared <datalist> per kind keeps the page small (~2,000 open electives listed once, not per row)
+  function wire(row) {
+    const kind = row.querySelector('select[name$="-category"]');
+    const sync = () => { row.dataset.cat = kind.value; row.querySelector('input[name$="-course"]').setAttribute('list', 'dl-' + kind.value); };
+    kind.addEventListener('change', sync); sync();
+  }
+  document.querySelectorAll('.erow').forEach(wire);
+  document.querySelectorAll('.add-row').forEach((button) => button.addEventListener('click', () => {
+    const block = button.closest('.sem-block');
+    const total = block.querySelector(`input[name="${button.dataset.prefix}-TOTAL_FORMS"]`);
+    const html = block.querySelector('template').innerHTML.replaceAll('__prefix__', total.value);
+    block.querySelector('.rows').insertAdjacentHTML('beforeend', html);
+    total.value = Number(total.value) + 1;
+    const row = block.querySelector('.rows').lastElementChild;
+    wire(row); row.querySelector('select').focus();
+  }));
+</script>
+{% endblock %}
