@@ -21,7 +21,8 @@ from django.db import transaction
 
 from catalog import models as m
 
-EXAMPLES_SHOWN = 12  # unresolved codes printed per source; the rest are in the report file
+EXAMPLES_SHOWN = 12
+EXPECTED_MINORS = 23  # Bulletin 2025-26; a different count after re-extraction means the minors parser broke  # unresolved codes printed per source; the rest are in the report file
 DEFAULT_POLICY = re.compile(r"as per (the )?(institute|augs|agsr|academic|university)|(augs|agsr)\w*\s*(division\s*)?(guidelines|rules|norms)"
                             r"|institute (rules|norms|guidelines)|see part[- ]i\b", re.I)
 CODE = re.compile(r"^[A-Z]{2,5} [A-Z]\d{3}[A-Z]?(-\d+)?$")
@@ -38,6 +39,14 @@ def load(path: Path):
 
 def department(code: str) -> str:
     return code.split(" ")[0]
+
+
+def discipline_code(lists: dict, programme: dict) -> str:
+    """Course prefix of a single degree ("CS"), read from its CDC list's project courses (XXX F266 -> CS F266)."""
+    if programme["type"] != "single" or not programme.get("cdc_lists"):
+        return ""
+    project_courses = lists[programme["cdc_lists"][0]]["project_courses"]
+    return department(project_courses[0]) if project_courses else ""
 
 
 class Command(BaseCommand):
@@ -130,6 +139,18 @@ class Command(BaseCommand):
             seen(handout["course_no"], handout.get("title") or "", "handouts")
         for mapping in manual_bulletin["code_mappings"]:
             seen(mapping["to"], mapping.get("title") or "", "code_mappings")
+        for requirement in manual_bulletin["category_requirements"]:
+            for course in requirement.get("named_courses") or []:
+                seen(course["code"], course.get("title") or "", "bulletin.pdf")
+                for alt in course.get("alternatives") or []:
+                    seen(alt, "", "bulletin.pdf")
+
+        # why: project courses are XXX F266 / F366 / ... for every degree, so match on the number part only
+        project_numbers = {p["code"].split(" ")[1] for p in bulletin["project_course_patterns"]}
+        for record in records.values():
+            number = record["code"].split(" ")[1]
+            record["is_project_course"] = number in project_numbers
+            record["is_higher_degree"] = number.startswith("G")
 
         fields = {f.name for f in m.Course._meta.fields}
         objects = [m.Course(**{k: v for k, v in r.items() if k in fields and v is not None}) for r in records.values()]
@@ -192,6 +213,7 @@ class Command(BaseCommand):
             footer = p.get("footer") or {}
             programmes[p["name"]] = m.Programme.objects.create(
                 name=p["name"], degree=p.get("degree") or "", type=p["type"], edition=p.get("edition") or "",
+                discipline_code=discipline_code(lists, p),
                 batch_range=p.get("batch_range"), core_units=footer.get("core_units"), core_courses=footer.get("core_courses"),
                 del_units=footer.get("del_units"), del_courses=footer.get("del_courses"), summer=p.get("summer"),
                 final_year_options=p.get("final_year_options") or [], sources={"chart": p.get("source")},
@@ -249,6 +271,15 @@ class Command(BaseCommand):
                               for c in group if c["code"] in courses]
         m.MinorCourse.objects.bulk_create(minor_courses)
 
+        m.GirCourse.objects.bulk_create([m.GirCourse(
+            course=courses[c["code"]], heading=r["category"], alternative_group=c.get("alternatives") or [],
+            sources={"requirement": r.get("source")})
+            for r in manual_bulletin["category_requirements"] for c in r.get("named_courses") or []])
+        m.CodeMapping.objects.bulk_create([m.CodeMapping(
+            from_code=x["from"], to_course=courses[x["to"]], inferred=x.get("inferred", True), reason=x.get("reason") or "",
+            needs_verification=x.get("needs_verification", True), sources={"mapping": x.get("id")})
+            for x in manual_bulletin["code_mappings"]])
+
     # ------------------------------------------------------------ hand-curated rules
     def load_rules(self, manual_bulletin, regulations, manual_timetable):
         m.CategoryRequirement.objects.bulk_create([m.CategoryRequirement(
@@ -303,14 +334,39 @@ class Command(BaseCommand):
         known = set(m.Course.objects.values_list("code", flat=True))
         prereq_codes = {code for d in bulletin["course_descriptions"] for group in d["prerequisites"] or [] for code in group}
         self.report["prerequisite code with no course"] = sorted(prereq_codes - known)
-        for label in ("handout course not in timetable", "programme with no CDC list", "prerequisite code with no course"):
+        self.report["single degree with no discipline code"] = sorted(
+            m.Programme.objects.filter(type="single", discipline_code="").values_list("name", flat=True))
+        for label in ("handout course not in timetable", "programme with no CDC list", "prerequisite code with no course",
+                      "single degree with no discipline code"):
             items = self.report.get(label, [])
             self.stdout.write(f"  {label:34} {len(items):4}  {', '.join(items[:EXAMPLES_SHOWN])}")
+
+        self.timetable_checks(timetable, bulletin)
+
+    def timetable_checks(self, timetable, bulletin):
+        """Facts timetable intelligence relies on (ideation 2.1 / Part 8), plus the expected minor count."""
+        courses = timetable["courses"]
+        sections = [s for c in courses for group in (c.get("sections") or {}).values() for s in group.values()]
+        practicals = [s for c in courses for s in (c.get("sections") or {}).get("practical", {}).values()]
+        multi_period = sum(any(len(periods) > 1 for periods in s["timings"].values()) for s in practicals)
+        no_timings = sum(not s.get("timings") and not s.get("cancelled") for s in sections)
+        no_sections = [c["course_no"] for c in courses if not c.get("sections")]
+        self.report["timetable: courses with no sections"] = no_sections
+        self.stdout.write("\nTimetable checks:")
+        self.stdout.write(f"  course entries / unique codes      {len(courses)} / {len({c['course_no'] for c in courses})}")
+        self.stdout.write(f"  sections / cancelled               {len(sections)} / {sum(bool(s.get('cancelled')) for s in sections)}")
+        self.stdout.write(f"  practicals spanning >1 period      {multi_period} of {len(practicals)}"
+                          + ("   <- expected most labs to be multi-period" if practicals and multi_period == 0 else ""))
+        self.stdout.write(f"  live sections with no fixed slot   {no_timings}   (project / thesis-style courses)")
+        self.stdout.write(f"  courses with no sections           {len(no_sections)}")
+        minors = len(bulletin["minors"])
+        self.stdout.write(f"  minors                             {minors}" + ("" if minors == EXPECTED_MINORS else
+                                                                          f"   <- expected {EXPECTED_MINORS}"))
 
     def print_counts(self):
         self.stdout.write("\nRecords per model:")
         for model in (m.Course, m.CourseEquivalent, m.Offering, m.Section, m.Handout, m.Programme, m.PatternSlot,
-                      m.ProgrammeCourse, m.HuelPoolCourse, m.AuditCourse, m.Minor, m.MinorCourse, m.CategoryRequirement,
+                      m.ProgrammeCourse, m.GirCourse, m.CodeMapping, m.HuelPoolCourse, m.AuditCourse, m.Minor, m.MinorCourse, m.CategoryRequirement,
                       m.Rule, m.KnownGap):
             total = model.objects.count()
             flagged = model.objects.filter(needs_verification=True).count() if hasattr(model, "needs_verification") else None

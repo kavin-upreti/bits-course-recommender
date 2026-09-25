@@ -6,7 +6,7 @@ deleting students' courses and plans (see the ingest command's --wipe-students).
 from django.conf import settings
 from django.db import models
 
-from catalog.models import Course, Minor, Programme, Section
+from catalog.models import Course, Minor, PatternSlot, Programme, Section
 
 
 class Student(models.Model):
@@ -39,6 +39,9 @@ class StudentCourse(models.Model):
     grade = models.CharField(max_length=3, null=True, blank=True)
     semester_taken = models.CharField(max_length=30, blank=True, default="")
     counted_as = models.CharField(max_length=20, blank=True, default="")  # optional category override
+    source = models.CharField(max_length=10, choices=[("pattern", "pattern"), ("user", "user")], default="user")
+    pattern_slot = models.ForeignKey(PatternSlot, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    needs_review = models.BooleanField(default=False)  # pre-filled but uncertain (e.g. first-year variants)
 
     class Meta:
         unique_together = ("student", "course")

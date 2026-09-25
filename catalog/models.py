@@ -33,6 +33,9 @@ class Course(Flagged):
     only_2026_batch = models.BooleanField(default=False)  # com_code >= 5000
     description = models.TextField(blank=True, default="")
     prerequisites = models.JSONField(null=True, blank=True)  # AND of OR-groups: [["CE F231", "ME F212"], ["MATH F211"]]
+    is_project_course = models.BooleanField(default=False)  # number matches the Bulletin's XXX F266/F366/... patterns
+    # ponytail: "G" level letter = higher degree (BITS numbering); not stated as a rule in our PDFs (ideation Part 10)
+    is_higher_degree = models.BooleanField(default=False)
     llm_tags = models.JSONField(null=True, blank=True)  # filled later (ideation 4.7)
 
     def __str__(self) -> str:
@@ -107,6 +110,7 @@ class Programme(Flagged):
     name = models.CharField(max_length=200, unique=True)
     degree = models.CharField(max_length=30, blank=True, default="")
     type = models.CharField(max_length=15, choices=TYPES)
+    discipline_code = models.CharField(max_length=10, blank=True, default="")  # "CS"; blank for dual (see components)
     first_component = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     second_component = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     edition = models.CharField(max_length=20, blank=True, default="")
@@ -146,6 +150,15 @@ class ProgrammeCourse(models.Model):
     track_or_pool = models.CharField(max_length=100, blank=True, default="")
     alternative_group = models.JSONField(default=list)  # codes that can replace this one
     inferred = models.BooleanField(default=False)  # e.g. BIOT -> BIO by title (code_mappings)
+    sources = models.JSONField(default=dict, blank=True)
+
+
+class GirCourse(models.Model):
+    """A named General Institutional Requirement course (category_requirements.json); classifies foundation courses."""
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="gir")
+    heading = models.CharField(max_length=100)  # Science Foundation / Technical Arts / ...
+    alternative_group = models.JSONField(default=list)
     sources = models.JSONField(default=dict, blank=True)
 
 
@@ -200,3 +213,12 @@ class KnownGap(Flagged):
     description = models.TextField()
     affected = models.JSONField(default=dict)
     user_message = models.TextField(null=True, blank=True)
+
+
+class CodeMapping(Flagged):
+    """Hand-inferred code mapping, e.g. the Bulletin's BIOT F211 -> the timetable's BIO F211 (same title)."""
+
+    from_code = models.CharField(max_length=20, unique=True)
+    to_course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="mapped_from")
+    inferred = models.BooleanField(default=True)
+    reason = models.TextField(blank=True, default="")
