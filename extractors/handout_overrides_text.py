@@ -5,6 +5,19 @@ NO_PLAN = {"topics": [], "notes": ["no_course_plan_in_handout"]}
 
 DIGITAL_DESIGN = ["Working in Binary", "Combinational Building Blocks", "Sequential Design and Building Blocks", "HDL (Verilog)",
                   "Algorithmic State Machines", "Digital Logic Families", "Computer Arithmetic"]
+# 135/136_CHE_G553: the "Course Plan:" heading is printed over the plan table's header (overprint), so the table
+# isn't found once overprinted text is dropped
+STAT_THERMO = ["Introduction to Statistical Thermodynamics",
+               "Concepts of chemical thermodynamics and need to study statistical thermodynamics",
+               "Introduction to the scope of statistical thermodynamics",
+               "Introduction to probability, ensembles and most probable distribution", "Ensemble Theory",
+               "Introducing the molecular partition function: its terms, interpretation and applications",
+               "Canonical ensemble and derivation of partition function; grand canonical and micro-canonical ensemble partition functions",
+               "Thermo-physical property calculations in ensembles",
+               "Derivation of thermodynamic variables and properties from the partition function",
+               "Statistical explanation of the second and third laws of thermodynamics", "Adsorption phenomenon",
+               "Thermodynamic properties of perfect gas; Einstein and Debye theory of crystalline solids",
+               "Langmuir isotherms of adsorption of gas on lattice structure", "BET isotherms of adsorption of gas on lattice structure"]
 BIOETHICS = ["Introduction to the need and issues governing biosafety",
              "Legal, ethical and social implications including issues related to human reproduction, gene manipulation, genetic testing",
              "Guidelines for research in transgenic organisms and plants such as cloning, stem cell research, gene therapy",
@@ -44,6 +57,7 @@ PEOPLE_ANALYTICS = ["Getting started with People Analytics", "People Analytics F
 
 TOPICS_ABOUT = {
     "030_BITS_E584.pdf": NO_PLAN, "068_BITS_G661.pdf": NO_PLAN, "524_PHY_U110.pdf": NO_PLAN,  # plan set per student / in the lab manual
+    "135_CHE_G553.pdf": {"topics": STAT_THERMO}, "136_CHE_G553.pdf": {"topics": STAT_THERMO},
     "058_BITS_F467.pdf": {"topics": BIOETHICS}, "074_BITS_U467.pdf": {"topics": BIOETHICS},
     "059_BITS_F468.pdf": {"topics": VENTURE}, "229_ECON_F415.pdf": {"topics": VENTURE},
     "076_CE_F213.pdf": {"topics": ["Introduction to the Basic Concepts of Surveying", "Linear Measurements and Instruments", "Chain Survey",

@@ -5623,6 +5623,42 @@
    "no_course_plan_in_handout"
   ]
  },
+ "135_CHE_G553.pdf": {
+  "topics": [
+   "Introduction to Statistical Thermodynamics",
+   "Concepts of chemical thermodynamics and need to study statistical thermodynamics",
+   "Introduction to the scope of statistical thermodynamics",
+   "Introduction to probability, ensembles and most probable distribution",
+   "Ensemble Theory",
+   "Introducing the molecular partition function: its terms, interpretation and applications",
+   "Canonical ensemble and derivation of partition function; grand canonical and micro-canonical ensemble partition functions",
+   "Thermo-physical property calculations in ensembles",
+   "Derivation of thermodynamic variables and properties from the partition function",
+   "Statistical explanation of the second and third laws of thermodynamics",
+   "Adsorption phenomenon",
+   "Thermodynamic properties of perfect gas; Einstein and Debye theory of crystalline solids",
+   "Langmuir isotherms of adsorption of gas on lattice structure",
+   "BET isotherms of adsorption of gas on lattice structure"
+  ]
+ },
+ "136_CHE_G553.pdf": {
+  "topics": [
+   "Introduction to Statistical Thermodynamics",
+   "Concepts of chemical thermodynamics and need to study statistical thermodynamics",
+   "Introduction to the scope of statistical thermodynamics",
+   "Introduction to probability, ensembles and most probable distribution",
+   "Ensemble Theory",
+   "Introducing the molecular partition function: its terms, interpretation and applications",
+   "Canonical ensemble and derivation of partition function; grand canonical and micro-canonical ensemble partition functions",
+   "Thermo-physical property calculations in ensembles",
+   "Derivation of thermodynamic variables and properties from the partition function",
+   "Statistical explanation of the second and third laws of thermodynamics",
+   "Adsorption phenomenon",
+   "Thermodynamic properties of perfect gas; Einstein and Debye theory of crystalline solids",
+   "Langmuir isotherms of adsorption of gas on lattice structure",
+   "BET isotherms of adsorption of gas on lattice structure"
+  ]
+ },
  "058_BITS_F467.pdf": {
   "topics": [
    "Introduction to the need and issues governing biosafety",

@@ -83,7 +83,12 @@ LABELS = {"quiz": "quizzes", "midsem": "mid-semester exam", "compre": "comprehen
           "viva": "viva", "seminar": "seminars", "class_participation": "class participation", "other": "other components"}
 MAKEUP_WORD = r"make\s*-?\s*ups?"
 LIST_MARKER = re.compile(r"^\s*(\(?[a-z]\)|\(?\d{1,2}[.)]|\(?[ivx]{1,4}[.)]|CLO\s*\d+\s*[.:]?|[•▪●○■◦➢✓*\-])\s*", re.I)
-TOPIC_PREFIX = re.compile(r"^\s*((M|L|Lec|Lectures?|Module|Unit|Week)\.?\s*-?\s*\d+(\s*(-|–|to)\s*L?\d+)?\s*[:.)\-–]?\s*|\d{1,2}\s*[.)]\s*)", re.I)
+# "L2.1-2.2 ", "L3.1-L3.2 ", "L# 22-23: ", "Module 4: ", "3. "
+TOPIC_PREFIX = re.compile(r"^\s*((M|L|Lec|Lectures?|Module|Unit|Week)\.?\s*[#-]?\s*\d+(\.\d+)*(\s*(-|–|to)\s*L?\d+(\.\d+)*)?\s*[:.)\-–]?\s*|\d{1,2}\s*[.)]\s*)", re.I)
+PRIVATE_BULLET = re.compile(r"[\uf0a7\uf0a8\uf0b7\uf0d8\uf076\uf0fc\uf0e0]\s*")
+LEAD_IN = re.compile(r"^.*?\b(?:will|should|shall) be able to\b[:\s,–-]*", re.I)
+SENTENCE_END = re.compile(r"(?<=[a-z0-9)\]]{2}[.;?])\s+(?=[A-Za-z(])")
+INLINE_LETTER = re.compile(r"\s+(?=[a-hA-H][.)]\s+[A-Z])")  # "... concepts b. To engage ..."
 
 Line = tuple[int, str]
 
@@ -100,7 +105,7 @@ class Handout:
     course_no: str
     title: str | None
     instructors: list[str]
-    about: str | None
+    about: str | None  # description + objectives + outcomes as one text (kept for search / embeddings)
     topics: list[str]
     evaluation: list[dict]
     attendance: dict
@@ -111,6 +116,11 @@ class Handout:
     issues: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
     needs_verification: bool = False
+    # the same content, structured for display
+    description: str | None = None
+    objectives: list[str] = field(default_factory=list)
+    outcomes: list[str] = field(default_factory=list)
+    topic_groups: list[dict] = field(default_factory=list)  # [{"module": str | None, "topics": [str]}]
 
 
 # ------------------------------ reading
@@ -118,13 +128,87 @@ def load_pdf(path: Path) -> Document | None:
     """Text lines and tables of every page; None (logged) if the PDF can't be read."""
     try:
         with pdfplumber.open(path) as pdf:
-            pages = [page.dedupe_chars() for page in pdf.pages]  # dedupe: "fake bold" letters are drawn twice
+            pages = [without_overprint(page.dedupe_chars()) for page in pdf.pages]  # dedupe: "fake bold" letters are drawn twice
             lines = [(p.page_number, clean(t)) for p in pages for t in (p.extract_text(x_tolerance=1.5) or "").splitlines() if clean(t)]
+            lines = drop_page_furniture(lines)
             tables = [(p.page_number, [[cell_lines(c) for c in row] for row in t]) for p in pages for t in p.extract_tables() if t]
         return Document(lines, tables)
     except Exception:
         log.exception("Could not read %s", path.name)
         return None
+
+
+def overprinted(chars: list[dict]) -> set[tuple]:
+    """Chars printed over a different text run: horizontally overlapping, baselines less than half a line apart.
+    Their letters interleave when read ("orersduinltasr" in 359_MATH_F211, where a table cell's text runs over the
+    next cell's). Found on 10 of 540 handouts; normal text, kerning and fake bold never match."""
+    buckets: dict[int, list[int]] = {}
+    for i, c in enumerate(chars):
+        buckets.setdefault(int(c["top"] // 4), []).append(i)
+    bad = set()
+    for key, indices in buckets.items():
+        pool = sorted(indices + buckets.get(key + 1, []), key=lambda i: chars[i]["x0"])
+        for n, i in enumerate(pool):
+            a = chars[i]
+            for j in pool[n + 1:]:
+                b = chars[j]
+                if b["x0"] >= a["x1"]:
+                    break
+                gap = abs(a["top"] - b["top"])
+                width = min(a["x1"] - a["x0"], b["x1"] - b["x0"]) or 1
+                if (0.5 < gap < 0.6 * min(a["size"], b["size"]) and a["text"].strip() and b["text"].strip()
+                        and a["x1"] - b["x0"] > 0.3 * width):
+                    bad |= {i, j}
+    # why: the two runs only partly overlap, so their non-overlapping letters would stay behind as stray residue
+    # ("r i ) e"); drop each run's whole stretch on its baseline, out to the nearest spaces
+    spans: dict[float, list[float]] = {}
+    for i in bad:
+        span = spans.setdefault(round(chars[i]["top"], 1), [chars[i]["x0"], chars[i]["x1"]])
+        span[0], span[1] = min(span[0], chars[i]["x0"]), max(span[1], chars[i]["x1"])
+    for top, (lo, hi) in spans.items():
+        line = sorted((i for i, c in enumerate(chars) if abs(c["top"] - top) < 0.3), key=lambda i: chars[i]["x0"])
+        inside = [n for n, i in enumerate(line) if lo <= chars[i]["x0"] <= hi]
+        if not inside:
+            continue
+        start, end = inside[0], inside[-1]
+        while start > 0 and chars[line[start - 1]]["text"].strip():
+            start -= 1
+        while end < len(line) - 1 and chars[line[end + 1]]["text"].strip():
+            end += 1
+        bad.update(line[start:end + 1])
+    return {(chars[i]["x0"], chars[i]["top"], chars[i]["text"]) for i in bad}
+
+
+def without_overprint(page):
+    """The page minus overprinted chars (see overprinted): losing that text beats storing it garbled."""
+    bad = overprinted(page.chars)
+    if not bad:
+        return page
+    return page.filter(lambda obj: obj.get("object_type") != "char" or (obj["x0"], obj["top"], obj["text"]) not in bad)
+
+
+FOOTER = re.compile(r"(page \d+( of \d+)?|\d{1,2}|_+|please do not print unless necessary)", re.I)
+TOP_ZONE, BOTTOM_ZONE = 4, 3  # lines per page where letterheads / footers sit
+
+
+def drop_page_furniture(lines: list[Line]) -> list[Line]:
+    """Remove running headers and footers, which otherwise glue onto whatever section spans a page break
+    ("...gender-based violence. 1 BIRLA INSTITUTE OF TECHNOLOGY AND SCIENCE, Pilani ...").
+
+    A line is furniture if it sits in a page's top or bottom zone and either repeats in that zone on another
+    page (digits ignored, so "Page 2 of 5" matches "Page 3 of 5"), or is a page number / print notice.
+    """
+    by_page: dict[int, list[int]] = {}
+    for index, (page, _) in enumerate(lines):
+        by_page.setdefault(page, []).append(index)
+    zone = {i for indices in by_page.values() for i in indices[:TOP_ZONE] + indices[-BOTTOM_ZONE:]}
+    key = lambda text: re.sub(r"\d+", "#", text.lower())  # noqa: E731
+    # why per page, not per line: a header appears once per page; counting lines would double-count a page
+    pages_with = Counter(key(text) for page, text in {(lines[i][0], lines[i][1]) for i in zone})
+    return [
+        line for i, line in enumerate(lines)
+        if i not in zone or not (pages_with[key(line[1])] > 1 or FOOTER.fullmatch(line[1].strip()))
+    ]
 
 
 def cell_lines(cell: str | None) -> str:
@@ -245,6 +329,47 @@ def build_about(sections: dict[str, list[Line]]) -> tuple[str | None, int | None
     return text or None, page
 
 
+def dehyphenate(text: str) -> str:
+    return re.sub(r"(\w)- (\w)", r"\1\2", text)
+
+
+def section_items(lines: list[Line]) -> list[str]:
+    """A section as list items: a new item at each list marker, or one per sentence when there are no markers.
+    Lead-ins ("Students will be able to:") are dropped, and each item starts with a capital."""
+    # why: Word's Symbol-font bullets arrive as private-use glyphs (\uf0b7 bullet, \uf020 space), often several per line
+    texts = []
+    for _, line in lines:
+        line = PRIVATE_BULLET.sub("• ", line.replace("\uf020", " "))
+        parts = [("• " + part if n else part).strip() for n, part in enumerate(line.split("•")) if part.strip()]
+        texts += [piece for part in parts for piece in INLINE_LETTER.split(part)]
+    if sum(bool(LIST_MARKER.match(t)) for t in texts) >= 2:
+        items: list[str] = []
+        for text in texts:
+            if LIST_MARKER.match(text) or not items:
+                items.append(LIST_MARKER.sub("", text))
+            else:
+                items[-1] += " " + text
+    else:
+        items = [piece for sentence in SENTENCE_END.split(" ".join(texts)) for piece in INLINE_LETTER.split(sentence)]
+    # a very long item is a paragraph under one bullet: one item per sentence reads better
+    items = [piece for item in items for piece in (SENTENCE_END.split(item) if len(item) > 250 else [item])]
+    result = []
+    for item in items:
+        item = LEAD_IN.sub("", dehyphenate(item).strip()).strip(" ;,")
+        item = re.sub(r"^[A-Ha-h][.)]\s+", "", item)  # "A. Understand ...", "b. To engage ..." lettered items
+        if len(re.findall(r"[A-Za-z]{3,}", item)) >= 3 and not item.endswith(":"):
+            result.append(item[0].upper() + item[1:])
+    return result
+
+
+def about_parts(sections: dict[str, list[Line]]) -> dict:
+    """The description as a paragraph, objectives and outcomes as lists (what build_about merges into one text)."""
+    description = dehyphenate(" ".join(LIST_MARKER.sub("", PRIVATE_BULLET.sub("", line.replace("\uf020", " ")))
+                                       for _, line in sections.get("description", []))).strip()
+    return {"description": description or None, "objectives": section_items(sections.get("objectives", [])),
+            "outcomes": section_items(sections.get("outcomes", []))}
+
+
 # ------------------------------ tables: topics and evaluation
 def is_plan_header(head: list[str]) -> bool:
     text = " ".join(head)
@@ -289,9 +414,10 @@ def value_at(head: list[str], row: list[str], index: int | None) -> str:
     return ""
 
 
-def extract_topics(tables) -> tuple[list[str], int | None, bool]:
-    """(topics, page, plan table found): the module column + the best topic column of every plan table."""
-    topics, first_page = [], None
+def extract_topics(tables) -> tuple[list[str], int | None, bool, list[dict]]:
+    """(topics, page, plan table found, groups): the module column + the best topic column of every plan table.
+    groups keeps each module with the topics listed under it: [{"module": "Laplace transform", "topics": [...]}]."""
+    topics, first_page, groups = [], None, []
     for rows, page in table_groups(tables, is_plan_header):
         head = [clean(c).lower() for c in rows[0]]
         numbers = tuple(i for i, n in enumerate(head) if re.search(r"\bno\.?$|number|^s\.? ?n", n))
@@ -303,10 +429,25 @@ def extract_topics(tables) -> tuple[list[str], int | None, bool]:
         for row in rows[1:]:
             for col in (module, topic):
                 for part in re.split(r"[•▪●]", value_at(head, row, col)):
-                    part = TOPIC_PREFIX.sub("", part).strip(" ,;:-–")
-                    if re.search(r"[A-Za-z]{3}", part) and part.lower() not in {t.lower() for t in topics}:
+                    part = TOPIC_PREFIX.sub("", dehyphenate(part)).strip(" ,;:-–")
+                    if not re.search(r"[A-Za-z]{3}", part):
+                        continue
+                    # why: a cell cut across rows (or pages) continues in lowercase: "with variable coefficients"
+                    continues = part[0].islower()
+                    if col == module and col is not None:
+                        if continues and groups and groups[-1]["module"]:
+                            groups[-1]["module"] += " " + part
+                        else:
+                            groups.append({"module": part, "topics": []})
+                    elif continues and groups and groups[-1]["topics"]:
+                        groups[-1]["topics"][-1] += " " + part
+                    elif part.lower() not in {t.lower() for t in (groups[-1]["topics"] if groups else [])}:
+                        if not groups:
+                            groups.append({"module": None, "topics": []})
+                        groups[-1]["topics"].append(part)
+                    if part.lower() not in {t.lower() for t in topics}:
                         topics.append(part)
-    return topics, first_page, first_page is not None
+    return topics, first_page, first_page is not None, [g for g in groups if g["module"] or g["topics"]]
 
 
 def parse_weight(text: str) -> float | None:
@@ -463,7 +604,7 @@ def extract_handout(name: str, doc: Document, models, titles: dict[str, str], ov
     if not about:
         issues.append("about_not_found")
 
-    topics, topics_page, plan_found = extract_topics(doc.tables)
+    topics, topics_page, plan_found, topic_groups = extract_topics(doc.tables)
     if plan_found and len(topics) < MIN_TOPICS:
         issues.append("topics_possibly_truncated")
     elif not topics:
@@ -483,6 +624,8 @@ def extract_handout(name: str, doc: Document, models, titles: dict[str, str], ov
                      not (key == "evaluation" and n.startswith("weightage"))]
     evaluation = override.get("evaluation", evaluation)
     topics, title, about = override.get("topics", topics), override.get("title", title), override.get("about", about)
+    if "topics" in override:
+        topic_groups = [{"module": None, "topics": topics}] if topics else []
     notes += override.get("notes", []) + (["manually_checked"] if override else [])
 
     attendance, attendance_method = extract_attendance(models, doc, sections.get("attendance"), issues)
@@ -498,6 +641,7 @@ def extract_handout(name: str, doc: Document, models, titles: dict[str, str], ov
                       "topics": topics_page, "evaluation": evaluation_page, "attendance": page_of("attendance"),
                       "makeup": page_of("makeup"), "consultation_hours": page_of("consultation")},
         issues=issues, notes=notes, needs_verification=bool(issues),
+        topic_groups=topic_groups, **about_parts(sections),
     )
 
 
