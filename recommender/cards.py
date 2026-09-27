@@ -80,6 +80,7 @@ def build_card(ctx: StudentContext, course: Course, listed: dict | None, section
         "units": course.units, "ltpu": ltpu(course),
         "facts": card_facts(get_course_facts(course)), "description": summary(course), "sources": sources(course),
         "score": (listed or {}).get("score"),  # match / penalty / final / why, when a search returned the course
+        "also_offered_as": (listed or {}).get("also_offered_as") or [],
     }
     if sections:
         card["sections"] = sections

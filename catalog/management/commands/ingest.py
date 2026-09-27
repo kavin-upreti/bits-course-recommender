@@ -299,7 +299,7 @@ class Command(BaseCommand):
             sources={"requirement": r.get("source")})
             for r in manual_bulletin["category_requirements"] for c in r.get("named_courses") or []])
         m.CourseEquivalent.objects.bulk_create([
-            m.CourseEquivalent(course=courses[d["code"]], equivalent_code=code)
+            m.CourseEquivalent(course=courses[d["code"]], equivalent_code=code, source="bulletin")
             for d in bulletin["course_descriptions"] if d["code"] in courses
             for code in bulletin_equivalents(d["description"], d["code"])], ignore_conflicts=True)
         m.CodeMapping.objects.bulk_create([m.CodeMapping(

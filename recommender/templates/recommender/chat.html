@@ -98,6 +98,7 @@
     }));
     $("picked-empty").hidden = selection.length > 0;
     $("finalise").disabled = $("picked-tt").disabled = selection.length === 0;
+    document.querySelectorAll("[data-alt]").forEach((button) => button.classList.toggle("chosen", selected(button.dataset.alt)));
     document.querySelectorAll("[data-select]").forEach((button) => {
       const on = selected(button.dataset.select);
       button.setAttribute("aria-pressed", on);
@@ -159,6 +160,20 @@
     node.append(meta);
     if (c.score && c.score.relevance != null) node.append(scoreBreakdown(c.score));
     if (c.note) node.append(el("p", "rec-note small", c.note));
+    if (c.also_offered_as.length) {
+      // why buttons like the section picker: the same class under another code may count differently for you
+      const alt = el("div", "rec-alt small");
+      alt.append(el("span", "muted", "Same class, other code: "));
+      c.also_offered_as.forEach((other) => {
+        const button = el("button", "alt-choice", `${other.code} (${other.category})`);
+        button.type = "button";
+        button.dataset.alt = other.code;
+        button.title = `Select ${other.code} ${other.title} instead`;
+        button.addEventListener("click", () => toggle(other.code, !selected(other.code)));
+        alt.append(button);
+      });
+      node.append(alt);
+    }
     const facts = el("dl", "rec-facts small");
     c.facts.forEach((f) => {
       const item = el("div");

@@ -1,6 +1,6 @@
 """check_plan (todo.md section 7): do these courses fit with the student's current ones? Also used by
 get_eligible_courses to drop courses that can't fit at all. The section search itself is in timetable.py."""
-from catalog.models import Course, Offering
+from catalog.models import Course, Offering, Rule
 
 from . import config
 from .codes import normalise_code, resolve_course
@@ -59,12 +59,27 @@ def _units_conflict(ctx: StudentContext, added: list[Course], notes: list[str]) 
     return total, []
 
 
+def _higher_degree_conflict(ctx: StudentContext, added: list[Course]) -> list[dict]:
+    """More higher degree (G) courses than the regulations allow per semester (current ones count too)."""
+    rule = Rule.objects.filter(rule_id="reg_higher_degree_course").first()
+    limit = (rule.values or {}).get("max_per_semester") if rule else None
+    if limit is None:
+        return []
+    current = Course.objects.filter(code__in=ctx.current_courses, is_higher_degree=True)
+    codes = sorted({course.code for course in current} | {course.code for course in added if course.is_higher_degree})
+    if len(codes) <= limit:
+        return []
+    return [{"a": ", ".join(codes), "b": "higher degree limit", "type": "higher_degree",
+             "detail": f"{len(codes)} higher degree courses ({', '.join(codes)}), at most {limit} per semester"}]
+
+
 def _problem_sentence(conflict: dict) -> str:
     a, b, detail = conflict["a"], conflict["b"], conflict["detail"]
     return {
         "midsem": f"{a} and {b} have their midsem at the same time ({detail}).",
         "compre": f"{a} and {b} have their compre at the same time ({detail}).",
         "units": f"Too many units: {detail}.",
+        "higher_degree": f"Too many higher degree courses: {detail}.",
         "class": f"{a} clashes with {b} in every section combination (e.g. {detail}).",
         "lunch": f"{a} and {b} together always leave no lunch hour free (e.g. {detail}).",
     }[conflict["type"]]
@@ -129,7 +144,7 @@ def check_plan(ctx: StudentContext, courses: list[str], avoid_8am: bool | None =
     added_codes = [course.code for course in added]
 
     total_units, unit_conflicts = _units_conflict(ctx, added, notes)
-    conflicts = _exam_conflicts(offerings, notes) + unit_conflicts
+    conflicts = _higher_degree_conflict(ctx, added) + _exam_conflicts(offerings, notes) + unit_conflicts
     if conflicts:
         return _failure(conflicts, current)
 

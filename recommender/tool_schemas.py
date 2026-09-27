@@ -13,14 +13,16 @@ TOOL_SCHEMAS: list[dict] = [
     },
     {
         "name": "get_eligible_courses",
-        "description": "Eligible courses for the student, best match first (5 unless count is given). Handles eligibility, handout filters, ranking and timetable preferences.",
+        "description": "Eligible courses for the student, best match first (5 per category unless count is given; with several topics, each topic gets its share). Handles eligibility, handout filters, ranking and timetable preferences.",
         "parameters": {
             "type": "object",
             "properties": {
                 "category": {"type": "string", "enum": ["HUEL", "DEL", "OPEL"],
                              "description": "Leave empty to search every category the student still needs."},
                 "about": {"type": "array", "items": {"type": "string", "maxLength": 100}, "maxItems": config.MAX_QUERY_TOPICS,
-                          "description": "Topics the course should be about, one topic per item, in full words, with abbreviations spelled out (e.g. 'ML and NLP' -> ['machine learning', 'natural language processing']). Only topics the student gave for this category; leave empty otherwise."},
+                          "description": "The student's own topics for this category, one per item, in full words, abbreviations spelled out (e.g. 'ML and NLP' -> ['machine learning', 'natural language processing']). 'AI in electronics' is ONE topic. Don't add topics the student didn't name; leave empty if none."},
+                "related": {"type": "array", "items": {"type": "string", "maxLength": 100}, "maxItems": config.MAX_QUERY_TOPICS,
+                            "description": "Optional: closely related topics, used only when too few courses match 'about' (e.g. for 'natural language processing': ['computational linguistics', 'text mining'])."},
                 "filters": {
                     "type": "object",
                     "additionalProperties": False,
@@ -36,7 +38,7 @@ TOOL_SCHEMAS: list[dict] = [
                     },
                 },
                 "count": {"type": "integer", "minimum": 1, "maximum": config.MAX_COUNT,
-                          "description": "How many courses the student asked for. Leave empty if they gave no number."},
+                          "description": "How many courses the student asked for in this category, as a number ('three' -> 3). Leave empty if they gave no number."},
                 "avoid_8am": AVOID_8AM,
                 "avoid_day": AVOID_DAY,
                 "exclude": {"type": "array", "items": {"type": "string"}, "maxItems": 20, "description": "Course codes to leave out."},

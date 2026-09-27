@@ -88,6 +88,19 @@ def best_cutoff(labelled: list[tuple[float, bool]]) -> tuple[float, float, float
     return best[:3]
 
 
+class MemoReranker:
+    """The reranker with its pair scores remembered, so trying several weights doesn't re-run the model."""
+
+    def __init__(self, reranker) -> None:
+        self.reranker, self.memo = reranker, {}
+
+    def score(self, pairs):
+        missing = [pair for pair in dict.fromkeys(pairs) if pair not in self.memo]
+        if missing:
+            self.memo.update(zip(missing, self.reranker.score(missing)))
+        return np.array([self.memo[pair] for pair in pairs])
+
+
 class Command(BaseCommand):
     help = "Tune embedding model, reranker, BEST_PIECE_WEIGHT, RERANK_CANDIDATES and RELEVANCE_CUTOFF."
 
@@ -123,6 +136,7 @@ class Command(BaseCommand):
         configs = {(weight, k): Config(model, None if reranker_name == "none" else reranker_name, weight, k)
                    for weight in options["weights"] for k in options["candidates"]}
         latencies: dict[int, list[float]] = {k: [] for k in options["candidates"]}
+        cached = MemoReranker(reranker) if reranker is not None else None
         for query in queries:
             for k in options["candidates"]:
                 started = time.monotonic()
@@ -132,8 +146,10 @@ class Command(BaseCommand):
                 rerank([scored], topics, vectors, index, reranker, 1.0)
                 latencies[k].append(time.monotonic() - started)
                 for weight in options["weights"]:
-                    ranking = sorted(((item.code, relevance(item.piece_scores, weight)) for item in scored),
-                                     key=lambda pair: (-pair[1], pair[0]))
+                    # why rerank again per weight (cached scores): the app's relevance also has the title gate and
+                    # the department fit, which recomputing relevance(piece_scores) here would leave out
+                    rerank([scored], topics, vectors, index, cached, weight)
+                    ranking = sorted(((item.code, item.relevance) for item in scored), key=lambda pair: (-pair[1], pair[0]))
                     configs[(weight, k)].rankings[query["query"]] = ranking
         for (weight, k), found in configs.items():
             found.latency = statistics.median(latencies[k])

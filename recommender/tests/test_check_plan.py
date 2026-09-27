@@ -35,6 +35,17 @@ class CheckPlanTests(RecommenderTestCase):
                                   "notes": ["AA F201's compre slot isn't in the timetable, so its compre clashes weren't checked",
                                             "BB F202's compre slot isn't in the timetable, so its compre clashes weren't checked"]})
 
+    def test_one_higher_degree_course_per_semester(self):
+        from catalog.models import Rule
+        Rule.objects.create(rule_id="reg_higher_degree_course", group="regulations", description="", values={"max_per_semester": 1})
+        for code, day in (("AA G511", "T"), ("BB G512", "F")):
+            course = self.course(code, [("lecture", "L1", {day: [3]})])
+            course.is_higher_degree = True
+            course.save()
+        self.assertTrue(self.plan(["AA G511"])["ok"])
+        result = self.plan(["AA G511", "BB G512"])
+        self.assertEqual(result["problem"], "Too many higher degree courses: 2 higher degree courses (AA G511, BB G512), at most 1 per semester.")
+
     def test_02_alternative_section_picked(self):
         self.course("AA F201", [("lecture", "L1", {"M": [2]}), ("lecture", "L2", {"T": [3]})])
         self.assertEqual(self.plan(["AA F201"])["sections"], {"AA F201": {"lecture": "L2"}})

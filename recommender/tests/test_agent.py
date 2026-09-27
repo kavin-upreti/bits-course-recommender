@@ -32,7 +32,7 @@ class AgentTests(Catalog):
         self.student.interests = ["quantum knitting"]
         self.student.save()
 
-    def agent(self, responses: list, message: str = "give me a good huel and a del related to LLMs, no 8 am"):
+    def agent(self, responses: list, message: str = "give me good courses related to LLMs, no 8 am"):
         fake = FakeLLM(responses)
         with patch("recommender.llm.chat", fake):
             result = run_agent(self.student, message)
@@ -153,6 +153,19 @@ class AgentTests(Catalog):
         self.assertEqual([card["code"] for card in result.cards], ["XX F411"])  # the note adds no card
         result, _ = self.agent([calls(("get_eligible_courses", {"category": "DEL"})), text("XX F411; XX F412 clashes.")])
         self.assertNotIn("Also", result.reply)  # already mentioned
+
+    def test_named_category_that_was_never_searched_gets_one_reminder(self):
+        message = "courses on LLMs, and a HUEL on psychology"
+        result, fake = self.agent([calls(("get_eligible_courses", {"about": ["large language models"]})), text("Here."),
+                                   calls(("get_eligible_courses", {"category": "HUEL", "about": ["psychology"]})), text("Done.")], message)
+        self.assertEqual(len(fake.requests), 4)
+        self.assertIn("haven't searched that category yet. Call get_eligible_courses with category HUEL", fake.requests[2]["messages"][-1]["text"])
+        self.assertEqual(result.debug["guardrail"], [{"action": "category reminder", "categories": ["HUEL"]}])
+        # searched explicitly (or reminded once already): no reminder
+        result, fake = self.agent([calls(("get_eligible_courses", {"category": "HUEL"})), text("Here.")], message)
+        self.assertEqual(len(fake.requests), 2)
+        result, fake = self.agent([text("Here."), text("Still here.")], message)
+        self.assertEqual((len(fake.requests), result.reply), (2, "Still here."))
 
     def test_empty_and_long_messages(self):
         self.assertEqual(run_agent(self.student, "   ").reply, "Please type a question.")

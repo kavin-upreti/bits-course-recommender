@@ -105,9 +105,51 @@ class RerankTests(Catalog):
         self.scores(**{"Natural Language Processing": 0.9, "Deep Learning": 0.9})
         result = self.result(category="DEL", about="linguistics", count=3)
         self.assertEqual([course["code"] for course in result["courses"]], ["XX F411"])
-        self.assertIn("also offered as XX F412 (the same course: take only one)", result["courses"][0]["note"])
+        self.assertIn("the same class is also offered as XX F412 (DEL); take only one", result["courses"][0]["note"])
+        self.assertEqual(result["courses"][0]["also_offered_as"], [{"code": "XX F412", "title": "Deep Learning", "category": "DEL"}])
         self.assertEqual(result["shortfall"], "Only 1 of the 3 courses you asked for match 'linguistics' well and fit "
                                               "your timetable; no other course this semester does.")
+
+    def test_same_class_shows_the_code_that_counts_best(self):
+        opel = make_course("YY F411", "Natural Language Processing")
+        offer(opel, [("lecture", "L1", {"T": [3], "Th": [3]})])
+        equivalent(self.courses["XX F411"], "YY F411")
+        self.embed({})
+        self.scores(**{"Natural Language Processing": 0.9})
+        result = self.result(about="linguistics")
+        # YY F411 isn't linked to the programme: an OPEL here, the DEL wins even with the same relevance
+        shown = {course["code"]: course for course in result["courses"]}
+        self.assertNotIn("YY F411", shown)
+        self.assertEqual(shown["XX F411"]["also_offered_as"], [{"code": "YY F411", "title": "Natural Language Processing", "category": "OPEL"}])
+
+    def topic_vectors(self) -> None:
+        """alpha: XX F411 and XX F412 (0.998, 0.990); beta: only XX F413 (0.979)."""
+        self.embed({"alpha": [1, 0], "beta": [0, 1], "Natural Language Processing": [1, -0.1], "Deep Learning": [1, -0.2],
+                    "Compiler Construction": [-0.3, 1]})
+
+    def test_each_topic_gets_its_share(self):
+        self.topic_vectors()
+        result = self.result(category="DEL", about=["alpha", "beta"], count=2)
+        # by rank alone both places would go to alpha; floor(2 / 2) = 1 place is kept for beta
+        self.assertEqual([course["code"] for course in result["courses"]], ["XX F411", "XX F413"])
+        result = self.result(category="DEL", about=["alpha"], count=2)
+        self.assertEqual([course["code"] for course in result["courses"]], ["XX F411", "XX F412"])
+
+    def test_related_topics_only_fill_what_the_students_topics_leave(self):
+        self.topic_vectors()
+        result = self.result(category="DEL", about=["alpha"], related=["beta"], count=3)
+        self.assertEqual([course["code"] for course in result["courses"]], ["XX F411", "XX F412", "XX F413"])
+        self.assertTrue(result["courses"][2]["score"]["related_topic"])
+        self.assertIn("matches the related topic 'beta', not your own", result["courses"][2]["score"]["why"])
+        self.assertNotIn("related_topic", result["courses"][0]["score"])
+        result = self.result(category="DEL", about=["alpha"], related=["beta"], count=2)
+        self.assertEqual([course["code"] for course in result["courses"]], ["XX F411", "XX F412"])
+
+    def test_default_count_is_per_category(self):
+        self.reranker.scores.update({title: 0.9 for title in TITLES + ["Introductory Psychology", "Film Studies"]})
+        result = self.result(about="anything")  # no category: DEL and HUEL both still needed
+        categories = [course["category"] for course in result["courses"]]
+        self.assertEqual((categories.count("DEL"), categories.count("HUEL")), (3, 2))  # every match, not 5 in total
 
     def test_04_penalties_reorder_but_never_remove(self):
         add_handout(self.courses["XX F411"], evaluation=[

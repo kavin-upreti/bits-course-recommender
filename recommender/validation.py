@@ -1,5 +1,9 @@
 """Check the LLM's tool arguments against TOOL_SCHEMAS (todo.md 9.3). Never raises: a problem comes back as an
 error string, which the agent returns to the LLM as the tool result so it can fix its call."""
+import json
+import re
+
+from .handout_facts import NUMBER_WORDS
 from .tool_schemas import TOOL_SCHEMAS
 
 SCHEMAS = {tool["name"]: tool["parameters"] for tool in TOOL_SCHEMAS}
@@ -7,13 +11,31 @@ EMPTY_TEXT = {"", "none", "null"}  # some models write "None" instead of leaving
 TYPE_NAMES = {"string": "a string", "integer": "a whole number", "boolean": "true or false", "array": "a list", "object": "an object"}
 
 
+def text_list(text: str) -> list:
+    """A list sent as text: '["AI", "game theory"]' (JSON), "AI, game theory", or one plain item.
+    why: a model sent about='["artificial intelligence", "game theory"]', which was searched as ONE topic."""
+    stripped = text.strip()
+    if stripped.startswith("["):
+        try:
+            parsed = json.loads(stripped)
+            if isinstance(parsed, list):
+                return parsed
+        except ValueError:
+            pass
+        stripped = stripped.strip("[]")
+    return [part.strip().strip("\"'") for part in re.split(r"[,;]", stripped) if part.strip().strip("\"'")]
+
+
 def _check(name: str, value, schema: dict):
     """(clean value, error) for one value against its schema."""
     kind = schema["type"]
     if kind == "integer" and isinstance(value, float) and value.is_integer():
         value = int(value)  # why: some providers send every number as a float
+    if kind == "integer" and isinstance(value, str):
+        text = value.strip().lower()  # why: "3" or "three" instead of 3
+        value = int(text) if text.isdigit() else NUMBER_WORDS.get(text, value)
     if kind == "array" and isinstance(value, str):
-        value = [value]  # why: a model may send one topic as plain text
+        value = text_list(value)
     if kind == "boolean" and isinstance(value, str) and value.lower() in ("true", "false"):
         value = value.lower() == "true"  # why: some models write booleans as text
     valid = {"string": isinstance(value, str), "boolean": isinstance(value, bool),

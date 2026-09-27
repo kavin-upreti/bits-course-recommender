@@ -88,6 +88,27 @@ def done_codes(student: Student, status: str | None = None) -> set[str]:
     return with_equivalents(codes)
 
 
+def same_class_groups(codes: list[str]) -> list[list[str]]:
+    """`codes` split into groups that are one course (timetable / Bulletin / content equivalents, code mappings),
+    each group in the order given. Two queries, whatever the number of codes."""
+    wanted = set(codes)
+    pairs = list(CourseEquivalent.objects.filter(course__code__in=wanted, equivalent_code__in=wanted)
+                 .values_list("course__code", "equivalent_code"))
+    pairs += CodeMapping.objects.filter(from_code__in=wanted, to_course__code__in=wanted).values_list("from_code", "to_course__code")
+    root = {code: code for code in codes}
+
+    def find(code: str) -> str:
+        while root[code] != code:
+            code = root[code]
+        return code
+    for a, b in pairs:
+        root[find(a)] = find(b)
+    groups: dict[str, list[str]] = {}
+    for code in codes:
+        groups.setdefault(find(code), []).append(code)
+    return list(groups.values())
+
+
 def with_equivalents(codes: set[str]) -> set[str]:
     """The codes plus their timetable equivalents and hand-made code mappings, in both directions."""
     base = set(codes)

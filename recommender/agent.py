@@ -32,6 +32,11 @@ BUSY = "The assistant is busy right now (free-tier limit). Please try again in a
 FAILED = "Something went wrong while contacting the assistant. Please try again."
 ANSWER_NOW = "Answer the student now using only the results above. Do not call any tools."
 REWRITE = "Your reply mentions {codes}, which did not appear in any tool result. Rewrite your reply using only courses from the tool results."
+SEARCH_MISSING = ("The student asked for {what}, but you haven't searched that category yet. Call get_eligible_courses "
+                  "with category {first} (with the topic the student gave for it, if any), then answer.")
+# categories a message can name; a search with no category doesn't count, since its topic was meant for the others
+CATEGORY_WORDS = {"HUEL": r"\bhuels?\b|\bhumanit\w* electives?", "DEL": r"\bdels?\b|\bdiscipline electives?",
+                  "OPEL": r"\bopels?\b|\bopen electives?"}
 RESULT_LISTS = ("courses", "couldnt_verify", "excluded", "loosely_related")  # only "courses" can get cards unasked
 
 
@@ -56,6 +61,13 @@ class Run:
     not_offered: dict[str, dict] = field(default_factory=dict)  # code -> better match not offered this semester
     shortfalls: list[str] = field(default_factory=list)          # "Only 1 of the 3 courses you asked for…"
     debug: dict = field(default_factory=lambda: {"rounds": [], "guardrail": [], "errors": []})
+    named: set[str] = field(default_factory=set)       # categories the student's message asks for
+    searched: set[str] = field(default_factory=set)    # categories a get_eligible_courses call named explicitly
+    reminded: bool = False
+
+
+def named_categories(message: str) -> set[str]:
+    return {category for category, pattern in CATEGORY_WORDS.items() if re.search(pattern, message, re.I)}
 
 
 def codes_in(value) -> set[str]:
@@ -129,6 +141,8 @@ def tool_round(run: Run, messages: list[dict], response: llm.LLMResponse, number
         started, timed = time.monotonic(), len(run.ctx.timings)
         result = execute(run, call)
         record(run, call.name, result)
+        if call.name == "get_eligible_courses" and isinstance(call.args, dict) and isinstance(call.args.get("category"), str):
+            run.searched.add(call.args["category"].strip().upper())
         results.append({"id": call.id, "name": call.name, "result": result})
         calls.append({"name": call.name, "args": call.args, "result_chars": len(str(result)),
                       "ms": round(1000 * (time.monotonic() - started)),
@@ -143,7 +157,16 @@ def loop(run: Run, messages: list[dict]) -> str:
         response = llm.chat(SYSTEM_PROMPT, messages, TOOL_SCHEMAS)
         if not response.tool_calls:
             run.debug["rounds"].append({"round": number, "calls": [], "usage": response.usage})
-            return response.text or ""
+            missing = sorted(run.named - run.searched)
+            if not missing or run.reminded:
+                return response.text or ""
+            # why in Python: "courses on AI, and a HUEL on media" was answered from one no-category search, so the
+            # media topic was never searched among HUELs. One reminder, then whatever the model says goes.
+            run.reminded = True
+            run.debug["guardrail"].append({"action": "category reminder", "categories": missing})
+            messages += [{"role": "assistant", "text": response.text or "", "tool_calls": []},
+                         {"role": "user", "text": SEARCH_MISSING.format(what=" and ".join(f"a {c}" for c in missing), first=missing[0])}]
+            continue
         tool_round(run, messages, response, number)
     messages.append({"role": "user", "text": ANSWER_NOW})
     response = llm.chat(SYSTEM_PROMPT, messages, None)
@@ -176,7 +199,7 @@ def run_agent(student: Student, message: str) -> AgentResult:
     if len(message) > config.MAX_MESSAGE_CHARS:
         return AgentResult(TOO_LONG.format(limit=config.MAX_MESSAGE_CHARS), [], {})
     started = time.monotonic()
-    run = Run(build_context(student))
+    run = Run(build_context(student), named=named_categories(message))
     messages = [{"role": "user", "text": message}]
     try:
         reply = guard(run, messages, loop(run, messages), set(find_codes(message.upper())))

@@ -23,10 +23,14 @@ class ValidationTests(SimpleTestCase):
         self.assertEqual(validate_call("check_plan", {"courses": ["A B101"], "avoid_8am": "TRUE"}),
                          ({"courses": ["A B101"], "avoid_8am": True}, None))
 
+    def test_counts_written_as_text(self):
+        for sent in ("3", " three ", 3.0):
+            self.assertEqual(validate_call("get_eligible_courses", {"count": sent}), ({"count": 3}, None))
+
     def test_errors(self):
         cases = [
             ("nope", {}, "Unknown tool nope. Available: get_remaining_requirements, get_eligible_courses, check_plan, get_course_details."),
-            ("get_eligible_courses", {"topic": "x"}, "Unknown argument topic. Allowed: category, about, filters, count, avoid_8am, avoid_day, exclude."),
+            ("get_eligible_courses", {"topic": "x"}, "Unknown argument topic. Allowed: category, about, related, filters, count, avoid_8am, avoid_day, exclude."),
             ("get_eligible_courses", {"category": "CDC"}, "category must be one of: HUEL, DEL, OPEL."),
             ("get_eligible_courses", {"about": ["x" * 101]}, "each item of about is too long (at most 100 characters)."),
             ("get_eligible_courses", {"about": ["a"] * 9}, "about must have between 0 and 8 items."),
@@ -61,3 +65,13 @@ class NoNetworkTests(SimpleTestCase):
         with self.assertRaises(NetworkUsedInTest), socket.socket() as connection:
             connection.connect(("example.com", 80))
         self.assertIsInstance(get_embedder(), FakeEmbedder)
+
+
+class TextListTests(SimpleTestCase):
+    def test_lists_sent_as_text(self):
+        from recommender.validation import text_list
+        self.assertEqual(text_list('["artificial intelligence", "game theory"]'), ["artificial intelligence", "game theory"])
+        self.assertEqual(text_list("AI, game theory"), ["AI", "game theory"])
+        self.assertEqual(text_list("AI in electronics"), ["AI in electronics"])
+        self.assertEqual(text_list("['broken json', 'x'"), ["broken json", "x"])
+        self.assertEqual(validate_call("get_eligible_courses", {"about": '["media"]'}), ({"about": ["media"]}, None))

@@ -45,6 +45,8 @@ class Course(Flagged):
 class CourseEquivalent(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="equivalents")
     equivalent_code = models.CharField(max_length=20)
+    # timetable / bulletin: listed in the source documents; content: found by recommender/equivalents.py
+    source = models.CharField(max_length=10, default="timetable")
 
     class Meta:
         unique_together = ("course", "equivalent_code")

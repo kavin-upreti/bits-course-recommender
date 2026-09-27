@@ -84,6 +84,7 @@ def get_course_details(ctx: StudentContext, code: str) -> dict:
 
 def get_eligible_courses(ctx: StudentContext, category: str | None = None, about: list[str] | str | None = None,
                          filters: dict | None = None, avoid_8am: bool | None = None, avoid_day: str | None = None,
-                         exclude: list[str] | None = None, count: int | None = None) -> dict:
+                         exclude: list[str] | None = None, count: int | None = None,
+                         related: list[str] | str | None = None) -> dict:
     """Eligible courses, best match first (see recommender/eligible.py)."""
-    return run(ctx, category, about, filters, avoid_8am, avoid_day, exclude, count)[0]
+    return run(ctx, category, about, filters, avoid_8am, avoid_day, exclude, count, related)[0]

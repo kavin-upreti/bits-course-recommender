@@ -27,10 +27,16 @@ TITLE_STRONG = 0.8                      # a title scoring this high counts on it
 DOMAIN_WEIGHT = 0.3                     # the worst-fitting department keeps 70% of its score (ranking_probe 2026-09-27)
 DOMAIN_NEUTRAL_DEPARTMENTS = {"BITS"}   # institute-wide interdisciplinary courses: no subject to fit
 RELEVANCE_TOP_PIECES = 3
-RELEVANCE_CUTOFF = 0.54                 # EDA 2026-09-27 (w=0, title gate, domain): max-F1 threshold; no-match queries 3/3
+RELEVANCE_CUTOFF = 0.75                 # EDA 2026-09-27 (app relevance: title gate, dept fit, per-topic pieces); only 6 judged queries, so 0.47-0.75 is within noise
 LOOSE_MATCH_COUNT = 3
 LOOSE_MATCH_FLOOR = 0.3                 # probe 2026-09-27: below this "loosely related" was noise (web development -> Issues in Economic Development, 0.02)
 MAX_QUERY_TOPICS = 8                    # "AI, ML, DL, NLP": each topic scored on its own, best one counts                   # "loosely_related" courses when nothing passes the cutoff
+
+# Same class under two codes (recommender/equivalents.py). EDA 2026-09-27 (docs/eda/equivalence_eda.md): best F1 on
+# listed pairs (precision 0.87, recall 0.62; the 12 "wrong" pairs above it are renamed titles of the same course)
+EQUIVALENT_TWIN_SIM = 0.99              # two pieces this similar are the same sentence
+EQUIVALENT_OVERLAP = 0.9                # share of the smaller course's pieces with a twin in the other
+EQUIVALENT_MEASURE = "smaller"          # beat "both" at every threshold (F1 0.72 vs 0.47)
 
 # Results
 MAX_RESULTS = 5                         # courses returned per get_eligible_courses call, unless the student asks for a number

@@ -7,8 +7,9 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from catalog.models import Course, CoursePiece
+from recommender import equivalents
 from recommender.embeddings import current_model_name, get_embedder
-from recommender.piece_index import invalidate_piece_index
+from recommender.piece_index import get_piece_index, invalidate_piece_index
 from recommender.pieces import build_pieces
 
 
@@ -33,6 +34,10 @@ class Command(BaseCommand):
             ], batch_size=1000)
         invalidate_piece_index()
         self.report(pieces, embedder.model_name, time.monotonic() - started)
+        if embedder.model_name == current_model_name():  # why: detection reads the pieces the app ranks with
+            pairs = equivalents.detect(get_piece_index())
+            equivalents.store(pairs)
+            self.stdout.write(f"Same-class courses found from their text: {len(pairs)} pairs")
 
     def report(self, pieces: list[tuple], model_name: str, seconds: float) -> None:
         """Counts per kind, courses with only a title piece, time taken."""

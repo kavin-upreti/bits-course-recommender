@@ -32,37 +32,47 @@ class Scored:
 
     code: str
     embedding: float
-    rows: list[int]                  # the pieces sent to the reranker (best by embedding, plus the title)
+    rows: list[int]                  # every piece sent to the reranker (the union over topics)
+    rows_by_topic: list[list[int]] = field(default_factory=list)  # per topic: its best pieces by embedding + the title
     relevance: float | None = None
     best_row: int | None = None      # the piece the reranker liked best
     best_topic: str | None = None    # the student's topic that matched best_row
     domain: float = 1.0              # the multiplier from the department's fit with the topic (1 = no change)
     piece_scores: list[float] = field(default_factory=list)
-
-
-def piece_sims(index: PieceIndex, rows: list[int], queries: np.ndarray) -> np.ndarray:
-    """Each piece's best similarity over the topics: queries is (topics, d)."""
-    return (index.matrix[rows] @ np.atleast_2d(queries).T).max(axis=1)
+    by_topic: list[float] = field(default_factory=list)   # relevance for each topic, in the order given
+    best_rows: list[int] = field(default_factory=list)    # the piece that answered each topic
+    domains: list[float] = field(default_factory=list)    # the department-fit multiplier for each topic
 
 
 def retrieve(index: PieceIndex, codes: list[str], queries: np.ndarray, candidates: int) -> list[Scored]:
-    """C1: the `candidates` courses with the highest best-piece similarity (ties by code), with their pieces.
-    Courses without any piece can't be scored and are left out."""
+    """C1: the `candidates` courses with the highest best-piece similarity to any topic (ties by code). Each topic
+    gets the course's RERANK_PIECES_PER_COURSE best pieces FOR THAT TOPIC, plus the title.
+    why per topic: with "NLP" and "machine learning", the AI course's three ML lines would otherwise crowd out its
+    one NLP line, and its NLP score would be computed without it. Courses without any piece are left out."""
+    queries = np.atleast_2d(queries)
     scored = []
     for code in codes:
         rows = index.rows_by_course.get(code)
         if not rows:
             continue
-        sims = piece_sims(index, rows, queries)
-        order = np.argsort(-sims, kind="stable")
-        chosen = [rows[i] for i in order[:config.RERANK_PIECES_PER_COURSE]]
-        chosen += [row for row in rows if index.kinds[row] == "title" and row not in chosen]
-        scored.append(Scored(code, float(sims[order[0]]), chosen))
+        sims = index.matrix[rows] @ queries.T  # (pieces, topics)
+        titles = [row for row in rows if index.kinds[row] == "title"]
+        by_topic = []
+        for topic in range(queries.shape[0]):
+            best = [rows[i] for i in np.argsort(-sims[:, topic], kind="stable")[:config.RERANK_PIECES_PER_COURSE]]
+            by_topic.append(best + [row for row in titles if row not in best])
+        union = list(dict.fromkeys(row for chosen in by_topic for row in chosen))
+        scored.append(Scored(code, float(sims.max()), union, by_topic))
     return sorted(scored, key=lambda item: (-item.embedding, item.code))[:candidates]
 
 
+STEM_LETTERS = 7  # "politics" / "political" -> "politic"; "statistics" / "statistical" -> "statist"
+
+
 def words(text: str) -> set[str]:
-    return set(re.findall(r"[a-z0-9]+", text.lower()))
+    """Lowercase words, each cut to its first STEM_LETTERS letters, so word forms of one root match.
+    ponytail: a prefix cut, not a stemmer; "computer" and "computational" stay apart (7 letters differ), which is right."""
+    return {word[:STEM_LETTERS] for word in re.findall(r"[a-z0-9]+", text.lower())}
 
 
 def title_contains(title: str, topic: str) -> bool:
@@ -97,39 +107,54 @@ def domain_multiplier(index: PieceIndex, fits: np.ndarray | None, code: str, top
     return 1 - config.DOMAIN_WEIGHT * (1 - float(fits[index.departments[department], topic]))
 
 
+def topic_score(index: PieceIndex, rows: list[int], scores: list[float], topic: str, weight: float,
+                fit: float) -> tuple[float, int, float]:
+    """(relevance, best piece position in `rows`, domain multiplier) of one course for one topic."""
+    titles = [i for i, row in enumerate(rows) if index.kinds[row] == "title"]
+    for i in titles:
+        if title_contains(index.texts[rows[i]], topic):
+            scores[i] = 1.0
+    title_score = max((scores[i] for i in titles), default=0.0)
+    content = relevance(scores, weight)
+    # why the title counts on its own: a course NAMED "Natural Language Processing" teaches it, even when its
+    # topic lines ("N-gram models", "POS tagging") never repeat the phrase (the cross-encoder scores those ~0).
+    # A weak title is ignored rather than averaged in, so it never drags a course down.
+    uses_title = bool(titles) and title_score >= config.TITLE_STRONG and title_score >= content
+    best = titles[0] if uses_title else int(np.argmax(scores))
+    return (title_score if uses_title else content) * fit, best, fit
+
+
 def rerank(groups: list[list[Scored]], topics: list[str], queries: np.ndarray, index: PieceIndex,
            reranker: Reranker | None, weight: float) -> None:
-    """C2: fill `relevance` / `best_row` for every Scored in every group, with ONE reranker call for all pairs
-    (every topic x every piece; a piece keeps its best topic's score)."""
+    """C2: fill `by_topic`, `relevance` (the best topic's), `best_row` / `best_topic` for every Scored in every group,
+    with ONE reranker call for all pairs. Each topic is scored on its own pieces only (rows_by_topic), so the pairs
+    grow with topics x pieces, not topics x all pieces of every topic."""
     everyone = [item for group in groups for item in group]
-    rows = [row for item in everyone for row in item.rows]
-    if reranker is not None:
-        pairs = [(topic, index.texts[row]) for row in rows for topic in topics]
-        flat = reranker.score(pairs) if pairs else np.zeros(0)
-        per_topic = flat.reshape(len(rows), len(topics))
-    else:  # no reranker: the same pieces, scored by their similarity
-        per_topic = index.matrix[rows] @ np.atleast_2d(queries).T
-    if not rows:
+    for item in everyone:
+        if not item.rows_by_topic:  # built by hand (tests): every topic gets every piece
+            item.rows_by_topic = [item.rows] * len(topics)
+    jobs = [(t, row) for item in everyone for t in range(len(topics)) for row in item.rows_by_topic[t]]
+    if not jobs:
         return
-    scores, topic_of_row = per_topic.max(axis=1), per_topic.argmax(axis=1)
+    if reranker is not None:
+        flat = np.asarray(reranker.score([(topics[t], index.texts[row]) for t, row in jobs]), dtype=float)
+    else:  # no reranker: the same pieces, scored by their similarity
+        vectors = np.atleast_2d(queries)
+        flat = np.array([float(index.matrix[row] @ vectors[t]) for t, row in jobs])
     fits = domain_fits(index, queries)
     position = 0
     for item in everyone:
-        item.piece_scores = [float(value) for value in scores[position:position + len(item.rows)]]
-        position += len(item.rows)
-        titles = [i for i, row in enumerate(item.rows) if index.kinds[row] == "title"]
-        for i in titles:
-            if any(title_contains(index.texts[item.rows[i]], topic) for topic in topics):
-                item.piece_scores[i] = 1.0
-        title_score = max((item.piece_scores[i] for i in titles), default=0.0)
-        content = relevance(item.piece_scores, weight)
-        # why the title counts on its own: a course NAMED "Natural Language Processing" teaches it, even when its
-        # topic lines ("N-gram models", "POS tagging") never repeat the phrase (the cross-encoder scores those ~0).
-        # A weak title is ignored rather than averaged in, so it never drags a course down.
-        uses_title = bool(titles) and title_score >= config.TITLE_STRONG and title_score >= content
-        best = titles[0] if uses_title else int(np.argmax(item.piece_scores))
-        topic = int(topic_of_row[position - len(item.rows) + best])
-        item.domain = domain_multiplier(index, fits, item.code, topic)
-        item.relevance = (title_score if uses_title else content) * item.domain
-        item.best_row = item.rows[best]
-        item.best_topic = topics[topic]
+        results = []
+        for t, topic in enumerate(topics):
+            rows = item.rows_by_topic[t]
+            scores = [float(value) for value in flat[position:position + len(rows)]]
+            position += len(rows)
+            score, best, fit = topic_score(index, rows, scores, topic, weight, domain_multiplier(index, fits, item.code, t))
+            results.append((score, rows[best], fit, scores))
+        item.by_topic = [score for score, *_ in results]
+        item.best_rows = [row for _, row, _, _ in results]
+        item.domains = [fit for _, _, fit, _ in results]
+        top = int(np.argmax(item.by_topic))
+        item.relevance, item.domain = item.by_topic[top], item.domains[top]
+        item.best_row, item.best_topic = item.best_rows[top], topics[top]
+        item.piece_scores = results[top][3]
