@@ -32,8 +32,6 @@ class FallbackTests(SimpleTestCase):
     def test_parses_providers_with_colons_in_model(self):
         with patch.dict("os.environ", ENV, clear=True):
             self.assertEqual(llm.providers(), [("groq", "m1"), ("openrouter", "vendor/m2:free"), ("gemini", "m3")])
-        with patch.dict("os.environ", {"GEMINI_MODEL": "old"}, clear=True):
-            self.assertEqual(llm.providers(), [("gemini", "old")])
 
     def test_first_provider_answers(self):
         response, tried, _ = self.run_chat({"groq": [LLMResponse("hi", [])]})
@@ -78,10 +76,20 @@ class OpenAIFormatTests(SimpleTestCase):
             {"role": "assistant", "text": None, "tool_calls": [ToolCall("c1", "check_plan", {"courses": ["A B101"]})], "raw": None},
             {"role": "tool", "results": [{"id": "c1", "name": "check_plan", "result": {"ok": True}}]},
         ]
-        converted = llm._openai_messages("sys", messages)
+        converted = llm._openai_messages("groq", "sys", messages)
         self.assertEqual(converted[0], {"role": "system", "content": "sys"})
         self.assertEqual(converted[2]["tool_calls"][0]["function"], {"name": "check_plan", "arguments": json.dumps({"courses": ["A B101"]})})
         self.assertEqual(converted[3], {"role": "tool", "tool_call_id": "c1", "content": '{"ok":true}'})
+
+    def test_gemini_gets_its_own_turns_back_and_a_placeholder_signature_for_others(self):
+        signed = {"role": "assistant", "tool_calls": [{"id": "g1", "extra_content": {"google": {"thought_signature": "sig"}}}]}
+        messages = [{"role": "user", "text": "hi"},
+                    {"role": "assistant", "text": None, "tool_calls": [ToolCall("c1", "check_plan", {})], "raw": ("groq", {})},
+                    {"role": "assistant", "text": None, "tool_calls": [ToolCall("g1", "check_plan", {})], "raw": ("gemini", signed)}]
+        converted = llm._openai_messages("gemini", "sys", messages)
+        self.assertEqual(converted[2]["tool_calls"][0]["extra_content"], llm.SKIP_SIGNATURE)
+        self.assertIs(converted[3], signed)
+        self.assertNotIn("extra_content", llm._openai_messages("groq", "sys", messages)[2]["tool_calls"][0])
 
     def test_bad_argument_json_reaches_validation(self):
         self.assertEqual(llm._parse_args("{oops"), {"unparseable_arguments": "{oops"})

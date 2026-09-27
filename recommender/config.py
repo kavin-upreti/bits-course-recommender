@@ -1,6 +1,6 @@
 """Every tunable number of the recommender (todo.md section 1). Nothing tunable is hardcoded anywhere else.
 
-GEMINI_API_KEY / GEMINI_MODEL come from .env (recommender/llm.py), not from here. The maximum units per semester
+LLM_PROVIDERS and the API keys come from .env (recommender/llm.py), not from here. The maximum units per semester
 comes from the Rule table (regulations), not from here.
 """
 

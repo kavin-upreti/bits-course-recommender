@@ -3,15 +3,15 @@
 LLM_PROVIDERS in .env lists provider:model pairs, tried in order:
     LLM_PROVIDERS=groq:llama-3.3-70b-versatile,openrouter:<model>:free,gemini:gemini-3.5-flash
 A rate limit, outage or provider error moves to the next provider. When every provider is rate-limited, the whole
-list is retried after 2 s, 4 s, 8 s, then LLMUnavailable. Groq and OpenRouter speak the OpenAI chat API (plain
-httpx); Gemini uses google-genai. This is the only file that knows about providers.
+list is retried after 2 s, 4 s, 8 s, then LLMUnavailable. All three speak the OpenAI chat API (Gemini through its
+OpenAI-compatible endpoint), so one plain httpx call serves them. This is the only file that knows about providers.
 
 Messages use our own format:
     {"role": "user", "text": ...}
-    {"role": "assistant", "text": ..., "tool_calls": [ToolCall], "raw": (provider, turn) or None}
+    {"role": "assistant", "text": ..., "tool_calls": [ToolCall], "raw": (provider, message) or None}
     {"role": "tool", "results": [{"id", "name", "result"}]}
-why "raw": Gemini's thinking models sign their function-call parts (thought_signature) and reject a history that
-drops the signature, so a Gemini turn is sent back to Gemini as it came. Other providers ignore it.
+why "raw": Gemini's thinking models sign their tool calls (extra_content.google.thought_signature) and reject a
+history without the signature, so a Gemini turn goes back to Gemini exactly as it came.
 """
 import json
 import logging
@@ -21,21 +21,18 @@ import uuid
 from dataclasses import dataclass, field
 
 import httpx
-from google import genai
-from google.genai import errors, types
 
 from . import config
 
 logger = logging.getLogger(__name__)
 RETRY_STATUS = {429, 500, 502, 503, 504}  # rate limit, temporary server errors
-OPENAI_COMPATIBLE = {  # provider -> (chat completions URL, env var with the key)
+PROVIDERS = {  # provider -> (chat completions URL, env var with the key)
     "groq": ("https://api.groq.com/openai/v1/chat/completions", "GROQ_API_KEY"),
     "openrouter": ("https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY"),
+    "gemini": ("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "GEMINI_API_KEY"),
 }
-KEY_VARS = {**{name: env for name, (_, env) in OPENAI_COMPATIBLE.items()}, "gemini": "GEMINI_API_KEY"}
-# Gemini accepts this in place of a real signature for function calls it didn't write (e.g. made by Groq earlier
-# in the same message, before a fallback)
-SKIP_SIGNATURE = b"skip_thought_signature_validator"
+# Gemini accepts this in place of a real signature for tool calls it didn't write (e.g. Groq's, before a fallback)
+SKIP_SIGNATURE = {"google": {"thought_signature": "skip_thought_signature_validator"}}
 
 
 class LLMUnavailable(Exception):
@@ -62,18 +59,15 @@ class LLMResponse:
     text: str | None
     tool_calls: list[ToolCall]
     usage: dict = field(default_factory=dict)  # input/output token counts if available, plus the provider used
-    raw: object = None                          # (provider, turn) to send back as-is (see module docstring)
+    raw: object = None                          # (provider, message) to send back as-is (see module docstring)
 
 
 def providers() -> list[tuple[str, str]]:
-    """[(provider, model)] from LLM_PROVIDERS; falls back to GEMINI_MODEL alone (the old setting)."""
-    spec = os.environ.get("LLM_PROVIDERS", "").strip()
-    if not spec and os.environ.get("GEMINI_MODEL"):
-        spec = f"gemini:{os.environ['GEMINI_MODEL']}"
+    """[(provider, model)] from LLM_PROVIDERS."""
     pairs = []
-    for item in filter(None, (part.strip() for part in spec.split(","))):
+    for item in filter(None, (part.strip() for part in os.environ.get("LLM_PROVIDERS", "").split(","))):
         name, _, model = item.partition(":")  # why partition: OpenRouter model names contain ":" ("...:free")
-        if name not in KEY_VARS or not model:
+        if name not in PROVIDERS or not model:
             raise LLMError(f"LLM_PROVIDERS: unknown entry {item!r} (use groq:, openrouter: or gemini:).")
         pairs.append((name, model))
     if not pairs:
@@ -81,19 +75,22 @@ def providers() -> list[tuple[str, str]]:
     return pairs
 
 
-# ---------------------------------------------------------------- OpenAI-compatible (Groq, OpenRouter)
-
-def _openai_messages(system: str, messages: list[dict]) -> list[dict]:
+def _openai_messages(provider: str, system: str, messages: list[dict]) -> list[dict]:
     """Neutral messages -> OpenAI chat messages (one "tool" message per result, in call order)."""
     converted = [{"role": "system", "content": system}]
     for message in messages:
         if message["role"] == "user":
             converted.append({"role": "user", "content": message["text"]})
         elif message["role"] == "assistant":
+            raw = message.get("raw")
+            if raw and raw[0] == provider == "gemini":  # why only Gemini: Groq rejects its own extra fields (reasoning)
+                converted.append(raw[1])
+                continue
             turn = {"role": "assistant", "content": message.get("text") or ""}
             if message.get("tool_calls"):
                 turn["tool_calls"] = [{"id": call.id, "type": "function",
-                                       "function": {"name": call.name, "arguments": json.dumps(call.args)}}
+                                       "function": {"name": call.name, "arguments": json.dumps(call.args)},
+                                       **({"extra_content": SKIP_SIGNATURE} if provider == "gemini" else {})}
                                       for call in message["tool_calls"]]
             converted.append(turn)
         else:
@@ -127,9 +124,10 @@ def _nullable(schema: dict) -> dict:
     return {**schema, "properties": properties}
 
 
-def _send_openai(provider: str, model: str, system: str, messages: list[dict], tools: list[dict] | None) -> LLMResponse:
-    url, key_var = OPENAI_COMPATIBLE[provider]
-    body: dict = {"model": model, "messages": _openai_messages(system, messages), "temperature": config.LLM_TEMPERATURE}
+def _send(provider: str, model: str, system: str, messages: list[dict], tools: list[dict] | None) -> LLMResponse:
+    """One call to one provider, no retries."""
+    url, key_var = PROVIDERS[provider]
+    body: dict = {"model": model, "messages": _openai_messages(provider, system, messages), "temperature": config.LLM_TEMPERATURE}
     if tools:
         body["tools"] = [{"type": "function", "function": {**tool, "parameters": _nullable(tool["parameters"])}} for tool in tools]
     try:
@@ -147,97 +145,15 @@ def _send_openai(provider: str, model: str, system: str, messages: list[dict], t
                       _parse_args(call["function"].get("arguments")))
              for call in message.get("tool_calls") or []]
     usage = data.get("usage") or {}
-    return LLMResponse(text=message.get("content") or None, tool_calls=calls,
+    return LLMResponse(text=message.get("content") or None, tool_calls=calls, raw=(provider, message),
                        usage={"input_tokens": usage.get("prompt_tokens", 0), "output_tokens": usage.get("completion_tokens", 0)})
-
-
-# ---------------------------------------------------------------- Gemini
-
-_gemini_client: genai.Client | None = None
-
-
-def _gemini() -> genai.Client:
-    global _gemini_client
-    if _gemini_client is None:
-        _gemini_client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-    return _gemini_client
-
-
-def _to_contents(messages: list[dict]) -> list[types.Content]:
-    """Neutral messages -> Gemini contents (function calls and responses in the same order)."""
-    contents = []
-    for message in messages:
-        if message["role"] == "user":
-            contents.append(types.Content(role="user", parts=[types.Part(text=message["text"])]))
-        elif message["role"] == "assistant":
-            raw = message.get("raw")
-            if raw and raw[0] == "gemini":
-                contents.append(raw[1])
-                continue
-            parts = [types.Part(text=message["text"])] if message.get("text") else []
-            parts += [types.Part(function_call=types.FunctionCall(id=call.id, name=call.name, args=call.args),
-                                 thought_signature=SKIP_SIGNATURE)
-                      for call in message.get("tool_calls", [])]
-            contents.append(types.Content(role="model", parts=parts))
-        else:
-            parts = []
-            for result in message["results"]:
-                part = types.Part.from_function_response(name=result["name"], response=result["result"])
-                part.function_response.id = result["id"]
-                parts.append(part)
-            contents.append(types.Content(role="user", parts=parts))
-    return contents
-
-
-def _to_tools(tools: list[dict]) -> list[types.Tool]:
-    """Our JSON-schema tool list -> one Gemini Tool with a declaration per function."""
-    return [types.Tool(function_declarations=[
-        types.FunctionDeclaration(name=tool["name"], description=tool["description"], parameters_json_schema=tool["parameters"])
-        for tool in tools
-    ])]
-
-
-def _send_gemini(model: str, system: str, messages: list[dict], tools: list[dict] | None) -> LLMResponse:
-    generation_config = types.GenerateContentConfig(
-        system_instruction=system, temperature=config.LLM_TEMPERATURE, tools=_to_tools(tools) if tools else None,
-        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-    )
-    try:
-        response = _gemini().models.generate_content(model=model, contents=_to_contents(messages), config=generation_config)
-    except errors.APIError as error:
-        if error.code in RETRY_STATUS:
-            raise ProviderBusy(f"gemini {error.code}: {error.message}") from error
-        raise LLMError(f"gemini {error.code}: {error.message}") from error
-    except httpx.TransportError as error:
-        raise ProviderBusy(f"gemini: {error}") from error
-    candidate = (response.candidates or [None])[0]
-    parts = (candidate.content.parts if candidate and candidate.content else None) or []
-    text = "".join(part.text for part in parts if part.text and not part.thought) or None
-    calls = [ToolCall(id=part.function_call.id or f"call_{uuid.uuid4().hex[:8]}", name=part.function_call.name,
-                      args=dict(part.function_call.args or {}))
-             for part in parts if part.function_call]
-    usage = {}
-    if response.usage_metadata:
-        usage = {"input_tokens": response.usage_metadata.prompt_token_count or 0,
-                 "output_tokens": response.usage_metadata.candidates_token_count or 0}
-    return LLMResponse(text=text, tool_calls=calls, usage=usage,
-                       raw=("gemini", candidate.content) if candidate and candidate.content else None)
-
-
-# ---------------------------------------------------------------- the one entry point
-
-def _send(provider: str, model: str, system: str, messages: list[dict], tools: list[dict] | None) -> LLMResponse:
-    """One call to one provider, no retries."""
-    if provider == "gemini":
-        return _send_gemini(model, system, messages, tools)
-    return _send_openai(provider, model, system, messages, tools)
 
 
 def chat(system: str, messages: list[dict], tools: list[dict] | None) -> LLMResponse:
     """Send the conversation; tools=None makes the model answer in text. Providers are tried in LLM_PROVIDERS order;
     a provider without a key is skipped, one that errors is dropped for this call, a busy one is retried after
     2 s / 4 s / 8 s together with the others."""
-    candidates = [(name, model) for name, model in providers() if os.environ.get(KEY_VARS[name])]
+    candidates = [(name, model) for name, model in providers() if os.environ.get(PROVIDERS[name][1])]
     if not candidates:
         raise LLMError("No LLM API key is set for any provider in LLM_PROVIDERS (see .env.example).")
     failures: list[str] = []

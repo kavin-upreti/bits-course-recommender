@@ -1,8 +1,6 @@
-"""validate_call (todo.md 9.3) and the schemas loading into the Gemini wrapper."""
+"""validate_call (todo.md 9.3)."""
 from django.test import SimpleTestCase
 
-from recommender.llm import _to_tools
-from recommender.tool_schemas import TOOL_SCHEMAS
 from recommender.validation import validate_call
 
 
@@ -49,11 +47,6 @@ class ValidationTests(SimpleTestCase):
         for name, args, error in cases:
             with self.subTest(args=args):
                 self.assertEqual(validate_call(name, args), ({}, error))
-
-    def test_schemas_load_in_wrapper(self):
-        tools = _to_tools(TOOL_SCHEMAS)
-        self.assertEqual([declaration.name for declaration in tools[0].function_declarations],
-                         [tool["name"] for tool in TOOL_SCHEMAS])
 
 
 class NoNetworkTests(SimpleTestCase):
