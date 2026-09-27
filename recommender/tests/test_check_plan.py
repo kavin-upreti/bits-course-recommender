@@ -134,8 +134,9 @@ class CheckPlanTests(RecommenderTestCase):
         self.course("BB F202", [("lecture", "L1", {"T": [3]})])
         self.course("DD F203", [("lecture", "L1", {"S": [2]}), ("lecture", "L2", {"S": [3]})])
         with patch.object(config, "PLAN_SEARCH_NODE_LIMIT", 1):
-            self.assertEqual(self.plan(["AA F201", "BB F202", "DD F203"])["problem"],
-                             "too many combinations to check; try fewer courses")
+            unknown = self.plan(["AA F201", "BB F202", "DD F203"])
+            self.assertEqual(unknown["problem"], "too many combinations to check; try fewer courses")
+            self.assertTrue(unknown["limit_hit"])  # callers treat it as unknown, not as a clash
         with patch.object(config, "PLAN_SEARCH_NODE_LIMIT", 6):  # finds one 8 AM plan, then hits the limit
             result = self.plan(["AA F201", "BB F202", "DD F203"], avoid_8am=True)
         self.assertTrue(result["ok"])

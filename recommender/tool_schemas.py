@@ -2,8 +2,8 @@
 Also the source of truth for argument validation (recommender/validation.py)."""
 from . import config
 
-AVOID_8AM = {"type": "boolean", "description": "true if the student wants no 8 AM classes, false if they say 8 AM is fine. Leave empty if not mentioned."}
-AVOID_DAY = {"type": "string", "enum": config.DAY_CODES, "description": "A day the student wants free. Leave empty if not mentioned."}
+AVOID_8AM = {"type": "boolean", "description": "true if the student wants as few 8 AM classes as possible, false if they say 8 AM is fine. Leave empty if not mentioned."}
+AVOID_DAY = {"type": "string", "enum": config.DAY_CODES, "description": "A day the student would like kept free (a preference, not a rule). Leave empty if not mentioned."}
 
 TOOL_SCHEMAS: list[dict] = [
     {

@@ -558,24 +558,18 @@ def preference_reason(candidate: Candidate, avoid_8am: bool, avoid_day: str | No
 
 
 def stage_d(pipeline: Pipeline, ranked: list[Candidate], ranked_by: str) -> list[Candidate]:
-    """Drop courses whose every section of some type breaks a timetable preference; the ones that would have been
-    in the top MAX_RESULTS are reported in `excluded`."""
+    """Timetable preferences are soft ("fewest 8 AMs", like the timetable sort): a course whose every section of
+    some type breaks one is kept with a note and ranked a little lower (the same penalty as a disliked style)."""
     avoid_8am, avoid_day = pipeline.settings["avoid_8am"], pipeline.settings["avoid_day"]
     if not avoid_8am and not avoid_day:
         return ranked
-    kept = []
     for candidate in ranked:
         if any(not section.timings for section in candidate.sections):
             candidate.notes.append(TIMINGS_NOTE)  # such sections count as OK
-        reason = preference_reason(candidate, avoid_8am, avoid_day)
-        if reason is None:
-            kept.append(candidate)
-            continue
-        pipeline.remove("timetable", candidate.code)
-        if candidate.rank <= config.MAX_RESULTS:
-            pipeline.excluded.append({"code": candidate.code, "title": course_title(candidate.course.title),
-                                      "category": candidate.category, "reason": reason})
-    return kept
+        if reason := preference_reason(candidate, avoid_8am, avoid_day):
+            candidate.notes.append(reason)
+            candidate.penalty -= config.DISLIKE_PENALTY
+    return rank(ranked, ranked_by)
 
 
 def fits(pipeline: Pipeline, candidate: Candidate) -> bool:
@@ -585,13 +579,17 @@ def fits(pipeline: Pipeline, candidate: Candidate) -> bool:
     a course the student can't take."""
     avoid_8am, avoid_day = pipeline.settings["avoid_8am"], pipeline.settings["avoid_day"]
     plan = check_plan(pipeline.ctx, [candidate.code], avoid_8am, avoid_day)
-    if plan["ok"] and candidate.code in plan.get("missed_preferences", []):
-        # stage D found a section avoiding the preference, but none of those fits with the current courses
+    if plan["ok"] and candidate.code in plan.get("missed_preferences", []) \
+            and preference_reason(candidate, avoid_8am, avoid_day) is None:
+        # a section avoiding the preference exists, but none of those fits with the current courses: still takeable
         wants = [text for on, text in ((avoid_8am, "an 8 AM class"),
                                        (avoid_day, f"a class on {config.DAY_NAMES.get(avoid_day, avoid_day)}")) if on]
-        plan = {"ok": False, "reason": f"every way it fits with your current courses has {' or '.join(wants)}"}
+        candidate.notes.append(f"every way it fits with your current courses has {' or '.join(wants)}")
     if plan["ok"]:
         candidate.picked_sections = plan["sections"].get(candidate.code, {})
+        return True
+    if plan.get("limit_hit"):  # unknown is not "doesn't fit": keep it and say so
+        candidate.notes.append("too many section combinations to fully check the fit with your current courses")
         return True
     pipeline.remove("fit", candidate.code)
     reason = plan.get("reason") or ("no combination of its sections fits with your current courses" if not plan.get("conflicts")

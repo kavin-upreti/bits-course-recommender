@@ -322,11 +322,13 @@ class TimetablePreferenceTests(Catalog):
             "XX F413": [("lecture", "L1", LATE), ("practical", "P1", {"F": [1, 2]})],         # only practical at 8
         })
         result = self.result(category="DEL", avoid_8am=True)
-        self.assertEqual(self.codes(result), ["XX F411"])
-        self.assertEqual({(entry["code"], entry["reason"]) for entry in result["excluded"]},
-                         {("XX F412", "every lecture section has an 8 AM class"),
-                          ("XX F413", "every practical section has an 8 AM class")})
-        self.assertEqual(set(result["excluded"][0]), {"code", "title", "category", "reason"})
+        # "fewest 8 AMs", not "no 8 AMs": kept with a note, ranked below the course that avoids 8 AM
+        self.assertEqual(self.codes(result)[0], "XX F411")
+        notes = {entry["code"]: entry.get("note", "") for entry in result["courses"]}
+        self.assertIn("every lecture section has an 8 AM class", notes["XX F412"])
+        self.assertIn("every practical section has an 8 AM class", notes["XX F413"])
+        self.assertNotIn("8 AM", notes["XX F411"])
+        self.assertEqual(result["excluded"], [])
 
     def test_13_excluded_only_if_in_top_five(self):
         vectors = {"topic": [1, 0], "Compiler Construction": with_sim(-0.9), "Natural Language Processing": with_sim(0.5),
@@ -349,10 +351,10 @@ class TimetablePreferenceTests(Catalog):
             "XX F413": [("lecture", "L1", {"M": [1], "F": [2]})],
         })
         result = self.result(category="DEL", avoid_day="F", avoid_8am=True)
-        self.assertEqual(self.codes(result), ["XX F411"])
-        reasons = {entry["code"]: entry["reason"] for entry in result["excluded"]}
-        self.assertEqual(reasons, {"XX F412": "every tutorial section is on Friday",
-                                   "XX F413": "every lecture section has an 8 AM class or is on Friday"})
+        self.assertEqual(self.codes(result)[0], "XX F411")
+        notes = {entry["code"]: entry.get("note", "") for entry in result["courses"]}
+        self.assertIn("every tutorial section is on Friday", notes["XX F412"])
+        self.assertIn("every lecture section has an 8 AM class or is on Friday", notes["XX F413"])
 
     def test_untimed_sections_are_ok_with_note(self):
         self.build({"XX F411": [("lecture", "L1", {})]})
@@ -364,11 +366,11 @@ class TimetablePreferenceTests(Catalog):
         self.student.default_avoid_8am, self.student.default_avoid_day = True, "S"
         self.student.save()
         result = self.result(category="DEL")
-        self.assertNotIn("XX F412", self.codes(result))
+        self.assertIn("8 AM", next(c for c in result["courses"] if c["code"] == "XX F412")["note"])
         self.assertEqual(result["settings_used"], {"avoid_8am": True, "avoid_8am_source": "profile", "avoid_day": "S",
                                                    "avoid_day_source": "profile", "ranked_by": "handout_completeness"})
         result = self.result(category="DEL", avoid_8am=False)
-        self.assertIn("XX F412", self.codes(result))
+        self.assertNotIn("8 AM", next(c for c in result["courses"] if c["code"] == "XX F412").get("note", ""))
         self.assertEqual((result["settings_used"]["avoid_8am"], result["settings_used"]["avoid_8am_source"]), (False, "message"))
 
 
@@ -478,7 +480,6 @@ class FitTests(Catalog):
         # L2 avoids 8 AM but meets at the current XX F211's hour; only the 8 AM L1 fits
         offer(self.courses["XX F411"], [("lecture", "L1", {"T": [1]}), ("lecture", "L2", {"M": [9]})])
         result = self.result(category="DEL", avoid_8am=True)
-        self.assertNotIn("XX F411", self.codes(result))
-        self.assertIn({"code": "XX F411", "title": "Natural Language Processing", "category": "DEL",
-                       "reason": "every way it fits with your current courses has an 8 AM class"}, result["excluded"])
-        self.assertIn("XX F411", self.codes(self.result(category="DEL", avoid_8am=False)))
+        entry = next(c for c in result["courses"] if c["code"] == "XX F411")  # still takeable, so still shown
+        self.assertEqual(entry["sections"], {"lecture": "L1"})
+        self.assertIn("every way it fits with your current courses has an 8 AM class", entry["note"])

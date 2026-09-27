@@ -117,7 +117,7 @@ def plan_problem(student: Student, codes: list[str]) -> str:
     """Why these courses can't all be taken with the current ones ("" = some timetable works). Tries every section
     combination and checks exams, units and the higher-degree limit too (the same check the recommender uses)."""
     plan = check_plan(build_context(student), codes)
-    return "" if plan["ok"] else plan["problem"]
+    return "" if plan["ok"] or plan.get("limit_hit") else plan["problem"]
 
 
 def logged_in_student(request: HttpRequest) -> Student | None:

@@ -153,7 +153,8 @@ def check_plan(ctx: StudentContext, courses: list[str], avoid_8am: bool | None =
     result = search_sections(variables, config.LUNCH_PERIODS, config.PLAN_SEARCH_NODE_LIMIT)
     if result.picks is None:
         if result.limit_hit:
-            return _failure([], current, "too many combinations to check; try fewer courses")
+            # ponytail: a safety net against a hung request; real checks use <= ~250 of the 200k steps (2026-09-28)
+            return {**_failure([], current, "too many combinations to check; try fewer courses"), "limit_hit": True}
         conflicts = _diagnose(added_codes, offerings)
         return _failure(conflicts, current, None if conflicts else "Each pair of courses fits, but not all of them together.")
     if result.limit_hit:
