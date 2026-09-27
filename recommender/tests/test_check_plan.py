@@ -1,7 +1,4 @@
 """check_plan (todo.md 7.6, tests 1-14)."""
-from unittest.mock import patch
-
-from recommender import config
 from recommender.context import build_context
 from recommender.tools import check_plan
 
@@ -128,19 +125,6 @@ class CheckPlanTests(RecommenderTestCase):
     def test_untimed_section_note(self):
         self.course("AA F201", [("lecture", "L1", {})])
         self.assertIn("class times for AA F201 L1 aren't listed, so clashes with it couldn't be checked", self.plan(["AA F201"])["notes"])
-
-    def test_13_node_limit(self):
-        self.course("AA F201", [("lecture", "L1", {"T": [1]}), ("lecture", "L2", {"T": [3]})])
-        self.course("BB F202", [("lecture", "L1", {"T": [3]})])
-        self.course("DD F203", [("lecture", "L1", {"S": [2]}), ("lecture", "L2", {"S": [3]})])
-        with patch.object(config, "PLAN_SEARCH_NODE_LIMIT", 1):
-            unknown = self.plan(["AA F201", "BB F202", "DD F203"])
-            self.assertEqual(unknown["problem"], "too many combinations to check; try fewer courses")
-            self.assertTrue(unknown["limit_hit"])  # callers treat it as unknown, not as a clash
-        with patch.object(config, "PLAN_SEARCH_NODE_LIMIT", 6):  # finds one 8 AM plan, then hits the limit
-            result = self.plan(["AA F201", "BB F202", "DD F203"], avoid_8am=True)
-        self.assertTrue(result["ok"])
-        self.assertIn("search limit reached; this is a valid timetable but maybe not the best one", result["notes"])
 
     def test_14_deterministic(self):
         for code, tutorial in (("AA F201", 8), ("BB F202", 9)):

@@ -585,9 +585,6 @@ def fits(pipeline: Pipeline, candidate: Candidate) -> bool:
     if plan["ok"]:
         candidate.picked_sections = plan["sections"].get(candidate.code, {})
         return True
-    if plan.get("limit_hit"):  # unknown is not "doesn't fit": keep it and say so
-        candidate.notes.append("too many section combinations to fully check the fit with your current courses")
-        return True
     pipeline.remove("fit", candidate.code)
     reason = plan.get("reason") or ("no combination of its sections fits with your current courses" if not plan.get("conflicts")
                                     else f"doesn't fit with your current courses: {plan['problem']}")

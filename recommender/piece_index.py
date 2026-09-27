@@ -19,13 +19,17 @@ class PieceIndex:
     kinds: list[str]
     texts: list[str]
     rows_by_course: dict[str, list[int]] = field(default_factory=dict)
-    course_vectors: dict[str, np.ndarray] = field(default_factory=dict)  # code -> mean of its pieces, normalised
+    course_vectors: dict[str, np.ndarray] = field(default_factory=dict)  # code -> centred mean of its pieces, normalised
 
     def __post_init__(self) -> None:
         for row, code in enumerate(self.course_codes):
             self.rows_by_course.setdefault(code, []).append(row)
-        for code, rows in self.rows_by_course.items():
-            vector = self.matrix[rows].mean(axis=0)
+        means = {code: self.matrix[rows].mean(axis=0) for code, rows in self.rows_by_course.items()}
+        # why centred: every course mean shares a big "university course" direction, which squeezed all similarities
+        # into 0.92-0.95 (video editing's 4th neighbour was Advanced Manufacturing); without it they spread 0.3-0.7
+        average = np.mean(list(means.values()), axis=0) if means else 0.0
+        for code, mean in means.items():
+            vector = mean - average
             self.course_vectors[code] = vector / (np.linalg.norm(vector) or 1.0)
 
 

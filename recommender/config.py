@@ -56,13 +56,9 @@ HEAVY_COMPRE_PERCENT = 45               # "heavy compre" means compre_percent >=
 
 # Timetable format
 EARLY_PERIODS = {1}                     # period 1 = 8 AM
-LUNCH_PERIODS = {4, 5, 6}               # at least one of these must be free every day
 DAY_CODES = ["M", "T", "W", "Th", "F", "S"]   # matches Section.timings (checked: M T W Th F S)
 DAY_NAMES = {"M": "Monday", "T": "Tuesday", "W": "Wednesday", "Th": "Thursday", "F": "Friday", "S": "Saturday"}
-
-# check_plan search
-PLAN_SEARCH_NODE_LIMIT = 200_000
-MAX_PLAN_COURSES = 10
+MAX_PLAN_COURSES = 10                   # courses one check_plan call may add
 
 # Pieces (section 4.2)
 PIECE_MIN_WORDS = 2

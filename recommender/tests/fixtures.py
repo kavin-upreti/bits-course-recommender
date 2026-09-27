@@ -61,6 +61,7 @@ def base_rules() -> None:
     CategoryRequirement.objects.create(category="Open Electives", code="OPEL", min_courses=5, min_units=15)
     Rule.objects.create(rule_id="reg_max_units", group="regulations", description="", values={"first_degree_max_units": 25})
     Rule.objects.create(rule_id="reg_max_units_2026", group="regulations", description="", values={"first_degree_max_units": None})
+    Rule.objects.create(rule_id="tt_lunch_hour", group="timetable", description="", values={"lunch_periods": [4, 5, 6]})
     Rule.objects.create(rule_id="reg_extra_electives", group="regulations", description="", values={"max_extra_electives": 4})
     Rule.objects.create(rule_id="minor_units", group="minor", description="",
                         values={"total_min_courses": 5, "electives_min_courses": 2})

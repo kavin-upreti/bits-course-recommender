@@ -213,7 +213,6 @@ class PickingTests(Catalog):
     def setUp(self) -> None:
         super().setUp()
         from catalog.models import Rule
-        Rule.objects.create(rule_id="tt_lunch_hour", group="timetable", description="", values={"lunch_periods": [4, 5, 6]})
         Rule.objects.create(rule_id="tt_periods", group="timetable", description="",
                             values=[{"period": n, "start": f"{7 + n:02d}:00", "end": f"{7 + n:02d}:50"} for n in range(1, 11)])
         for code, timings in (("XX F411", {"W": [3]}), ("HSS F202", {"F": [3]})):

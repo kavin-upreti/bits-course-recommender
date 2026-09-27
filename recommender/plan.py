@@ -1,11 +1,12 @@
 """check_plan (todo.md section 7): do these courses fit with the student's current ones? Also used by
-get_eligible_courses to drop courses that can't fit at all. The section search itself is in timetable.py."""
+get_eligible_courses to drop courses that can't fit at all. The section search is timetable.generate, the same one
+the timetable page uses."""
 from catalog.models import Course, Offering, Rule
 
 from . import config
 from .codes import normalise_code, resolve_course
 from .context import StudentContext, resolve_preferences
-from .timetable import PlanOption, clash_detail, offerings_for, plan_options, search_sections
+from .timetable import DAYS, Choice, Timetable, TimetableFilters, always_clash, generate, lunch_periods, offerings_for
 
 
 def offered(course: Course, semester_tag: str) -> bool:
@@ -90,46 +91,64 @@ def _failure(conflicts: list[dict], current: list[str], problem: str | None = No
             "includes_current_courses": current}
 
 
+def _lunch_detail(timetable: Timetable) -> str:
+    """"together they fill periods 4, 5 and 6 on M": the first day a timetable (made without the lunch rule) fills."""
+    periods = sorted(lunch_periods())
+    day = next(day for day in DAYS if all((day, period) in timetable.by_slot for period in periods))
+    return f"together they fill periods {', '.join(map(str, periods[:-1]))} and {periods[-1]} on {day}"
+
+
 def _diagnose(added: list[str], offerings: dict[str, Offering]) -> list[dict]:
-    """Pairs (an added course, any other scheduled course) that have no valid assignment on their own."""
+    """Pairs (an added course, any other scheduled course) that have no timetable on their own, and why."""
     conflicts, checked = [], set()
     for a in added:
         for b in offerings:
             if a == b or frozenset((a, b)) in checked:
                 continue
             checked.add(frozenset((a, b)))
-            variables = [options for code in (a, b) for options in plan_options(offerings[code], False, None, config.EARLY_PERIODS)]
-            result = search_sections(variables, config.LUNCH_PERIODS, config.PLAN_SEARCH_NODE_LIMIT)
-            if result.picks is None and not result.limit_hit:
-                if result.first_clash:
-                    conflicts.append({"a": a, "b": b, "type": "class", "detail": clash_detail(result.first_clash, a)})
-                else:
-                    conflicts.append({"a": a, "b": b, "type": "lunch", "detail": result.first_lunch})
+            pair = [offerings[a], offerings[b]]
+            if generate(pair, limit=1):
+                continue
+            without_lunch = generate(pair, limit=1, lunch=False)
+            if without_lunch:
+                conflicts.append({"a": a, "b": b, "type": "lunch", "detail": _lunch_detail(without_lunch[0])})
+            else:
+                conflicts.append({"a": a, "b": b, "type": "class",
+                                  "detail": always_clash(*pair) or "no pick of their sections avoids a clash"})
     return conflicts
 
 
-def _preference_notes(picks: list[PlanOption], avoid_8am: bool, avoid_day: str | None) -> list[str]:
+def _broken(pick: Choice, avoid_8am: bool, avoid_day: str | None) -> tuple[list[str], bool]:
+    """(days the pick has an 8 AM class, if avoiding them; does it meet on the day to keep free)."""
+    early = sorted({day for day, period in pick.slots if period in config.EARLY_PERIODS}, key=DAYS.index) if avoid_8am else []
+    return early, bool(avoid_day) and any(day == avoid_day for day, _ in pick.slots)
+
+
+def _preference_notes(picks: list[Choice], avoid_8am: bool, avoid_day: str | None) -> list[str]:
     """One note per pick that still breaks a preference, naming the course, the section and the problem."""
     notes = []
-    for option in sorted(picks, key=lambda option: (option.code, option.type)):
+    for pick in sorted(picks, key=lambda pick: (pick.code, pick.type)):
+        early, on_day = _broken(pick, avoid_8am, avoid_day)
         wants, has = [], []
-        if avoid_8am and option.early_days:
+        if early:
             wants.append("avoids 8 AM")
-            has.append(f"8 AM on {' '.join(option.early_days)}")
-        if avoid_day and option.on_avoid_day:
+            has.append(f"8 AM on {' '.join(early)}")
+        if on_day:
             day = config.DAY_NAMES.get(avoid_day, avoid_day)
             wants.append(f"keeps {day} free")
             has.append(f"class on {day}")
+        section = pick.section.section_id
         if wants:
-            notes.append(f"no section combination {' or '.join(wants)} for {option.code}; chose {option.section_id} ({'; '.join(has)})")
-        if option.untimed:
-            notes.append(f"class times for {option.code} {option.section_id} aren't listed, so clashes with it couldn't be checked")
+            notes.append(f"no section combination {' or '.join(wants)} for {pick.code}; chose {section} ({'; '.join(has)})")
+        if not pick.slots:
+            notes.append(f"class times for {pick.code} {section} aren't listed, so clashes with it couldn't be checked")
     return notes
 
 
 def check_plan(ctx: StudentContext, courses: list[str], avoid_8am: bool | None = None,
                avoid_day: str | None = None) -> dict:
-    """Do these courses fit with the student's current ones (exams, units, classes, lunch)? Picks sections."""
+    """Do these courses fit with the student's current ones (exams, units, classes, lunch)? Picks sections: the best
+    timetable by the timetable page's own order (fewest 8 AMs / classes on the free day first, when asked)."""
     added, problem = _plan_codes(ctx, courses)
     if problem:
         return {"ok": False, "problem": problem}
@@ -148,27 +167,20 @@ def check_plan(ctx: StudentContext, courses: list[str], avoid_8am: bool | None =
     if conflicts:
         return _failure(conflicts, current)
 
-    variables = [options for code in sorted(offerings)
-                 for options in plan_options(offerings[code], settings["avoid_8am"], settings["avoid_day"], config.EARLY_PERIODS)]
-    result = search_sections(variables, config.LUNCH_PERIODS, config.PLAN_SEARCH_NODE_LIMIT)
-    if result.picks is None:
-        if result.limit_hit:
-            # ponytail: a safety net against a hung request; real checks use <= ~250 of the 200k steps (2026-09-28)
-            return {**_failure([], current, "too many combinations to check; try fewer courses"), "limit_hit": True}
+    order = TimetableFilters(no_8am=settings["avoid_8am"], free_day=settings["avoid_day"] or "").key
+    found = generate([offerings[code] for code in sorted(offerings)], limit=1, order=order)
+    if not found:
         conflicts = _diagnose(added_codes, offerings)
         return _failure(conflicts, current, None if conflicts else "Each pair of courses fits, but not all of them together.")
-    if result.limit_hit:
-        notes.append("search limit reached; this is a valid timetable but maybe not the best one")
+    picks = found[0].picks
     sections: dict[str, dict[str, str]] = {code: {} for code in added_codes}
-    for option in result.picks:
-        if option.code in sections:
-            sections[option.code][option.type] = option.section_id
-    result_dict = {"ok": True, "sections": {code: dict(sorted(picked.items())) for code, picked in sections.items()},
-                   "includes_current_courses": current, "total_units": total_units,
-                   "notes": notes + _preference_notes(result.picks, settings["avoid_8am"], settings["avoid_day"])}
-    # ponytail: the search minimises total violations, so a tie between a current course's 8 AM and the new
-    # course's could land on the new one; exhaustive per-course checks if that shows up in practice
-    missed = sorted({option.code for option in result.picks if option.code in sections and option.violations})
+    for pick in picks:
+        if pick.code in sections:
+            sections[pick.code][pick.type] = pick.section.section_id
+    result = {"ok": True, "sections": {code: dict(sorted(picked.items())) for code, picked in sections.items()},
+              "includes_current_courses": current, "total_units": total_units,
+              "notes": notes + _preference_notes(picks, settings["avoid_8am"], settings["avoid_day"])}
+    missed = sorted({pick.code for pick in picks if pick.code in sections and any(_broken(pick, settings["avoid_8am"], settings["avoid_day"]))})
     if missed:
-        result_dict["missed_preferences"] = missed  # given courses that fit only by breaking 8 AM / free day
-    return result_dict
+        result["missed_preferences"] = missed  # given courses that fit only by breaking 8 AM / free day
+    return result

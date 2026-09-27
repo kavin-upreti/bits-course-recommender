@@ -66,10 +66,16 @@ def offerings_for(codes: list[str]) -> dict[str, Offering]:
     return offerings
 
 
+def section_order(section_id: str) -> tuple[str, int, str]:
+    """Natural order: L2 before L10."""
+    match = re.match(r"([A-Za-z]*)(\d*)(.*)", section_id)
+    return match[1], int(match[2] or 0), match[3]
+
+
 def choices_for(offering: Offering) -> list[list[Choice]]:
     """One list per section type the course has (lecture / tutorial / practical); a timetable picks one from each."""
     by_type: dict[str, dict[frozenset, Choice]] = {}
-    for section in offering.sections.all():
+    for section in sorted(offering.sections.all(), key=lambda section: section_order(section.section_id)):
         if section.cancelled:
             continue
         slots = frozenset((day, period) for day, periods in section.timings.items() for period in periods)
@@ -108,9 +114,15 @@ class TimetableFilters:
             choice.sections.sort(key=lambda section: not any((choice.code, name) in wanted for name in section.instructors))
 
 
-def generate(offerings: list[Offering], limit: int = 20, order=None) -> list[Timetable]:
+def lunch_periods() -> list[int]:
+    """tt_lunch_hour: every day keeps one of these periods free."""
+    return Rule.objects.get(rule_id="tt_lunch_hour").values["lunch_periods"]
+
+
+def generate(offerings: list[Offering], limit: int = 20, order=None, lunch: bool = True) -> list[Timetable]:
     """The `limit` best clash-free timetables that keep a lunch hour free every day, or [] if there are none.
-    Best = lowest `order(timetable)` (default: `Timetable.score`)."""
+    Best = lowest `order(timetable)` (default: `Timetable.score`). lunch=False skips the lunch rule (to tell a lunch
+    problem from a clash). Used by the timetable page and by check_plan."""
     variables = [options for offering in offerings for options in choices_for(offering)]
     variables.sort(key=len)  # why: fewest options first, so dead ends are found early
     found: list[Timetable] = []
@@ -118,7 +130,7 @@ def generate(offerings: list[Offering], limit: int = 20, order=None) -> list[Tim
     # why a dict, not a set: a course's own sections may share a slot (BITS F102 lists its lecture and tutorial
     # at the same hour), which isn't a clash; only two different courses in one slot are
     taken: dict[tuple[str, int], str] = {}
-    lunch = Rule.objects.get(rule_id="tt_lunch_hour").values["lunch_periods"]
+    free = lunch_periods() if lunch else []
 
     def search(index: int, picks: list[Choice]) -> None:
         if len(found) >= MAX_SOLUTIONS:
@@ -132,7 +144,7 @@ def generate(offerings: list[Offering], limit: int = 20, order=None) -> list[Tim
             added = [slot for slot in option.slots if slot not in taken]
             taken.update(dict.fromkeys(added, option.code))
             # tt_lunch_hour: every day keeps one of the lunch periods free
-            if all(any((day, period) not in taken for period in lunch) for day in {day for day, _ in added}):
+            if not free or all(any((day, period) not in taken for period in free) for day in {day for day, _ in added}):
                 picks.append(option)
                 search(index + 1, picks)
                 picks.pop()
@@ -143,16 +155,21 @@ def generate(offerings: list[Offering], limit: int = 20, order=None) -> list[Tim
     return sorted(found, key=order or Timetable.score)[:limit]
 
 
+def always_clash(first: Offering, second: Offering) -> str | None:
+    """"L1 and P1 on Th, period 8" when a section type of `first` clashes with one of `second` whatever is picked."""
+    for var_a in choices_for(first):
+        for var_b in choices_for(second):
+            if all(a.slots & b.slots for a in var_a for b in var_b):
+                a, b = var_a[0].section.section_id, var_b[0].section.section_id
+                day, period = min(var_a[0].slots & var_b[0].slots, key=lambda slot: (DAYS.index(slot[0]), slot[1]))
+                return f"{f'both {a}' if a == b else f'{a} and {b}'} on {day}, period {period}"
+    return None
+
+
 def always_clashing(offerings: list[Offering]) -> list[tuple[str, str]]:
     """Pairs of courses no section pick can separate; explains an empty `generate` result."""
-    options = {offering.course.code: choices_for(offering) for offering in offerings}
-    pairs = []
-    codes = list(options)
-    for i, first in enumerate(codes):
-        for second in codes[i + 1:]:
-            if any(all(a.slots & b.slots for a in var_a for b in var_b) for var_a in options[first] for var_b in options[second]):
-                pairs.append((first, second))
-    return pairs
+    return [(first.course.code, second.course.code) for i, first in enumerate(offerings)
+            for second in offerings[i + 1:] if always_clash(first, second)]
 
 
 def period_times() -> dict[int, str]:
@@ -272,125 +289,3 @@ def semester_for(admission_year: int) -> tuple[int, int] | None:
     ponytail: assumes the normal track; a repeated semester or a break would need a manual override."""
     term = timetable_term()
     return (term[0] - admission_year + 1, term[1]) if term else None
-
-
-# ---------------------------------------------------------------- check_plan's section search (todo.md 7.3)
-
-@dataclass
-class PlanOption:
-    """One pick for a (course, section type): the lowest-id section of a group meeting at identical times."""
-
-    code: str
-    type: str
-    section_id: str
-    slots: frozenset[tuple[str, int]]
-    violations: int          # timetable preferences it breaks (8 AM, the day to keep free)
-    early_days: list[str]    # days it has an 8 AM class
-    on_avoid_day: bool
-    untimed: bool            # no timings listed: occupies nothing, so clashes can't be checked
-
-
-@dataclass
-class PlanSearch:
-    """The best assignment found (None = no valid one), and what the search ran into."""
-
-    picks: list[PlanOption] | None
-    violations: int
-    nodes: int
-    limit_hit: bool
-    first_clash: tuple | None    # (code, section, other code, other section, day, period) of the first clash met
-    first_lunch: str | None      # "together they fill periods 4, 5 and 6 on W"
-
-
-def clash_detail(clash: tuple, first_code: str) -> str:
-    """"both L1 on T, period 3" / "L1 and P2 on Th, period 8", with first_code's section named first."""
-    code, section, other_code, other_section, day, period = clash
-    if code != first_code:
-        section, other_section = other_section, section
-    pair = f"both {section}" if section == other_section else f"{section} and {other_section}"
-    return f"{pair} on {day}, period {period}"
-
-
-def section_order(section_id: str) -> tuple[str, int, str]:
-    """Natural order: L2 before L10."""
-    match = re.match(r"([A-Za-z]*)(\d*)(.*)", section_id)
-    return match[1], int(match[2] or 0), match[3]
-
-
-def plan_options(offering: Offering, avoid_8am: bool, avoid_day: str | None,
-                 early_periods: set[int]) -> list[list[PlanOption]]:
-    """One option list per required section type (types with a non-cancelled section)."""
-    groups: dict[tuple[str, frozenset], list[Section]] = {}
-    for section in offering.sections.all():
-        if not section.cancelled:
-            slots = frozenset((day, period) for day, periods in section.timings.items() for period in periods)
-            groups.setdefault((section.type, slots), []).append(section)
-    by_type: dict[str, list[PlanOption]] = {}
-    for (kind, slots), sections in groups.items():
-        first = min(sections, key=lambda section: section_order(section.section_id))
-        early = sorted({day for day, period in slots if period in early_periods}, key=DAYS.index)
-        on_day = bool(avoid_day) and any(day == avoid_day for day, _ in slots)
-        violations = int(avoid_8am and bool(early)) + int(on_day)
-        by_type.setdefault(kind, []).append(PlanOption(offering.course.code, kind, first.section_id, slots, violations,
-                                                       early, on_day, not slots))
-    return [sorted(options, key=lambda option: (option.violations, section_order(option.section_id)))
-            for _, options in sorted(by_type.items())]
-
-
-def search_sections(variables: list[list[PlanOption]], lunch_periods: set[int], node_limit: int) -> PlanSearch:
-    """Backtracking with branch-and-bound: the assignment with the fewest preference violations, stopping at the
-    first one with none. A course's own sections may share a slot (not a clash); two courses may not; every day
-    keeps one lunch period free."""
-    variables = sorted(variables, key=lambda options: (len(options), options[0].code, options[0].type))
-    taken: dict[tuple[str, int], PlanOption] = {}
-    picks: list[PlanOption] = []
-    state = {"best": None, "best_violations": float("inf"), "nodes": 0, "limit": False, "clash": None, "lunch": None}
-
-    def clash_with(option: PlanOption) -> tuple[str, int] | None:
-        return next((slot for slot in sorted(option.slots) if slot in taken and taken[slot].code != option.code), None)
-
-    def lunch_broken(option: PlanOption) -> str | None:
-        for day in sorted({day for day, _ in option.slots}, key=DAYS.index):
-            if all((day, period) in taken for period in lunch_periods):
-                periods = sorted(lunch_periods)
-                return f"together they fill periods {', '.join(map(str, periods[:-1]))} and {periods[-1]} on {day}"
-        return None
-
-    def search(index: int, violations: int) -> bool:
-        """True = stop the whole search (a perfect assignment, or the node limit)."""
-        state["nodes"] += 1
-        if state["nodes"] > node_limit:
-            state["limit"] = True
-            return True
-        if violations >= state["best_violations"]:
-            return False
-        if index == len(variables):
-            state["best"], state["best_violations"] = list(picks), violations
-            return violations == 0
-        for option in variables[index]:
-            slot = clash_with(option)
-            if slot:
-                other = taken[slot]
-                state["clash"] = state["clash"] or (option.code, option.section_id, other.code, other.section_id, *slot)
-                continue
-            added = [slot for slot in option.slots if slot not in taken]
-            taken.update(dict.fromkeys(added, option))
-            broken = lunch_broken(option)
-            if broken:
-                state["lunch"] = state["lunch"] or broken
-            else:
-                picks.append(option)
-                stop = search(index + 1, violations + option.violations)
-                picks.pop()
-                if stop:
-                    for slot in added:
-                        del taken[slot]
-                    return True
-            for slot in added:
-                del taken[slot]
-        return False
-
-    search(0, 0)
-    best = state["best"]
-    return PlanSearch(best, 0 if best is None else int(state["best_violations"]), state["nodes"], state["limit"],
-                      state["clash"], state["lunch"])
