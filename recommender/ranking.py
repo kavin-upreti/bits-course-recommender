@@ -76,17 +76,20 @@ def retrieve(index: PieceIndex, codes: list[str], queries: np.ndarray, candidate
 
 
 # longest first; a closed list of word endings, so word forms of one root meet on the same base
-SUFFIXES = ("ically", "ations", "ation", "ical", "ics", "ies", "ing", "al", "ic", "es", "ed", "s", "y")
+SUFFIXES = ("ically", "ations", "ation", "ments", "ical", "ment", "ics", "ies", "ing", "al", "ic", "es", "ed", "s", "y")
 MIN_BASE = 3  # "ethics" / "ethical" -> "eth"; shorter bases ("gas" -> "ga") are left whole
+PREFIX_BASE = 6  # shorter bases ("art", "data") must match whole words, or "art" would match "artificial"
 
 
 def base(word: str) -> str:
-    """The word without its longest listed ending: politics / political -> polit, economy / economics -> econom,
-    but communism / communication / community stay apart (a 7-letter prefix cut made all three "communi")."""
+    """The word without its longest listed ending, then without a final "e": politics / political -> polit,
+    advertisements / advertising -> advertis, course / courses -> cours; but communism / communication /
+    community stay apart (a 7-letter prefix cut made all three "communi")."""
     for suffix in SUFFIXES:
         if word.endswith(suffix) and len(word) - len(suffix) >= MIN_BASE:
-            return word[:-len(suffix)]
-    return word
+            word = word[:-len(suffix)]
+            break
+    return word[:-1] if word.endswith("e") and len(word) > MIN_BASE + 1 else word
 
 
 def words(text: str) -> set[str]:
@@ -97,8 +100,10 @@ def words(text: str) -> set[str]:
 def title_contains(title: str, topic: str) -> bool:
     """Every word of the topic is in the title ("statistics" in "Statistics & Basic Econometrics").
     why: the cross-encoder scores a one-word topic against a short title badly (0.2 for that pair)."""
-    wanted = words(topic)
-    return bool(wanted) and wanted <= words(title)
+    wanted, have = words(topic), words(title)
+    # a long base may also start a title word: cinema -> cinemat(ic), program -> programm(ing)
+    return bool(wanted) and all(word in have or (len(word) >= PREFIX_BASE and any(other.startswith(word) for other in have))
+                                for word in wanted)
 
 
 def relevance(piece_scores: list[float], weight: float) -> float:

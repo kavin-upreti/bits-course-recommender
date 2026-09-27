@@ -288,6 +288,10 @@ class TitleWordTests(SimpleTestCase):
         self.assertTrue(title_contains("Politics and Society", "political"))
         self.assertTrue(title_contains("Statistical Inference", "statistics"))
         self.assertTrue(title_contains("Principles of Economics", "economy"))
+        self.assertTrue(title_contains("Print and Audio-Visual Advertising", "advertisements"))
+        self.assertTrue(title_contains("Machine Learning", "machines"))
+        self.assertTrue(title_contains("Cinematic Art", "cinema"))
+        self.assertFalse(title_contains("Artificial Intelligence", "art"))
         self.assertFalse(title_contains("Communication Skills", "communism"))  # a 7-letter prefix cut matched these
         self.assertFalse(title_contains("Community Development", "communism"))
 
