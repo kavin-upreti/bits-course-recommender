@@ -139,8 +139,12 @@ def _send(provider: str, model: str, system: str, messages: list[dict], tools: l
         raise ProviderBusy(f"{provider} {response.status_code}: {response.text[:200]}")
     if response.status_code != 200:
         raise LLMError(f"{provider} {response.status_code}: {response.text[:300]}")
-    data = response.json()
-    message = data["choices"][0]["message"]
+    try:
+        data = response.json()
+        message = data["choices"][0]["message"]
+    except (ValueError, KeyError, IndexError, TypeError) as error:
+        # why: OpenRouter can answer 200 with {"error": {...}} (an upstream rate limit); that's "try the next one"
+        raise ProviderBusy(f"{provider}: no reply in the response: {response.text[:200]}") from error
     calls = [ToolCall(call.get("id") or f"call_{uuid.uuid4().hex[:8]}", call["function"]["name"],
                       _parse_args(call["function"].get("arguments")))
              for call in message.get("tool_calls") or []]

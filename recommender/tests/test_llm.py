@@ -91,6 +91,16 @@ class OpenAIFormatTests(SimpleTestCase):
         self.assertIs(converted[3], signed)
         self.assertNotIn("extra_content", llm._openai_messages("groq", "sys", messages)[2]["tool_calls"][0])
 
+    def test_a_200_without_choices_is_busy_not_a_crash(self):
+        class Response:
+            status_code, text = 200, '{"error": {"code": 429}}'
+
+            def json(self):
+                return {"error": {"code": 429}}
+        with patch.dict("os.environ", ENV), patch("httpx.post", return_value=Response()):
+            with self.assertRaises(ProviderBusy):
+                llm._send("openrouter", "m", "sys", [{"role": "user", "text": "hi"}], None)
+
     def test_bad_argument_json_reaches_validation(self):
         self.assertEqual(llm._parse_args("{oops"), {"unparseable_arguments": "{oops"})
         self.assertEqual(llm._parse_args(""), {})

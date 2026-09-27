@@ -4,5 +4,6 @@ torch
 pytest  # tests/ only
 django
 python-dotenv
+httpx  # recommender/llm.py (all LLM providers)
 numpy
 matplotlib  # embedding_eda chart
