@@ -95,8 +95,8 @@ class RecommenderTestCase(TestCase):
 
     def setUp(self) -> None:
         # why pinned: the tests check behaviour; the tuned values (EDA) may change without breaking them
-        # DOMAIN_WEIGHT 0: fake vectors give the fixture departments arbitrary fits (tested on its own in test_ranking)
-        for name, value in (("BEST_PIECE_WEIGHT", 0.7), ("RELEVANCE_CUTOFF", 0.5), ("DOMAIN_WEIGHT", 0.0)):
+        # NEIGHBOUR_ANCHOR_FLOOR above 1: neighbours off (the fake reranker scores any pair ~0.5); NeighbourTests turn them on
+        for name, value in (("RELEVANCE_CUTOFF", 0.5), ("NEIGHBOUR_ANCHOR_FLOOR", 1.1)):
             patcher = patch.object(config, name, value)
             patcher.start()
             self.addCleanup(patcher.stop)

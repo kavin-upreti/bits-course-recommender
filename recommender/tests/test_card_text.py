@@ -12,8 +12,6 @@ from recommender.ranking import Scored, rerank
 class FakeIndex:
     texts = ["Deep learning", "Marketing mix"]
     kinds = ["topic", "topic"]
-    department_matrix = None
-    departments: dict = {}
 
 
 class TopicReranker:
@@ -35,6 +33,6 @@ class CardTextTests(SimpleTestCase):
                          "Here you go:\n\n- ME F321 note\n\nOne note about CS F425.")
 
     def test_best_topic(self):
-        item = Scored("X", 0.5, [0, 1])
-        rerank([[item]], ["machine learning", "economics"], np.zeros((2, 2)), FakeIndex(), TopicReranker(), 1.0)
-        self.assertEqual((item.best_row, item.best_topic), (1, "economics"))
+        item = Scored("X", 0.5, [[0, 1], [0, 1]])
+        rerank([[item]], ["machine learning", "economics"], np.zeros((2, 2)), FakeIndex(), TopicReranker())
+        self.assertEqual((item.by_topic.index(item.relevance), item.best_rows[1]), (1, 1))  # "economics", "Marketing mix"

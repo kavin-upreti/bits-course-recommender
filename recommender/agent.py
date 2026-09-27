@@ -37,14 +37,14 @@ SEARCH_MISSING = ("The student asked for {what}, but you haven't searched that c
 # categories a message can name; a search with no category doesn't count, since its topic was meant for the others
 CATEGORY_WORDS = {"HUEL": r"\bhuels?\b|\bhumanit\w* electives?", "DEL": r"\bdels?\b|\bdiscipline electives?",
                   "OPEL": r"\bopels?\b|\bopen electives?"}
-RESULT_LISTS = ("courses", "couldnt_verify", "excluded", "loosely_related")  # only "courses" can get cards unasked
+RESULT_LISTS = ("courses", "couldnt_verify", "excluded")  # only "courses" can get cards unasked
 
 
 @dataclass
 class AgentResult:
     reply: str
     cards: list[dict]
-    debug: dict      # rounds, calls (name, args, result size in chars), usage, guardrail actions, timings
+    debug: dict      # rounds, calls (name, args, result size in chars, ms), usage, guardrail actions
     left_out: list[dict] = field(default_factory=list)  # [{code, title, category, reason}] shown under the cards
 
 
@@ -159,15 +159,14 @@ def tool_round(run: Run, messages: list[dict], response: llm.LLMResponse, number
     messages.append({"role": "assistant", "text": response.text, "tool_calls": response.tool_calls, "raw": response.raw})
     results, calls = [], []
     for call in response.tool_calls:
-        started, timed = time.monotonic(), len(run.ctx.timings)
+        started = time.monotonic()
         result = execute(run, call)
         record(run, call.name, result)
         if call.name == "get_eligible_courses" and isinstance(call.args, dict) and isinstance(call.args.get("category"), str):
             run.searched.add(call.args["category"].strip().upper())
         results.append({"id": call.id, "name": call.name, "result": result})
         calls.append({"name": call.name, "args": call.args, "result_chars": len(str(result)),
-                      "ms": round(1000 * (time.monotonic() - started)),
-                      **({"stage_c": run.ctx.timings[timed]} if len(run.ctx.timings) > timed else {})})
+                      "ms": round(1000 * (time.monotonic() - started))})
     messages.append({"role": "tool", "results": results})
     run.debug["rounds"].append({"round": number, "calls": calls, "usage": response.usage})
 

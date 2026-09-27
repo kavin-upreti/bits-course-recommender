@@ -21,8 +21,6 @@ TOOL_SCHEMAS: list[dict] = [
                              "description": "Leave empty to search every category the student still needs."},
                 "about": {"type": "array", "items": {"type": "string", "maxLength": 100}, "maxItems": config.MAX_QUERY_TOPICS,
                           "description": "The student's own topics for this category, one per item, in full words, abbreviations spelled out (e.g. 'ML and NLP' -> ['machine learning', 'natural language processing']). 'AI in electronics' is ONE topic. Don't add topics the student didn't name; leave empty if none."},
-                "related": {"type": "array", "items": {"type": "string", "maxLength": 100}, "maxItems": config.MAX_QUERY_TOPICS,
-                            "description": "Optional: closely related topics, used only when too few courses match 'about' (e.g. for 'natural language processing': ['computational linguistics', 'text mining'])."},
                 "filters": {
                     "type": "object",
                     "additionalProperties": False,

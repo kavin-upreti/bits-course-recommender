@@ -26,7 +26,7 @@ class RerankTests(Catalog):
         self.reranker.scores.update({title: 0.1 for title in TITLES})
         self.reranker.scores.update(by_text)
 
-    def test_01_one_strong_piece_beats_many_mild_ones(self):
+    def test_01_one_passing_mention_doesnt_carry_a_course(self):
         strong, mild = self.courses["XX F411"], self.courses["XX F412"]
         strong.description = "Network security and cryptography."
         strong.save()
@@ -36,26 +36,22 @@ class RerankTests(Catalog):
         self.scores(**{"Network security and cryptography.": 0.95, "Natural Language Processing": 0.1, "Deep Learning": 0.6,
                        **{f"Some {word}.": 0.6 for word in ("systems", "networks", "protocols", "servers", "clients")}})
         result = self.result(category="DEL", about="cybersecurity")
-        self.assertEqual([course["code"] for course in result["courses"]], ["XX F411", "XX F412"])
-        # 0.7 * 0.95 + 0.3 * mean(0.95, 0.1); the old top-3 mean would have given 0.525 < 0.6
-        self.assertEqual(result["courses"][0]["score"]["relevance"], round(0.7 * 0.95 + 0.3 * (0.95 + 0.1) / 2, 2))
-        self.assertEqual(result["courses"][1]["score"]["relevance"], 0.6)
-        self.assertIn("matches bulletin description: Network security and cryptography.", result["courses"][0]["score"]["why"])
+        # relevance = mean of the best 3 pieces: steady content (0.6) beats one strong line next to a weak title
+        self.assertEqual([course["code"] for course in result["courses"]], ["XX F412", "XX F411"])
+        self.assertEqual(result["courses"][0]["score"]["relevance"], 0.6)
+        self.assertAlmostEqual(result["courses"][1]["score"]["relevance"], (0.95 + 0.1) / 2, delta=0.006)
+        self.assertIn("matches bulletin description: Network security and cryptography.", result["courses"][1]["score"]["why"])
 
-    def test_02_cutoff_no_padding_and_loosely_related(self):
+    def test_02_cutoff_no_padding(self):
         self.scores(**{"Natural Language Processing": 0.9})
         result = self.result(category="DEL", about="language")
         self.assertEqual([course["code"] for course in result["courses"]], ["XX F411"])  # fewer than 5: no padding
-        self.assertNotIn("loosely_related", result)
-        self.assertFalse(any("strongly matches" in warning for warning in result["warnings"]))
+        self.assertFalse(any("directly" in warning for warning in result["warnings"]))
 
         self.scores(**{"Natural Language Processing": 0.45, "Deep Learning": 0.4})  # Compiler Construction 0.1
         result = self.result(category="DEL", about="marine biology")
         self.assertEqual(result["courses"], [])
-        # below LOOSE_MATCH_FLOOR isn't even loosely related
-        self.assertEqual([course["code"] for course in result["loosely_related"]], ["XX F411", "XX F412"])
-        self.assertIn("No course this semester strongly matches 'marine biology'. The closest ones are listed as "
-                      "loosely related.", result["warnings"])
+        self.assertIn("Nothing this semester matches 'marine biology' directly.", result["warnings"])
 
     def test_03_no_cutoff_for_interests_or_completeness(self):
         self.scores(**{"Deep Learning": 0.6})  # one related course: ranked by the interests, the rest still shown
@@ -63,7 +59,6 @@ class RerankTests(Catalog):
         self.student.save()
         result = self.result(category="DEL")
         self.assertEqual((result["settings_used"]["ranked_by"], len(result["courses"])), ("profile_interests", 3))
-        self.assertNotIn("loosely_related", result)
         self.student.interests = []
         self.student.save()
         calls = len(self.reranker.calls)
@@ -135,16 +130,6 @@ class RerankTests(Catalog):
         result = self.result(category="DEL", about=["alpha"], count=2)
         self.assertEqual([course["code"] for course in result["courses"]], ["XX F411", "XX F412"])
 
-    def test_related_topics_only_fill_what_the_students_topics_leave(self):
-        self.topic_vectors()
-        result = self.result(category="DEL", about=["alpha"], related=["beta"], count=3)
-        self.assertEqual([course["code"] for course in result["courses"]], ["XX F411", "XX F412", "XX F413"])
-        self.assertTrue(result["courses"][2]["score"]["related_topic"])
-        self.assertIn("matches the related topic 'beta', not your own", result["courses"][2]["score"]["why"])
-        self.assertNotIn("related_topic", result["courses"][0]["score"])
-        result = self.result(category="DEL", about=["alpha"], related=["beta"], count=2)
-        self.assertEqual([course["code"] for course in result["courses"]], ["XX F411", "XX F412"])
-
     def test_default_count_is_per_category(self):
         self.reranker.scores.update({title: 0.9 for title in TITLES + ["Introductory Psychology", "Film Studies"]})
         result = self.result(about="anything")  # no category: DEL and HUEL both still needed
@@ -198,11 +183,11 @@ class RerankTests(Catalog):
         self.assertEqual(len(self.reranker.calls), calls + 1)
 
     def test_09_keys_and_determinism(self):
-        self.scores(**{"Natural Language Processing": 0.3})
+        self.scores(**{"Natural Language Processing": 0.9})
         first = self.result(category="DEL", about="rocks")
         self.assertEqual(set(first), {"searched", "settings_used", "courses", "couldnt_verify", "excluded", "warnings",
-                                      "loosely_related"})
-        self.assertEqual(set(first["loosely_related"][0]["score"]), {"embedding", "relevance", "penalty", "final", "why", "topic"})
+                                      "shortfall"})
+        self.assertEqual(set(first["courses"][0]["score"]), {"embedding", "relevance", "penalty", "final", "why", "topic"})
         self.assertEqual(self.result(category="DEL", about="rocks"), first)
 
 
@@ -230,27 +215,41 @@ class PrefixTests(SimpleTestCase):
         self.assertEqual(self.encoded("all-MiniLM-L6-v2", "query"), "topic")
 
 
-class LooselyRelatedAgentTests(Catalog):
-    def test_08_loosely_related_codes_pass_the_guardrail_and_get_no_cards(self):
-        self.reranker.scores.update({title: 0.35 for title in TITLES})  # under the cutoff, over LOOSE_MATCH_FLOOR
-        fake = FakeLLM([
-            LLMResponse(None, [ToolCall("c0", "get_eligible_courses", {"category": "DEL", "about": "marine biology"})]),
-            LLMResponse("No course strongly matches. Loosely related: XX F411 Natural Language Processing.", []),
-        ])
-        with patch("recommender.llm.chat", fake):
-            result = run_agent(self.student, "a DEL on marine biology")
-        self.assertEqual(len(fake.requests), 2)  # no guardrail retry
-        self.assertIn("loosely_related", json.dumps(fake.requests[1]["messages"][-1]["results"][0]["result"]))
-        self.assertEqual(result.cards, [])
-        self.assertIn("rerank_ms", result.debug["rounds"][0]["calls"][0]["stage_c"])
+class NeighbourTests(Catalog):
+    """A topic no offered course matches directly: the courses closest in content to the catalogue's best match."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        link(self.programme, make_course("XX F499", "Video Production"))  # a DEL with no offering this semester
+        patcher = patch.object(config, "NEIGHBOUR_ANCHOR_FLOOR", 0.3)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.embed({"Video Production": [1, 0], "Deep Learning": [0.9, 0.2], "Natural Language Processing": [0.2, 1],
+                    "Compiler Construction": [-1, 0]})
+        self.reranker.scores.update({title: 0.1 for title in TITLES + ["Introductory Psychology", "Film Studies",
+                                                                       "Financial Markets", "Soil Science", "Data Structures"]})
+
+    def test_closest_content_to_the_anchor_is_listed_after_a_warning(self):
+        self.reranker.scores["Video Production"] = 0.4  # over the anchor floor, under the cutoff
+        with patch.object(config, "NEIGHBOURS_PER_TOPIC", 2):
+            result = self.result(category="DEL", about="video editing")
+        self.assertEqual(self.codes(result), ["XX F412", "XX F411"])
+        self.assertEqual(result["courses"][0]["score"]["similar_to"], "XX F499 Video Production")
+        self.assertIn("no direct match for 'video editing'", result["courses"][0]["score"]["why"])
+        self.assertIn("Nothing this semester matches 'video editing' directly; the courses listed for it are the closest "
+                      "in content to the catalogue's best matches.", result["warnings"])
+
+    def test_no_anchor_no_neighbours(self):
+        self.reranker.scores["Video Production"] = 0.2  # "cooking": nothing in the catalogue is about it
+        result = self.result(category="DEL", about="cooking")
+        self.assertEqual(result["courses"], [])
+        self.assertIn("Nothing this semester matches 'cooking' directly.", result["warnings"])
 
 
-class DomainIndex:
-    """Four one-piece courses (a title and one topic each) in CS, CE, BITS; departments: CS on the topic's axis."""
+class TitleIndex:
+    """Three courses, each a title piece and a topic piece."""
     texts = ["AI", "Search and planning", "AI in Civil Engineering", "Search and planning", "AI", "Search and planning"]
     kinds = ["title", "topic"] * 3
-    departments = {"BITS": 0, "CE": 1, "CS": 2}
-    department_matrix = np.array([[0.0, 1.0], [0.0, 1.0], [1.0, 0.0]])
 
 
 class PieceScores:
@@ -261,25 +260,15 @@ class PieceScores:
         return np.array([self.by_text[text] for _, text in pairs])
 
 
-class DomainAndTitleTests(SimpleTestCase):
-    def ranked(self, by_text: dict[str, float]) -> dict[str, Scored]:
-        items = [Scored("CS F407", 0.9, [0, 1]), Scored("CE F417", 0.9, [2, 3]), Scored("BITS F444", 0.9, [4, 5])]
-        with patch.object(config, "DOMAIN_WEIGHT", 0.3), patch.object(config, "TITLE_STRONG", 0.8):
-            rerank([items], ["artificial intelligence"], np.array([[1.0, 0.0]]), DomainIndex(), PieceScores(by_text), 0.0)
-        return {item.code: item for item in items}
-
-    def test_department_fit_scales_relevance_and_bits_is_neutral(self):
-        ranked = self.ranked({"AI": 0.95, "AI in Civil Engineering": 0.95, "Search and planning": 0.2})
-        self.assertEqual({code: round(item.domain, 2) for code, item in ranked.items()},
-                         {"CS F407": 1.0, "CE F417": 0.7, "BITS F444": 1.0})
-        self.assertAlmostEqual(ranked["CE F417"].relevance, 0.95 * 0.7, places=5)  # strong title, worst department
-        self.assertAlmostEqual(ranked["CS F407"].relevance, 0.95, places=5)
-
+class TitleTests(SimpleTestCase):
     def test_weak_title_is_ignored_not_averaged_in(self):
-        ranked = self.ranked({"AI": 0.3, "AI in Civil Engineering": 0.3, "Search and planning": 0.9})
+        item = Scored("CS F407", 0.9, [[0, 1]])
+        with patch.object(config, "TITLE_STRONG", 0.8):
+            rerank([[item]], ["artificial intelligence"], np.array([[1.0, 0.0]]), TitleIndex(),
+                   PieceScores({"AI": 0.3, "Search and planning": 0.9}))
         # under TITLE_STRONG: relevance is the mean of the best pieces, with the title just one of them
-        self.assertAlmostEqual(ranked["CS F407"].relevance, (0.9 + 0.3) / 2, places=5)
-        self.assertEqual(DomainIndex.kinds[ranked["CS F407"].best_row], "topic")
+        self.assertAlmostEqual(item.relevance, (0.9 + 0.3) / 2, places=5)
+        self.assertEqual(TitleIndex.kinds[item.best_rows[0]], "topic")
 
 
 class TitleWordTests(SimpleTestCase):

@@ -1,6 +1,6 @@
 """`python manage.py embedding_eda`: tune the retrieve-then-rerank ranking on real queries (todo.md section 13).
 
-Grid: embedding model x reranker (or none) x BEST_PIECE_WEIGHT x RERANK_CANDIDATES, using the same code as the
+Grid: embedding model x reranker (or none) x RERANK_CANDIDATES, using the same code as the
 app (recommender/ranking.py). Pieces are embedded in memory per model; stored CoursePiece rows are not touched.
 Courses ranked = every offered course a pre-2026 student can take (category ignored: this tests matching only).
 
@@ -22,9 +22,9 @@ from django.core.management.base import BaseCommand
 from catalog.models import Course, Offering
 from recommender import config
 from recommender.embeddings import CrossEncoderReranker, SentenceTransformerEmbedder
-from recommender.piece_index import PieceIndex, department_centroids
+from recommender.piece_index import PieceIndex
 from recommender.pieces import build_pieces
-from recommender.ranking import relevance, rerank, retrieve
+from recommender.ranking import rerank, retrieve
 
 QUERIES = Path(__file__).resolve().parents[2] / "eda" / "queries.json"
 OUT_DIR = settings.BASE_DIR / "docs" / "eda"
@@ -38,7 +38,6 @@ CUTOFF_BINS = [round(0.1 * step, 1) for step in range(11)]
 class Config:
     embedder: str
     reranker: str | None
-    weight: float
     candidates: int
     hit: float = 0.0
     mrr: float = 0.0
@@ -53,7 +52,7 @@ class Config:
 
     @property
     def name(self) -> str:
-        return f"{self.embedder} + {self.reranker or 'none'}, w={self.weight}, K={self.candidates}"
+        return f"{self.embedder} + {self.reranker or 'none'}, K={self.candidates}"
 
 
 def pool() -> list[Course]:
@@ -66,11 +65,7 @@ def pool() -> list[Course]:
 def build_index(model: str, pieces: list[tuple[str, str, str]]) -> PieceIndex:
     """Embed the pieces with `model` (passage prefix) into an in-memory PieceIndex."""
     matrix = SentenceTransformerEmbedder(model).embed([text for *_, text in pieces], kind="passage")
-    index = PieceIndex(model, matrix, [code for code, *_ in pieces], [kind for _, kind, _ in pieces], [text for *_, text in pieces])
-    for row, code in enumerate(index.course_codes):
-        index.rows_by_course.setdefault(code, []).append(row)
-    department_centroids(index)  # why: the app's relevance includes the department fit (ranking.py)
-    return index
+    return PieceIndex(model, matrix, [code for code, *_ in pieces], [kind for _, kind, _ in pieces], [text for *_, text in pieces])
 
 
 def best_cutoff(labelled: list[tuple[float, bool]]) -> tuple[float, float, float]:
@@ -88,26 +83,12 @@ def best_cutoff(labelled: list[tuple[float, bool]]) -> tuple[float, float, float
     return best[:3]
 
 
-class MemoReranker:
-    """The reranker with its pair scores remembered, so trying several weights doesn't re-run the model."""
-
-    def __init__(self, reranker) -> None:
-        self.reranker, self.memo = reranker, {}
-
-    def score(self, pairs):
-        missing = [pair for pair in dict.fromkeys(pairs) if pair not in self.memo]
-        if missing:
-            self.memo.update(zip(missing, self.reranker.score(missing)))
-        return np.array([self.memo[pair] for pair in pairs])
-
-
 class Command(BaseCommand):
-    help = "Tune embedding model, reranker, BEST_PIECE_WEIGHT, RERANK_CANDIDATES and RELEVANCE_CUTOFF."
+    help = "Tune embedding model, reranker, RERANK_CANDIDATES and RELEVANCE_CUTOFF."
 
     def add_arguments(self, parser) -> None:
         parser.add_argument("--models", nargs="+", default=["all-MiniLM-L6-v2", "BAAI/bge-small-en-v1.5", "intfloat/e5-small-v2"])
         parser.add_argument("--rerankers", nargs="+", default=["none", "cross-encoder/ms-marco-MiniLM-L-6-v2", "BAAI/bge-reranker-base"])
-        parser.add_argument("--weights", nargs="+", type=float, default=[1.0, 0.7, 0.5])
         parser.add_argument("--candidates", nargs="+", type=int, default=[30, 50])
 
     def handle(self, *args, **options) -> None:
@@ -131,31 +112,23 @@ class Command(BaseCommand):
         self.write_report(results, queries, courses, pieces)
 
     def run_grid(self, model, reranker_name, reranker, embedder, index, codes, queries, options) -> list[Config]:
-        """All weights x candidate counts for one embedder + reranker. Piece scores don't depend on the weight, so
-        each (query, K) is reranked once and the weights reuse the scores."""
-        configs = {(weight, k): Config(model, None if reranker_name == "none" else reranker_name, weight, k)
-                   for weight in options["weights"] for k in options["candidates"]}
-        latencies: dict[int, list[float]] = {k: [] for k in options["candidates"]}
-        cached = MemoReranker(reranker) if reranker is not None else None
-        for query in queries:
-            for k in options["candidates"]:
+        """All candidate counts for one embedder + reranker."""
+        results = []
+        for k in options["candidates"]:
+            found, latencies = Config(model, None if reranker_name == "none" else reranker_name, k), []
+            for query in queries:
                 started = time.monotonic()
                 topics = [topic.strip() for topic in query["query"].split(",")]  # queries.json: comma-separated topics
                 vectors = embedder.embed(topics, kind="query")
                 scored = retrieve(index, codes, vectors, k)
-                rerank([scored], topics, vectors, index, reranker, 1.0)
-                latencies[k].append(time.monotonic() - started)
-                for weight in options["weights"]:
-                    # why rerank again per weight (cached scores): the app's relevance also has the title gate and
-                    # the department fit, which recomputing relevance(piece_scores) here would leave out
-                    rerank([scored], topics, vectors, index, cached, weight)
-                    ranking = sorted(((item.code, item.relevance) for item in scored), key=lambda pair: (-pair[1], pair[0]))
-                    configs[(weight, k)].rankings[query["query"]] = ranking
-        for (weight, k), found in configs.items():
-            found.latency = statistics.median(latencies[k])
-        self.stdout.write(f"  {model} + {reranker_name}: median latency "
-                          + ", ".join(f"K={k} {statistics.median(v):.2f}s" for k, v in latencies.items()))
-        return list(configs.values())
+                rerank([scored], topics, vectors, index, reranker)
+                latencies.append(time.monotonic() - started)
+                found.rankings[query["query"]] = sorted(((item.code, item.relevance) for item in scored),
+                                                        key=lambda pair: (-pair[1], pair[0]))
+            found.latency = statistics.median(latencies)
+            self.stdout.write(f"  {model} + {reranker_name}, K={k}: median latency {found.latency:.2f}s")
+            results.append(found)
+        return results
 
     def score(self, results: list[Config], queries: list[dict]) -> None:
         """hit@5, MRR, recall@candidates over the queries with expected codes; the cutoff and the no_match check."""
@@ -194,10 +167,10 @@ class Command(BaseCommand):
                  f"{chosen.latency:.2f} s · at the cutoff: precision {chosen.precision:.2f}, recall {chosen.cutoff_recall:.2f}, "
                  f"no-match queries with no real match {chosen.no_match_ok}/{no_match}.", "",
                  "## All configurations", "",
-                 "| embedder | reranker | w | K | hit@5 | MRR | recall@K | latency s | cutoff | precision | recall | no-match ok |",
-                 "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+                 "| embedder | reranker | K | hit@5 | MRR | recall@K | latency s | cutoff | precision | recall | no-match ok |",
+                 "|---|---|---|---|---|---|---|---|---|---|---|"]
         for found in sorted(results, key=lambda f: (-f.hit, -f.mrr, -f.no_match_ok, f.latency)):
-            lines.append(f"| {found.embedder} | {found.reranker or 'none'} | {found.weight} | {found.candidates} | {found.hit:.2f} | "
+            lines.append(f"| {found.embedder} | {found.reranker or 'none'} | {found.candidates} | {found.hit:.2f} | "
                          f"{found.mrr:.2f} | {found.recall:.2f} | {found.latency:.2f} | {found.cutoff:.2f} | {found.precision:.2f} | "
                          f"{found.cutoff_recall:.2f} | {found.no_match_ok}/{no_match} |")
         lines += ["", "## Cutoff data (chosen configuration)", "",
@@ -216,24 +189,9 @@ class Command(BaseCommand):
             lines += [f"| {n} | {code} | {titles.get(code, '')} | {value:.2f} | {'yes' if code in query['expected'] else ''} |"
                       for n, (code, value) in enumerate(ranking[:TOP_K], 1)]
             lines.append("")
-        lines += self.cyber_before_after(chosen, courses, pieces, titles)
         lines += self.piece_stats(pieces, courses)
         (OUT_DIR / "embedding_eda.md").write_text("\n".join(lines) + "\n")
         self.stdout.write("\n".join(lines[:12]) + f"\n\nReport: {OUT_DIR / 'embedding_eda.md'}")
-
-    def cyber_before_after(self, chosen: Config, courses: list[Course], pieces: list[tuple], titles: dict) -> list[str]:
-        """"cybersecurity": the old ranking (MiniLM, mean of each course's best 3 piece similarities) vs the chosen one."""
-        index = build_index("all-MiniLM-L6-v2", pieces)
-        vector = SentenceTransformerEmbedder("all-MiniLM-L6-v2").embed(["cybersecurity"], kind="query")[0]
-        old = sorted(((code, float(np.mean(np.sort(index.matrix[rows] @ vector)[::-1][:3]))) for code, rows in index.rows_by_course.items()),
-                     key=lambda pair: (-pair[1], pair[0]))[:TOP_K]
-        new = chosen.rankings.get("cybersecurity", [])[:TOP_K]
-        lines = ["## Before / after: \"cybersecurity\"", "", "| # | before (MiniLM, mean of top 3) | after (chosen) |", "|---|---|---|"]
-        for n in range(TOP_K):
-            before = f"{old[n][0]} {titles.get(old[n][0], '')} ({old[n][1]:.2f})" if n < len(old) else ""
-            after = f"{new[n][0]} {titles.get(new[n][0], '')} ({new[n][1]:.2f})" if n < len(new) else ""
-            lines.append(f"| {n + 1} | {before} | {after} |")
-        return lines + [""]
 
     def piece_stats(self, pieces: list[tuple], courses: list[Course]) -> list[str]:
         per_course = Counter(code for code, *_ in pieces)

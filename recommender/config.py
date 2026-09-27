@@ -21,16 +21,17 @@ RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 RERANK_CANDIDATES = 30                  # courses (by embedding score) that reach the reranker
 RERANK_PIECES_PER_COURSE = 3            # best pieces per candidate by embedding, plus its title piece
 RERANK_BATCH_SIZE = 64
-BEST_PIECE_WEIGHT = 0.0                 # content = w * best piece + (1 - w) * mean of the best 3; 0 (2026-09-27): one
-                                        # passing mention ("applications in NLP") no longer carries a course
 TITLE_STRONG = 0.8                      # a title scoring this high counts on its own; below, the title is ignored
-DOMAIN_WEIGHT = 0.3                     # the worst-fitting department keeps 70% of its score (ranking_probe 2026-09-27)
-DOMAIN_NEUTRAL_DEPARTMENTS = {"BITS"}   # institute-wide interdisciplinary courses: no subject to fit
-RELEVANCE_TOP_PIECES = 3
-RELEVANCE_CUTOFF = 0.75                 # EDA 2026-09-27 (app relevance: title gate, dept fit, per-topic pieces); only 6 judged queries, so 0.47-0.75 is within noise
-LOOSE_MATCH_COUNT = 3
-LOOSE_MATCH_FLOOR = 0.3                 # probe 2026-09-27: below this "loosely related" was noise (web development -> Issues in Economic Development, 0.02)
-MAX_QUERY_TOPICS = 8                    # "AI, ML, DL, NLP": each topic scored on its own, best one counts                   # "loosely_related" courses when nothing passes the cutoff
+RELEVANCE_TOP_PIECES = 3                # relevance = mean of a course's best 3 piece scores (one passing mention can't carry it)
+RELEVANCE_CUTOFF = 0.75                 # EDA 2026-09-27; only a few judged queries, so 0.47-0.75 is within noise
+MAX_QUERY_TOPICS = 8                    # "AI, ML, DL, NLP": each topic scored on its own, best one counts
+# Neighbours (ranking.neighbours): a topic with fewer real matches than places is topped up with the courses whose
+# content is closest to the catalogue's best matches for it ("anchors"). probe 2026-09-28: every nonsense topic
+# (cooking, fashion design, marine biology, cricket) had no catalogue course above 0.1; video editing 0.46,
+# cybersecurity 0.56.
+NEIGHBOUR_ANCHORS = 3
+NEIGHBOURS_PER_TOPIC = 3                # probe 2026-09-28: the 4th-5th for 'video editing' were noise (Advanced Manufacturing)
+NEIGHBOUR_ANCHOR_FLOOR = 0.3            # an anchor needs at least this relevance; no anchor -> no neighbours
 
 # Same class under two codes (recommender/equivalents.py). EDA 2026-09-27 (docs/eda/equivalence_eda.md): best F1 on
 # listed pairs (precision 0.87, recall 0.62; the 12 "wrong" pairs above it are renamed titles of the same course)

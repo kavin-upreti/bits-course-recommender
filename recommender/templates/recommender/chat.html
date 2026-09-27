@@ -131,18 +131,24 @@
     // why <details>: a native toggle, keyboard-accessible, no state to manage
     const box = el("details", "rec-score small");
     const summary = el("summary");
-    summary.append(el("strong", null, "Relevance " + score.final.toFixed(2)));
+    // a neighbour has no direct match: its number is content similarity, not topic relevance
+    summary.append(el("strong", null, (score.similar_to ? "Similar content " : "Relevance ") + score.final.toFixed(2)));
     // why on the summary line: with several topics, 1.00 alone reads as "matches everything you asked"
-    if (score.topic) summary.append(el("span", "rec-topic", `for '${score.topic}'` + (score.related_topic ? " (a related topic)" : "")));
+    if (score.topic) summary.append(el("span", "rec-topic", `for '${score.topic}'`));
     summary.append(el("span", "breakdown-link", "See breakdown"));
     box.append(summary);
     const rows = [];
     if (score.topic) rows.push(["Your topic", score.topic]);
-    const [kind, ...text] = (score.why || "").replace(/^matches /, "").split(";")[0].split(": ");
-    if (text.length) rows.push(["Best match in the course", `${kind}: ${text.join(": ")}`]);
-    if (score.domain) rows.push(["Subject-area fit (department)", `× ${score.domain.toFixed(2)}`]);
-    rows.push(["Topic relevance (0 to 1)", score.relevance.toFixed(2)]);
-    if (score.penalty) rows.push(["Penalty", `${score.penalty.toFixed(2)} (${score.why.split("; ").filter((part) => !part.startsWith("matches ")).join("; ")})`]);
+    if (score.similar_to) {
+      rows.push(["No direct match; content close to", score.similar_to]);
+      rows.push(["Content similarity (0 to 1)", score.relevance.toFixed(2)]);
+    } else {
+      const [kind, ...text] = (score.why || "").replace(/^matches /, "").split(";")[0].split(": ");
+      if (text.length) rows.push(["Best match in the course", `${kind}: ${text.join(": ")}`]);
+      rows.push(["Topic relevance (0 to 1)", score.relevance.toFixed(2)]);
+    }
+    const penalised = (score.why || "").split("; ").filter((part) => !part.startsWith("matches ") && !part.startsWith("no direct match"));
+    if (score.penalty) rows.push(["Penalty", `${score.penalty.toFixed(2)} (${penalised.join("; ")})`]);
     rows.push(["Final score", score.final.toFixed(2)]);
     const list = el("dl", "breakdown");
     rows.forEach(([label, value]) => { const item = el("div"); item.append(el("dt", null, label), el("dd", null, value)); list.append(item); });

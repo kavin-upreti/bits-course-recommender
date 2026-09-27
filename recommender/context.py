@@ -50,7 +50,6 @@ class StudentContext:
     interests: list[str]
     minor_courses: dict[str, str] = field(default_factory=dict)  # code -> "core" | "elective"
     max_units: int | None = None         # from the Rule table; None if not stated for this batch
-    timings: list[dict] = field(default_factory=list)  # per get_eligible_courses call, for the debug panel
 
     @property
     def is_dual(self) -> bool:

@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from catalog.models import Course, Minor, PatternSlot, Programme, Section
+from catalog.models import Course, Minor, PatternSlot, Programme
 from recommender.config import DAY_CODES, DAY_NAMES
 
 GOALS = [("job", "Job / placement"), ("research", "Research / higher studies"), ("not_sure", "Not sure")]
@@ -91,39 +91,3 @@ class StudentCourse(models.Model):
 
     class Meta:
         unique_together = ("student", "course")
-
-
-class SemesterPlan(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="plans")
-    semester_tag = models.CharField(max_length=30)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ("student", "semester_tag")
-
-
-class PlanItem(models.Model):
-    ADDED_BY = [("user", "user"), ("agent", "agent")]
-    plan = models.ForeignKey(SemesterPlan, on_delete=models.CASCADE, related_name="items")
-    course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="+")
-    lecture_section = models.ForeignKey(Section, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
-    tutorial_section = models.ForeignKey(Section, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
-    practical_section = models.ForeignKey(Section, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
-    added_by = models.CharField(max_length=5, choices=ADDED_BY, default="user")
-
-
-class TimetablePreference(models.Model):
-    student = models.OneToOneField(Student, on_delete=models.CASCADE, related_name="timetable_preference")
-    no_8am_days = models.JSONField(default=list, blank=True)  # ["M", "W"]
-    free_day = models.CharField(max_length=2, blank=True, default="")
-    no_saturday = models.BooleanField(default=False)
-    avoid_gaps = models.BooleanField(default=False)
-    compact = models.BooleanField(default=False)
-    priority_order = models.JSONField(default=list, blank=True)
-
-
-class ChatState(models.Model):
-    student = models.OneToOneField(Student, on_delete=models.CASCADE, related_name="chat_state")
-    requests = models.JSONField(default=list, blank=True)  # [{"category": "DEL", "want": ["AI"], "dont_want": ["midsem"]}]
-    messages = models.JSONField(default=list, blank=True)
-    updated_at = models.DateTimeField(auto_now=True)

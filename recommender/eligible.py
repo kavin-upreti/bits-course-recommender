@@ -8,8 +8,6 @@ Every removal is recorded in `Pipeline.removed` (stage -> codes), for tests and 
 from dataclasses import dataclass, field
 from functools import cmp_to_key
 
-import time
-
 import numpy as np
 from django.db.models import Prefetch
 
@@ -24,7 +22,7 @@ from .embeddings import get_embedder, get_reranker
 from .handout_facts import CourseFacts, all_course_facts, get_course_facts, number
 from .history import same_class_groups, with_equivalents
 from .piece_index import get_piece_index
-from .ranking import Scored, rerank, retrieve
+from .ranking import Scored, neighbours, rerank, retrieve
 from .plan import check_plan
 from .timetable import timetable_term
 
@@ -61,13 +59,13 @@ class Candidate:
     unverified: list[str] = field(default_factory=list)
     unverified_notes: list[str] = field(default_factory=list)
     embedding: float | None = None                  # best piece similarity (C1)
-    relevance: float | None = None                  # cross-encoder relevance, 0-1 (C2), times domain
-    domain: float | None = None                     # the department-fit multiplier inside relevance
+    relevance: float | None = None                  # cross-encoder relevance, 0-1 (C2); a neighbour's content similarity
     penalty: float = 0.0
     matched_on: str | None = None
     matched_topic: str | None = None                # the student's topic that matched_on answered
-    by_topic: list[float] = field(default_factory=list)  # relevance per topic (the student's first, then related ones)
-    via_related: bool = False                       # matched only a related topic the LLM added, none of the student's
+    by_topic: list[float] = field(default_factory=list)  # relevance per topic
+    neighbour_of: int | None = None                 # no direct match: added for this topic by content (add_neighbours)
+    similar_to: str = ""                            # the anchors a neighbour is close to ("GS F343 Short Film…")
     why: str = ""
     rank: int = 0                                   # 1-based, before stage D
     picked_sections: dict = field(default_factory=dict)  # {"lecture": "L2"}: a fit with the current courses
@@ -95,12 +93,10 @@ class Pipeline:
     removed: dict[str, list[str]] = field(default_factory=dict)
     excluded: list[dict] = field(default_factory=list)
     offered_codes: set[str] = field(default_factory=set)
-    timings: dict = field(default_factory=dict)       # stage C: retrieval_ms, rerank_ms, rerank_pairs
-    unoffered: list[Scored] = field(default_factory=list)       # reranked courses not offered this semester
+    catalogue: list[Scored] = field(default_factory=list)       # the whole catalogue's best matches, reranked
     next_semester_relevance: dict[str, float] = field(default_factory=dict)
     next_semester: list[tuple[str, str]] = field(default_factory=list)  # (code, "X needs Y, which you're taking…")
-    topics: list[str] = field(default_factory=list)  # the student's topics, then the related ones
-    own_topics: int = 0                              # how many of `topics` are the student's own
+    topics: list[str] = field(default_factory=list)  # the student's topics (or profile interests)
 
     def remove(self, stage: str, code: str) -> None:
         self.removed.setdefault(stage, []).append(code)
@@ -304,16 +300,13 @@ def stage_b(pipeline: Pipeline, candidates: list[Candidate]) -> tuple[list[Candi
 
 # ---------------------------------------------------------------- 6.4 stage C
 
-def query_topics(ctx: StudentContext, about: list[str] | None,
-                 related: list[str] | None = None) -> tuple[list[str] | None, str, int]:
-    """(topics to embed, ranked_by, how many of them are the student's own). Each topic is scored on its own.
-    `related` topics (the LLM's additions) come after the student's and only count when those find too little."""
+def query_topics(ctx: StudentContext, about: list[str] | None) -> tuple[list[str], str]:
+    """(topics to embed, ranked_by). Each topic is scored on its own."""
     if about:
-        extra = [topic for topic in dict.fromkeys(related or []) if topic not in about]
-        return list(about) + extra, "about", len(about)
+        return list(about), "about"
     if ctx.interests:
-        return list(ctx.interests), "profile_interests", len(ctx.interests)
-    return None, "handout_completeness", 0
+        return list(ctx.interests), "profile_interests"
+    return [], "handout_completeness"
 
 
 def shorten(text: str, limit: int) -> str:
@@ -339,33 +332,19 @@ def matched_text(index, row: int) -> str:
     return shorten(f"{index.kinds[row].replace('_', ' ')}: {index.texts[row]}", config.MATCHED_ON_MAX_CHARS)
 
 
-def unoffered_pool(pipeline: Pipeline) -> list[str]:
-    """Courses of the searched categories that aren't offered this semester and aren't done."""
-    ctx = pipeline.ctx
-    return [code for code in get_piece_index().rows_by_course
-            if code not in pipeline.offered_codes and code not in ctx.completed and code not in ctx.current
-            and ctx.category_map.get(code) in pipeline.searched]
-
-
-def relevance_scores(pipeline: Pipeline, topics: list[str], ranked_by: str, passed: list[Candidate],
+def relevance_scores(pipeline: Pipeline, ranked_by: str, passed: list[Candidate],
                      unknown: list[Candidate]) -> tuple[list[Candidate], list[Candidate]]:
     """C1 + C2. Each list keeps only its top RERANK_CANDIDATES by embedding, now with embedding / relevance /
-    matched_on. Courses not offered (topic searches) and "next semester" ones are reranked in the same call."""
-    index, started = get_piece_index(), time.monotonic()
+    matched_on. The whole catalogue (topic searches: anchors for neighbours, better matches not offered) and the
+    "next semester" courses are reranked in the same call."""
+    index, topics = get_piece_index(), pipeline.topics
     query = get_embedder().embed(topics, kind="query")
-    own = pipeline.own_topics
-    main = retrieve(index, [candidate.code for candidate in passed], query, config.RERANK_CANDIDATES, own)
-    unverified = retrieve(index, [candidate.code for candidate in unknown], query, config.RERANK_CANDIDATES, own)
-    unoffered = retrieve(index, unoffered_pool(pipeline), query, config.RERANK_CANDIDATES, own) if ranked_by == "about" else []
+    main = retrieve(index, [candidate.code for candidate in passed], query, config.RERANK_CANDIDATES)
+    unverified = retrieve(index, [candidate.code for candidate in unknown], query, config.RERANK_CANDIDATES)
+    catalogue = retrieve(index, list(index.rows_by_course), query, config.RERANK_CANDIDATES) if ranked_by == "about" else []
     later = retrieve(index, [code for code, _ in pipeline.next_semester], query, len(pipeline.next_semester))
-    retrieved = time.monotonic()
-    groups = [main, unverified, unoffered, later]
-    rerank(groups, topics, query, index, get_reranker(), config.BEST_PIECE_WEIGHT)
-    pipeline.timings = {"retrieval_ms": round(1000 * (retrieved - started)), "rerank_ms": round(1000 * (time.monotonic() - retrieved)),
-                        "rerank_pairs": sum(len(rows) for group in groups for item in group for rows in item.rows_by_topic)}
-    for item in unoffered + later:  # "better match" / "eligible next semester" notes: the student's own topics only
-        item.relevance = max(item.by_topic[:own])
-    pipeline.unoffered = unoffered
+    rerank([main, unverified, catalogue, later], topics, query, index, get_reranker())
+    pipeline.catalogue = catalogue
     pipeline.next_semester_relevance = {item.code: item.relevance for item in later}
 
     def attach(candidates: list[Candidate], scored: list[Scored], stage: str) -> list[Candidate]:
@@ -376,12 +355,8 @@ def relevance_scores(pipeline: Pipeline, topics: list[str], ranked_by: str, pass
             if item is None:
                 pipeline.remove(stage, candidate.code)
                 continue
-            topic = int(np.argmax(item.by_topic[:own]))
-            if item.by_topic[topic] < config.RELEVANCE_CUTOFF and len(topics) > own \
-                    and max(item.by_topic[own:]) >= config.RELEVANCE_CUTOFF:
-                topic, candidate.via_related = own + int(np.argmax(item.by_topic[own:])), True
-            candidate.embedding, candidate.by_topic = item.embedding, item.by_topic
-            candidate.relevance, candidate.domain = item.by_topic[topic], item.domains[topic]
+            topic = int(np.argmax(item.by_topic))
+            candidate.embedding, candidate.by_topic, candidate.relevance = item.embedding, item.by_topic, item.relevance
             candidate.matched_on = matched_text(index, item.best_rows[topic])
             candidate.matched_topic = topics[topic]
             kept.append(candidate)
@@ -395,9 +370,10 @@ def apply_penalties(ctx: StudentContext, ranked_by: str, has_query: bool, candid
         reasons = penalties(candidate.facts, ctx.avoid_eval_styles)
         candidate.penalty = -config.DISLIKE_PENALTY * len(reasons)
         parts = []
-        if candidate.matched_on and ranked_by == "about":
-            parts.append(f"matches the related topic '{candidate.matched_topic}', not your own: {candidate.matched_on}"
-                         if candidate.via_related else f"matches {candidate.matched_on}")
+        if candidate.similar_to:
+            parts.append(f"no direct match for '{candidate.matched_topic}'; its content is close to {candidate.similar_to}")
+        elif candidate.matched_on and ranked_by == "about":
+            parts.append(f"matches {candidate.matched_on}")
         if ranked_by != "about":
             candidate.matched_topic = None  # why: profile interests aren't "your topic", same reason as below
         if ranked_by == "profile_interests":
@@ -410,48 +386,66 @@ def apply_penalties(ctx: StudentContext, ranked_by: str, has_query: bool, candid
         candidate.why = "; ".join(parts)
 
 
-def relevance_cutoff(pipeline: Pipeline, about: list[str], passed: list[Candidate], unknown: list[Candidate],
-                     ranked_by: str) -> tuple[list[Candidate], list[Candidate], list[Candidate]]:
-    """C3 (topic searches only): keep real matches (relevance before penalties >= RELEVANCE_CUTOFF), never pad.
-    No real match at all -> the closest few become `loosely_related`, with a warning."""
+def anchors(pipeline: Pipeline, topic: int) -> list[str]:
+    """The catalogue's best matches for the topic (offered or not), if any is at least NEIGHBOUR_ANCHOR_FLOOR."""
+    best = sorted(pipeline.catalogue, key=lambda item: (-item.by_topic[topic], item.code))[:config.NEIGHBOUR_ANCHORS]
+    return [item.code for item in best if item.by_topic[topic] >= config.NEIGHBOUR_ANCHOR_FLOOR]
+
+
+def add_neighbours(pipeline: Pipeline, eligible: list[Candidate], real: list[Candidate], places: int) -> list[Candidate]:
+    """For each topic with fewer real matches than `places`: the eligible courses closest in content to its anchors,
+    up to the missing number (at most NEIGHBOURS_PER_TOPIC). They rank after every direct match (compare) and say what they're close to."""
+    taken, added = {candidate.code for candidate in real}, []
+    for topic, name in enumerate(pipeline.topics):
+        direct = sum(on_topic(candidate, topic) for candidate in real)
+        found = anchors(pipeline, topic) if direct < places else []
+        titles = dict(Course.objects.filter(code__in=found).values_list("code", "title"))
+        pool = {candidate.code: candidate for candidate in eligible if candidate.code not in taken}
+        close = neighbours(get_piece_index(), found, list(pool))[:min(places - direct, config.NEIGHBOURS_PER_TOPIC)] if found else []
+        for code, similarity in close:
+            candidate = pool[code]
+            candidate.relevance, candidate.neighbour_of, candidate.matched_topic = similarity, topic, name
+            candidate.similar_to = ", ".join(f"{anchor} {course_title(titles.get(anchor, ''))}" for anchor in found)
+            added.append(candidate)
+            taken.add(code)
+        if not direct:
+            pipeline.warnings.append(f"Nothing this semester matches '{name}' directly"
+                                     + ("; the courses listed for it are the closest in content to the catalogue's best matches."
+                                        if close else "."))
+    return added
+
+
+def relevance_cutoff(pipeline: Pipeline, eligible: list[Candidate], passed: list[Candidate], unknown: list[Candidate],
+                     places: int) -> tuple[list[Candidate], list[Candidate]]:
+    """C3 (topic searches only): keep real matches (relevance before penalties >= RELEVANCE_CUTOFF), then top up
+    each short topic with neighbours from all `eligible` courses (retrieved or not)."""
     real = [candidate for candidate in passed if candidate.relevance >= config.RELEVANCE_CUTOFF]
     for candidate in passed + unknown:
         if candidate.relevance < config.RELEVANCE_CUTOFF:
             pipeline.remove("cutoff", candidate.code)
-    if len(about) > 1:  # several topics: say which of them found nothing
-        for position, topic in enumerate(about):
-            if real and not any(on_topic(candidate, position) for candidate in real):
-                pipeline.warnings.append(f"Nothing this semester matches '{topic}' well.")
-    loose = []
-    if passed and not real:
-        loose = [candidate for candidate in rank(passed, ranked_by)[:config.LOOSE_MATCH_COUNT]
-                 if candidate.relevance >= config.LOOSE_MATCH_FLOOR]
-        pipeline.warnings.append(f"No course this semester strongly matches '{', '.join(about)}'."
-                                 + (" The closest ones are listed as loosely related." if loose else ""))
-    return real, [candidate for candidate in unknown if candidate.relevance >= config.RELEVANCE_CUTOFF], loose
+    if eligible:  # why: with nothing eligible, stage A already said why
+        real += add_neighbours(pipeline, eligible, real, places)
+    return real, [candidate for candidate in unknown if candidate.relevance >= config.RELEVANCE_CUTOFF]
 
 
-def stage_c(pipeline: Pipeline, about: list[str] | None, passed: list[Candidate],
-            unknown: list[Candidate]) -> tuple[str, list[Candidate], list[Candidate], list[Candidate]]:
-    """Retrieve, rerank, cut off, penalise. Returns (ranked_by, passed, unknown, loosely_related)."""
-    topics, ranked_by = pipeline.topics or None, ("about" if about else "profile_interests" if pipeline.topics else "handout_completeness")
-    if topics is not None:
-        scored_passed, scored_unknown = relevance_scores(pipeline, topics, ranked_by, passed, unknown)
+def stage_c(pipeline: Pipeline, ranked_by: str, passed: list[Candidate], unknown: list[Candidate],
+            places: int) -> tuple[str, list[Candidate], list[Candidate]]:
+    """Retrieve, rerank, cut off (+ neighbours), penalise. Returns (ranked_by, passed, unknown)."""
+    if pipeline.topics:
+        scored_passed, scored_unknown = relevance_scores(pipeline, ranked_by, passed, unknown)
+        if ranked_by == "about":
+            scored_passed, scored_unknown = relevance_cutoff(pipeline, passed, scored_passed, scored_unknown, places)
         if ranked_by == "profile_interests" and not any(candidate.relevance >= config.RELEVANCE_CUTOFF
                                                         for candidate in scored_passed + scored_unknown):
             # nothing relates to the interests (e.g. HUELs for an ML student): a relevance score would be noise
             for candidate in passed + unknown:
-                candidate.embedding = candidate.relevance = candidate.domain = None
-                candidate.matched_on = candidate.matched_topic = None
+                candidate.embedding = candidate.relevance = candidate.matched_on = candidate.matched_topic = None
             pipeline.removed.pop("retrieval", None)
-            topics, ranked_by = None, "handout_completeness"
+            pipeline.topics, ranked_by = [], "handout_completeness"
         else:
             passed, unknown = scored_passed, scored_unknown
-    apply_penalties(pipeline.ctx, ranked_by, topics is not None, passed + unknown)
-    loose = []
-    if ranked_by == "about":
-        passed, unknown, loose = relevance_cutoff(pipeline, about, passed, unknown, ranked_by)
-    return ranked_by, passed, unknown, loose
+    apply_penalties(pipeline.ctx, ranked_by, bool(pipeline.topics), passed + unknown)
+    return ranked_by, passed, unknown
 
 
 def next_semester_warnings(pipeline: Pipeline, has_query: bool) -> list[str]:
@@ -466,14 +460,17 @@ def next_semester_warnings(pipeline: Pipeline, has_query: bool) -> list[str]:
 
 def unoffered_matches(pipeline: Pipeline, shown: list[Candidate]) -> list[dict]:
     """Real matches not offered this semester that beat everything shown (so the student hears "System Security
-    isn't offered" instead of nothing)."""
-    best = max((candidate.relevance for candidate in shown if candidate.relevance is not None), default=0.0)
-    better = [item for item in pipeline.unoffered
-              if item.relevance >= config.RELEVANCE_CUTOFF and item.relevance >= best + config.TIE_EPSILON]
+    isn't offered" instead of nothing): catalogue courses of the searched categories the student hasn't done."""
+    ctx = pipeline.ctx
+    best = max((candidate.relevance for candidate in shown if not candidate.similar_to), default=0.0)
+    better = [item for item in pipeline.catalogue
+              if item.code not in pipeline.offered_codes and item.code not in ctx.completed and item.code not in ctx.current
+              and ctx.category_map.get(item.code) in pipeline.searched
+              and item.relevance >= config.RELEVANCE_CUTOFF and item.relevance >= best + config.TIE_EPSILON]
     top = sorted(better, key=lambda item: (-item.relevance, item.code))[:config.MAX_NOT_OFFERED]
     titles = dict(Course.objects.filter(code__in=[item.code for item in top]).values_list("code", "title"))
     return [{"code": item.code, "title": course_title(titles.get(item.code, "")),
-             "category": pipeline.ctx.category_map[item.code]} for item in top]
+             "category": ctx.category_map[item.code]} for item in top]
 
 
 # ---------------------------------------------------------------- 6.45 one class, several codes
@@ -509,8 +506,8 @@ def compare(ranked_by: str):
     def key_order(a: Candidate, b: Candidate) -> int:
         if (a.relevance is None) != (b.relevance is None) and ranked_by != "handout_completeness":
             return 1 if a.relevance is None else -1
-        if a.via_related != b.via_related:  # a match on the student's own words beats one on an added topic
-            return 1 if a.via_related else -1
+        if (a.neighbour_of is None) != (b.neighbour_of is None):  # a direct match beats a neighbour
+            return 1 if a.neighbour_of is not None else -1
         if abs(a.final - b.final) >= config.TIE_EPSILON:
             return -1 if a.final > b.final else 1
         keys = [(tie_position(a), tie_position(b)), (-a.facts.completeness, -b.facts.completeness)]
@@ -600,8 +597,16 @@ def fits(pipeline: Pipeline, candidate: Candidate) -> bool:
 
 
 def on_topic(candidate: Candidate, topic: int) -> bool:
-    """A real match for the student's topic number `topic`."""
+    """A real match for the student's topic number `topic`, or a neighbour added for it."""
+    if candidate.neighbour_of is not None:
+        return candidate.neighbour_of == topic
     return len(candidate.by_topic) > topic and candidate.by_topic[topic] >= config.RELEVANCE_CUTOFF
+
+
+def topic_order(topic: int):
+    """Sort key within one topic: direct matches by their score for it, then neighbours by similarity."""
+    return lambda candidate: ((1, -candidate.relevance) if candidate.neighbour_of is not None
+                              else (0, -candidate.by_topic[topic]))
 
 
 def stage_fit(pipeline: Pipeline, ranked: list[Candidate], limit: int, topics: int = 0) -> tuple[list[Candidate], int]:
@@ -618,7 +623,7 @@ def stage_fit(pipeline: Pipeline, ranked: list[Candidate], limit: int, topics: i
     quota = limit // topics if topics > 1 else 0
     for topic in range(topics if quota else 0):
         mine = sum(on_topic(candidate, topic) for candidate in picked.values())
-        for candidate in sorted((c for c in ranked if on_topic(c, topic)), key=lambda c: -c.by_topic[topic]):
+        for candidate in sorted((c for c in ranked if on_topic(c, topic)), key=topic_order(topic)):
             if mine >= quota or len(picked) == limit:
                 break
             if candidate.code not in picked and ok(candidate):
@@ -634,7 +639,7 @@ def stage_fit(pipeline: Pipeline, ranked: list[Candidate], limit: int, topics: i
 
 def default_count(pipeline: Pipeline) -> int:
     """No number given: MAX_RESULTS per category, and at least one place per topic of the student's."""
-    return max(config.MAX_RESULTS, pipeline.own_topics if pipeline.topics else 0)
+    return max(config.MAX_RESULTS, len(pipeline.topics))
 
 
 def fill(pipeline: Pipeline, ranked: list[Candidate], count: int | None, topics: int) -> tuple[list[Candidate], int]:
@@ -662,8 +667,7 @@ def score_object(candidate: Candidate) -> dict:
     return {"embedding": rounded(candidate.embedding), "relevance": rounded(candidate.relevance),
             "penalty": round(candidate.penalty, 2) + 0.0, "final": round(candidate.final, 2), "why": candidate.why,
             **({"topic": candidate.matched_topic} if candidate.matched_topic else {}),
-            **({"domain": round(candidate.domain, 2)} if candidate.domain is not None and candidate.domain < 1 else {}),
-            **({"related_topic": True} if candidate.via_related else {})}
+            **({"similar_to": candidate.similar_to} if candidate.similar_to else {})}
 
 
 def shortfall(about: list[str], found: int, count: int | None, wanted: int) -> str | None:
@@ -702,34 +706,30 @@ def course_entry(ctx: StudentContext, candidate: Candidate, verify: bool = False
 
 def run(ctx: StudentContext, category: str | None, about: list[str] | str | None, filters: dict | None,
         avoid_8am: bool | None, avoid_day: str | None, exclude: list[str] | None,
-        count: int | None = None, related: list[str] | str | None = None) -> tuple[dict, Pipeline]:
+        count: int | None = None) -> tuple[dict, Pipeline]:
     """The whole pipeline; returns the tool result and the pipeline (for tests / debug)."""
     settings = resolve_preferences(ctx, avoid_8am, avoid_day)
     exclude_codes, warnings = resolve_exclude(exclude)
     searched, search_warnings, stop = categories_to_search(ctx, category)
     pipeline = Pipeline(ctx, settings, searched, exclude_codes, dict(filters or {}), warnings + search_warnings)
-    courses, unknown, loose, not_offered, unverified_more = [], [], [], [], 0
+    courses, unknown, not_offered, unverified_more = [], [], [], 0
     about = [about] if isinstance(about, str) else about  # one topic given as plain text
-    related = [related] if isinstance(related, str) else related
-    topics, ranked_by, pipeline.own_topics = query_topics(ctx, about, related)
-    pipeline.topics = topics or []
+    pipeline.topics, ranked_by = query_topics(ctx, about)
     places = 0
     if not stop:
         if category:
             pipeline.warnings += complete_warnings(ctx, category)
         passed, unknown = stage_b(pipeline, stage_a(pipeline))
-        ranked_by, passed, unknown, loose = stage_c(pipeline, about, passed, unknown)
-        passed, unknown, loose = merge_same_class(passed), merge_same_class(unknown), merge_same_class(loose)
-        quota_topics = pipeline.own_topics if ranked_by == "about" else 0
+        ranked_by, passed, unknown = stage_c(pipeline, ranked_by, passed, unknown, count or default_count(pipeline))
+        passed, unknown = merge_same_class(passed), merge_same_class(unknown)
+        quota_topics = len(pipeline.topics) if ranked_by == "about" else 0
         courses, places = fill(pipeline, stage_d(pipeline, rank(passed, ranked_by), ranked_by), count, quota_topics)
         ranked_unknown = stage_d(pipeline, rank(unknown, ranked_by), ranked_by)
         unknown, checked = stage_fit(pipeline, ranked_unknown, config.MAX_UNVERIFIED)
         unverified_more = len(ranked_unknown) - checked
         pipeline.warnings += next_semester_warnings(pipeline, ranked_by != "handout_completeness")
         if ranked_by == "about":
-            not_offered = unoffered_matches(pipeline, courses + loose)
-        if pipeline.timings:
-            ctx.timings.append(pipeline.timings)
+            not_offered = unoffered_matches(pipeline, courses)
     result = {
         "searched": searched,
         "settings_used": {**settings, "ranked_by": ranked_by},
@@ -740,8 +740,6 @@ def run(ctx: StudentContext, category: str | None, about: list[str] | str | None
     }
     if unverified_more:
         result["couldnt_verify_more"] = unverified_more  # not checked for fit, only counted
-    if loose:
-        result["loosely_related"] = [course_entry(ctx, candidate) for candidate in loose]
     if not_offered:
         result["better_matches_not_offered"] = not_offered
     if ranked_by == "about" and (short := shortfall(about, len(courses), count, places)):
