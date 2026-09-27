@@ -239,6 +239,20 @@ class PickingTests(Catalog):
             self.select("XX F411")
             self.assertIn("at most 1", self.select("XX F412").json()["error"])
 
+    def test_clashing_course_is_refused_on_select_and_finalise(self):
+        from students.models import StudentCourse
+        self.courses["HSS F202"].offerings.all().delete()
+        offer(self.courses["HSS F202"], [("lecture", "L1", {"W": [3]})])  # same slot as XX F411's only lecture
+        self.select("XX F411")
+        refused = self.select("HSS F202")
+        self.assertEqual(refused.status_code, 400)
+        self.assertIn("Can't add HSS F202", refused.json()["error"])
+        self.assertEqual([item["code"] for item in self.select("XX F411").json()["selection"]], ["XX F411"])
+        both = self.client.post("/plan/finalise/", json.dumps({"codes": ["XX F411", "HSS F202"]}), content_type="application/json")
+        self.assertEqual(both.status_code, 400)  # the selection is re-checked, not trusted
+        self.assertIn("can't all be taken together", both.json()["error"])
+        self.assertFalse(StudentCourse.objects.filter(course__code__in=["XX F411", "HSS F202"]).exists())
+
     def test_timetables_popup_includes_current_selected_and_candidate(self):
         self.select("XX F411")
         page = self.client.get("/plan/timetables/?with=HSS%20F202").content.decode()

@@ -34,6 +34,7 @@
     <h3 id="picked-title">Selected courses</h3>
     <p class="muted small" id="picked-empty">Nothing yet. Use "Select" on a suggestion.</p>
     <ul id="picked" class="picked-list"></ul>
+    <p id="picked-error" class="notice bad small" role="alert" hidden></p>
     <button type="button" class="btn ghost wide" id="picked-tt">See timetables with these</button>
     <button type="button" class="btn wide" id="finalise">Add to my semester</button>
     <p class="faint small">Kept until you add them or log out. Added courses can be removed on the <a href="{% url 'semester' %}">semester page</a>.</p>
@@ -108,14 +109,11 @@
 
   async function toggle(code, on) {
     const {ok, data} = await post("{% url 'plan_select' %}", {code, selected: on});
-    if (ok) selection = data.selection; else alertInline(data.error);
+    if (ok) selection = data.selection;
+    // why in the panel: a card's Select button can be far below the answer's top, where a note would go unseen
+    $("picked-error").textContent = ok ? "" : (data.error || "Couldn't change the selection.");
+    $("picked-error").hidden = ok;
     renderSelection();
-  }
-
-  function alertInline(message) {
-    const note = el("p", "notice small", message);
-    answer.prepend(note);
-    setTimeout(() => note.remove(), 6000);
   }
 
   async function showTimetables(code) {

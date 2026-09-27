@@ -20,10 +20,11 @@ from students.views import read_filters, timetable_context
 from . import config
 from .agent import run_agent
 from .categories import category_map
+from .context import build_context
 from .codes import normalise_code, resolve_course
 from .embeddings import embed_query
 from .history import done_codes
-from .plan import offered
+from .plan import check_plan, offered
 from .tools import DISPLAY_CATEGORY
 
 logger = logging.getLogger(__name__)
@@ -112,6 +113,13 @@ def pickable(student: Student, raw_code: str) -> tuple[Course | None, str]:
     return course, ""
 
 
+def plan_problem(student: Student, codes: list[str]) -> str:
+    """Why these courses can't all be taken with the current ones ("" = some timetable works). Tries every section
+    combination and checks exams, units and the higher-degree limit too (the same check the recommender uses)."""
+    plan = check_plan(build_context(student), codes)
+    return "" if plan["ok"] else plan["problem"]
+
+
 def logged_in_student(request: HttpRequest) -> Student | None:
     return Student.objects.filter(user=request.user).select_related("programme").first()
 
@@ -132,6 +140,8 @@ def select_course(request: HttpRequest) -> JsonResponse:
         if course.code not in codes:
             if len(codes) >= config.MAX_PLAN_COURSES:
                 return JsonResponse({"error": f"You can select at most {config.MAX_PLAN_COURSES} courses."}, status=400)
+            if problem := plan_problem(student, codes + [course.code]):
+                return JsonResponse({"error": f"Can't add {course.code}: {problem}"}, status=400)
             codes.append(course.code)
     else:
         codes = [code for code in codes if code != normalise_code(data.get("code") or "")]
@@ -174,6 +184,9 @@ def finalise(request: HttpRequest) -> JsonResponse:
         if course is None:
             return JsonResponse({"error": problem}, status=400)
         courses.append(course)
+    # why again: the selection lives in the session and may predate a change (another tab, a finalise elsewhere)
+    if problem := plan_problem(student, [course.code for course in courses]):
+        return JsonResponse({"error": f"These can't all be taken together: {problem}"}, status=400)
     with transaction.atomic():
         for course in courses:
             StudentCourse.objects.get_or_create(student=student, course=course, defaults={
