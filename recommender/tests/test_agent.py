@@ -149,10 +149,10 @@ class AgentTests(Catalog):
         self.courses["XX F412"].offerings.all().delete()
         offer(self.courses["XX F412"], [("lecture", "L1", {"M": [2]})])  # clashes with the current XX F211
         result, _ = self.agent([calls(("get_eligible_courses", {"category": "DEL"})), text("Take **XX F411**.")])
-        self.assertTrue(result.reply.startswith("Take **XX F411**.\n\n**Also:**\n- XX F412 Deep Learning was left out: "))
-        self.assertEqual([card["code"] for card in result.cards], ["XX F411"])  # the note adds no card
-        result, _ = self.agent([calls(("get_eligible_courses", {"category": "DEL"})), text("XX F411; XX F412 clashes.")])
-        self.assertNotIn("Also", result.reply)  # already mentioned
+        self.assertEqual(result.reply, "Take **XX F411**.")  # the reasons go in left_out, not the prose
+        self.assertEqual([card["code"] for card in result.cards], ["XX F411"])  # a left-out course gets no card
+        self.assertEqual([(row["code"], row["reason"][:32]) for row in result.left_out],
+                         [("XX F412", "doesn't fit with your current co")])
 
     def test_named_category_that_was_never_searched_gets_one_reminder(self):
         message = "courses on LLMs, and a HUEL on psychology"

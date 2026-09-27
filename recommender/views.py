@@ -75,7 +75,7 @@ def recommend(request: HttpRequest) -> JsonResponse:
     if not isinstance(message, str):
         return JsonResponse({"error": "The message is missing."}, status=400)
     result = run_agent(student, message)
-    body = {"reply": result.reply, "cards": result.cards}
+    body = {"reply": result.reply, "cards": result.cards, "left_out": result.left_out}
     if settings.DEBUG:
         body["debug"] = result.debug
     return JsonResponse(body)

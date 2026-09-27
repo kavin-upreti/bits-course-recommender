@@ -45,6 +45,7 @@ class AgentResult:
     reply: str
     cards: list[dict]
     debug: dict      # rounds, calls (name, args, result size in chars), usage, guardrail actions, timings
+    left_out: list[dict] = field(default_factory=list)  # [{code, title, category, reason}] shown under the cards
 
 
 @dataclass
@@ -110,17 +111,22 @@ def record(run: Run, name: str, result: dict) -> None:
         run.shortfalls.append(result["shortfall"])
 
 
-def missing_notes(run: Run, reply: str) -> str:
-    """What the reply should have said but didn't: courses left out (and why) and better matches not offered.
-    why in Python: models often skip these, and the student needs them to trust the list."""
-    mentioned = set(find_codes(reply))
+def missing_notes(run: Run) -> str:
+    """Shortfalls ("only 1 of the 3 you asked for…"), which models often skip. Left-out courses go in left_out()."""
     lines = [f"- {text}" for text in run.shortfalls]
-    lines += [f"- {entry['code']} {entry['title']} was left out: {entry['reason']}"
-              for code, entry in run.excluded.items() if code not in mentioned]
-    unoffered = [f"{entry['code']} {entry['title']}" for code, entry in run.not_offered.items() if code not in mentioned]
-    if unoffered:
-        lines.append(f"- Better matches that aren't offered this semester: {', '.join(unoffered)}")
     return "\n\n**Also:**\n" + "\n".join(lines) if lines else ""
+
+
+def left_out(run: Run, cards: list[dict]) -> list[dict]:
+    """Every course a search found but didn't recommend, with the reason, straight from the tool results.
+    why structured, not in the reply: the model's wording of reasons drifts (an exam clash became "clashes with
+    your timetable"); these are the exact reasons, and the page lists them under the cards."""
+    carded = {card["code"] for card in cards}
+    rows = [{key: entry[key] for key in ("code", "title", "category", "reason")}
+            for code, entry in run.excluded.items() if code not in carded]
+    rows += [{**{key: entry[key] for key in ("code", "title", "category")}, "reason": "a better match, but not offered this semester"}
+             for code, entry in run.not_offered.items() if code not in carded and code not in run.excluded]
+    return rows
 
 
 def without_card_bullets(reply: str, cards: list[dict]) -> str:
@@ -226,7 +232,7 @@ def run_agent(student: Student, message: str) -> AgentResult:
         return AgentResult(FAILED, [], run.debug)
     cards = build_cards(run.ctx, reply, run.plans, run.listed, run.mentioned)
     # after the cards: these courses aren't recommendations; notes read the full reply, before its bullets go
-    reply = without_card_bullets(reply, cards) + missing_notes(run, reply)
+    reply = without_card_bullets(reply, cards) + missing_notes(run)
     run.debug["seconds"] = round(time.monotonic() - started, 2)
     run.debug["usage"] = {key: sum(r["usage"].get(key, 0) for r in run.debug["rounds"]) for key in ("input_tokens", "output_tokens")}
-    return AgentResult(reply, cards, run.debug)
+    return AgentResult(reply, cards, run.debug, left_out(run, cards))

@@ -26,6 +26,10 @@
     <section id="answer" aria-live="polite" hidden>
       <div id="reply" class="reply"></div>
       <div id="cards" class="rec-cards"></div>
+      <details id="left-out" class="left-out" open hidden>
+        <summary></summary>
+        <table class="confirm-table"><thead><tr><th>Code</th><th>Title</th><th>Why not</th></tr></thead><tbody></tbody></table>
+      </details>
       {% if debug %}<details id="debug" class="debug"><summary>Debug</summary><pre></pre></details>{% endif %}
     </section>
   </div>
@@ -194,16 +198,28 @@
     return node;
   }
 
+  function renderLeftOut(rows) {
+    const box = $("left-out");
+    box.hidden = rows.length === 0;
+    box.querySelector("summary").textContent = `Not shown (${rows.length}), and why`;
+    box.querySelector("tbody").replaceChildren(...rows.map((row) => {
+      const tr = el("tr");
+      tr.append(el("td", "code", row.code), el("td", null, row.title), el("td", "muted", row.reason));
+      return tr;
+    }));
+  }
+
   async function ask() {
     const message = box.value.trim();
     if (!message) return;
     send.disabled = true; send.textContent = "Thinking…";
-    answer.hidden = false; cards.replaceChildren();
+    answer.hidden = false; cards.replaceChildren(); renderLeftOut([]);
     reply.innerHTML = '<span class="thinking" aria-label="Thinking"><i></i><i></i><i></i></span>';
     try {
       const {data} = await post("{% url 'recommend' %}", {message});
       reply.innerHTML = formatted(data.reply || data.error || "Something went wrong. Please try again.");
       (data.cards || []).forEach((c) => cards.append(card(c)));
+      renderLeftOut(data.left_out || []);
       renderSelection();
       if (debug) debug.textContent = data.debug ? JSON.stringify(data.debug, null, 1) : "";
     } catch (error) {
