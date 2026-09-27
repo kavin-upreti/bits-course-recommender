@@ -280,3 +280,22 @@ class DomainAndTitleTests(SimpleTestCase):
         # under TITLE_STRONG: relevance is the mean of the best pieces, with the title just one of them
         self.assertAlmostEqual(ranked["CS F407"].relevance, (0.9 + 0.3) / 2, places=5)
         self.assertEqual(DomainIndex.kinds[ranked["CS F407"].best_row], "topic")
+
+
+class TitleWordTests(SimpleTestCase):
+    def test_word_forms_match_but_different_words_sharing_a_prefix_dont(self):
+        from recommender.ranking import title_contains
+        self.assertTrue(title_contains("Politics and Society", "political"))
+        self.assertTrue(title_contains("Statistical Inference", "statistics"))
+        self.assertTrue(title_contains("Principles of Economics", "economy"))
+        self.assertFalse(title_contains("Communication Skills", "communism"))  # a 7-letter prefix cut matched these
+        self.assertFalse(title_contains("Community Development", "communism"))
+
+
+class NamedCategoryTests(SimpleTestCase):
+    def test_done_or_negated_categories_are_not_asks(self):
+        from recommender.agent import named_categories
+        self.assertEqual(named_categories("suggest DELs on ML, I've finished my HUELs"), {"DEL"})
+        self.assertEqual(named_categories("no HUELs please, just OPELs"), {"OPEL"})
+        self.assertEqual(named_categories("a DEL with no midsem"), {"DEL"})  # negation after the word is about the DEL
+        self.assertEqual(named_categories("I don't want OPELs"), set())

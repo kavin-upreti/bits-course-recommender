@@ -66,8 +66,23 @@ class Run:
     reminded: bool = False
 
 
+CLAUSE_BREAK = re.compile(r"[,.;:!?\n]|\bbut\b", re.I)
+DONE_WORDS = re.compile(r"\b(finished|completed?|done|already)\b", re.I)            # anywhere in the clause
+NEGATIONS = re.compile(r"\b(no|not|don'?t|do not|without|except|skip)\b", re.I)  # only before the category word
+
+
 def named_categories(message: str) -> set[str]:
-    return {category for category, pattern in CATEGORY_WORDS.items() if re.search(pattern, message, re.I)}
+    """Categories the student asks for. "I've finished my HUELs" / "no OPELs" don't count, "a DEL with no midsem" does.
+    ponytail: clause-level word rules, not parsing; a missed ask only skips the reminder, a false one forces a search."""
+    found = set()
+    for clause in CLAUSE_BREAK.split(message):
+        if DONE_WORDS.search(clause):
+            continue
+        for category, pattern in CATEGORY_WORDS.items():
+            match = re.search(pattern, clause, re.I)
+            if match and not NEGATIONS.search(clause[:match.start()]):
+                found.add(category)
+    return found
 
 
 def codes_in(value) -> set[str]:

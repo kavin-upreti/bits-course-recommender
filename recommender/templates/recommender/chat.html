@@ -127,7 +127,10 @@
     // why <details>: a native toggle, keyboard-accessible, no state to manage
     const box = el("details", "rec-score small");
     const summary = el("summary");
-    summary.append(el("strong", null, "Relevance " + score.final.toFixed(2)), el("span", "breakdown-link", "See breakdown"));
+    summary.append(el("strong", null, "Relevance " + score.final.toFixed(2)));
+    // why on the summary line: with several topics, 1.00 alone reads as "matches everything you asked"
+    if (score.topic) summary.append(el("span", "rec-topic", `for '${score.topic}'` + (score.related_topic ? " (a related topic)" : "")));
+    summary.append(el("span", "breakdown-link", "See breakdown"));
     box.append(summary);
     const rows = [];
     if (score.topic) rows.push(["Your topic", score.topic]);

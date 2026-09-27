@@ -75,13 +75,23 @@ def retrieve(index: PieceIndex, codes: list[str], queries: np.ndarray, candidate
     return sorted(shortlist, key=lambda item: (-item.embedding, item.code))
 
 
-STEM_LETTERS = 7  # "politics" / "political" -> "politic"; "statistics" / "statistical" -> "statist"
+# longest first; a closed list of word endings, so word forms of one root meet on the same base
+SUFFIXES = ("ically", "ations", "ation", "ical", "ics", "ies", "ing", "al", "ic", "es", "ed", "s", "y")
+MIN_BASE = 3  # "ethics" / "ethical" -> "eth"; shorter bases ("gas" -> "ga") are left whole
+
+
+def base(word: str) -> str:
+    """The word without its longest listed ending: politics / political -> polit, economy / economics -> econom,
+    but communism / communication / community stay apart (a 7-letter prefix cut made all three "communi")."""
+    for suffix in SUFFIXES:
+        if word.endswith(suffix) and len(word) - len(suffix) >= MIN_BASE:
+            return word[:-len(suffix)]
+    return word
 
 
 def words(text: str) -> set[str]:
-    """Lowercase words, each cut to its first STEM_LETTERS letters, so word forms of one root match.
-    ponytail: a prefix cut, not a stemmer; "computer" and "computational" stay apart (7 letters differ), which is right."""
-    return {word[:STEM_LETTERS] for word in re.findall(r"[a-z0-9]+", text.lower())}
+    """Lowercase words, each reduced to its base (see base())."""
+    return {base(word) for word in re.findall(r"[a-z0-9]+", text.lower())}
 
 
 def title_contains(title: str, topic: str) -> bool:

@@ -430,6 +430,7 @@ dialog.sheet[open] { animation: sheet-in 0.4s var(--ease-out); }
 .rec-meta { color: var(--text-2); font-size: 0.8125rem; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .rec-score { font-size: 0.8125rem; margin-top: var(--s2); color: var(--text-2); }
 .rec-score strong { color: var(--text); }
+.rec-topic { color: var(--text-2); }
 .rec-score summary { cursor: pointer; list-style: none; display: flex; gap: var(--s2); align-items: baseline; }
 .rec-score summary::-webkit-details-marker { display: none; }
 .breakdown-link { color: var(--accent, var(--text-2)); text-decoration: underline; text-underline-offset: 2px; }
