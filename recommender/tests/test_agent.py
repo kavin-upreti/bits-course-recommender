@@ -253,6 +253,15 @@ class PickingTests(Catalog):
         self.assertIn("can't all be taken together", both.json()["error"])
         self.assertFalse(StudentCourse.objects.filter(course__code__in=["XX F411", "HSS F202"]).exists())
 
+    def test_timetables_popup_says_an_exam_clash_blocks_the_course(self):
+        for code, timings in (("XX F411", {"W": [3]}), ("HSS F202", {"F": [3]})):  # classes fit, midsems don't
+            self.courses[code].offerings.all().delete()
+            offer(self.courses[code], [("lecture", "L1", timings)], midsem=("10/10", "FN1"))
+        self.select("XX F411")
+        page = self.client.get("/plan/timetables/?with=HSS%20F202").content.decode()
+        self.assertIn("Can't be added: XX F411 and HSS F202 have their midsem at the same time", page)
+        self.assertNotIn("Can't be added:", self.client.get("/plan/timetables/").content.decode())
+
     def test_timetables_popup_includes_current_selected_and_candidate(self):
         self.select("XX F411")
         page = self.client.get("/plan/timetables/?with=HSS%20F202").content.decode()

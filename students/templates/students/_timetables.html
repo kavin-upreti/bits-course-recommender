@@ -4,6 +4,7 @@ dashed), filters, filter_notes, teacher_options, chosen_teachers, avoid_keys, pe
   <div class="tt-head">
     <div>
       <h2>{{ heading }}</h2>
+      {% if blocked %}<p class="notice bad small" role="alert">Can't be added: {{ blocked }}</p>{% endif %}
       <p class="muted small">Every option keeps a lunch hour free each day. Best first: your sort choices, then fewest free hours between classes, fewest 8 AMs, fewest days on campus.</p>
     </div>
     {% if timetables|length > 1 %}

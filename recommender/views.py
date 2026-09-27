@@ -163,8 +163,10 @@ def plan_timetables(request: HttpRequest) -> HttpResponse:
     grids = timetable_context(codes, set(considering) - set(current), read_filters(request.GET), category_map(student.programme))
     grids.pop("offered")
     heading = f"Timetables with {', '.join(considering)}" if considering else "Your current timetables"
+    # why: the grids only show class times; an exam clash or the unit limit blocks a course with a clash-free week too
+    blocked = plan_problem(student, considering) if considering and grids["timetables"] else ""
     return render(request, "students/_timetables.html", {**grids, "heading": heading, "with_code": extra[0] if extra else "",
-                                                         "filters_url": reverse("plan_timetables")})
+                                                         "filters_url": reverse("plan_timetables"), "blocked": blocked})
 
 
 @login_required
