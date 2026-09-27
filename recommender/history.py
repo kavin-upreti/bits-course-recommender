@@ -73,17 +73,25 @@ def rebuild_inferred_courses(student: Student) -> None:
     StudentCourse.objects.bulk_create(rows.values())
 
 
-def done_codes(student: Student) -> set[str]:
+def done_codes(student: Student, status: str | None = None) -> set[str]:
     """Codes the student has done or is doing this semester, widened to everything that stands in for them:
     the other side of an "X or Y" slot, timetable equivalents and hand-made code mappings (both directions).
-    What the recommender must never suggest again."""
+    What the recommender must never suggest again. status: only "completed" or only "current" rows."""
     rows = StudentCourse.objects.filter(student=student).select_related("course", "pattern_slot__course")
+    if status:
+        rows = rows.filter(status=status)
     codes = {row.course.code for row in rows}
     for row in rows:
         if row.pattern_slot and row.pattern_slot.course:
             codes.add(row.pattern_slot.course.code)
             codes.update(row.pattern_slot.alternatives)
+    return with_equivalents(codes)
+
+
+def with_equivalents(codes: set[str]) -> set[str]:
+    """The codes plus their timetable equivalents and hand-made code mappings, in both directions."""
     base = set(codes)
+    codes = set(codes)
     codes.update(CourseEquivalent.objects.filter(course__code__in=base).values_list("equivalent_code", flat=True))
     codes.update(CourseEquivalent.objects.filter(equivalent_code__in=base).values_list("course__code", flat=True))
     codes.update(CodeMapping.objects.filter(to_course__code__in=base).values_list("from_code", flat=True))

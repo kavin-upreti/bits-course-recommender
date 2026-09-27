@@ -5,11 +5,18 @@ from django.contrib.auth.models import User
 
 from catalog.models import Minor
 
+from dataclasses import replace
+
 from .bits_id import BitsIdError, ParsedId, parse_bits_id, resolve_programme
-from .models import COMFORT, GRADES, Student
+from recommender.config import DAY_CODES, DAY_NAMES
+
+from .models import COMFORT, EVAL_STYLES, GRADES, Student
 
 YES_NO = [("", "Not decided"), ("True", "Yes"), ("False", "No")]
-MINOR_FROM_YEAR = 3  # minor_rules: declared at the end of the 2nd year
+MINOR_AIM_FROM_YEAR = 2  # 2nd-years can name the minor they're aiming for
+MINOR_FROM_YEAR = 3  # minor_rules: declared at the end of the 2nd year, so pursued from 3-1
+SECOND_DEGREE_ASKED_FROM = (2, 1)  # dual degrees are allotted after the 1st year
+SECOND_DEGREE_NEEDED_FROM = (2, 2)  # the planner needs the B.E. chart from here on (user's rule, 2026-09-26)
 
 
 class RegisterForm(UserCreationForm):
@@ -44,34 +51,56 @@ class RegisterForm(UserCreationForm):
         return user
 
 
-def semester_choices(max_year: int) -> list[tuple[str, str]]:
-    """Every year-sem of the programme. The pick only decides what's done: all semesters before it."""
-    return [(f"{year}-{sem}", f"{year}-{sem}") for year in range(1, max_year + 1) for sem in (1, 2)]
-
-
 class ProfileForm(forms.ModelForm):
-    """Everything about the student except courses. Programme, campus and batch are not asked: they come from the ID."""
+    """Everything about the student except courses. Programme, campus, batch and the semester being planned are not
+    asked: they come from the ID (the semester from its batch and the loaded timetable, recommender.timetable)."""
 
-    planning = forms.ChoiceField(label="Semester you're going into")
+    second_degree_code = forms.ChoiceField(label="Your B.E. (second) degree", required=False)
     minor = forms.ModelChoiceField(Minor.objects.order_by("name"), required=False, empty_label="No minor")
     interests = forms.CharField(required=False, help_text="Comma-separated, e.g. machine learning, finance")
     sop_plan = forms.TypedChoiceField(
         label="Planning an SOP (study-oriented project under a professor)?", choices=YES_NO, required=False,
         coerce=lambda value: value == "True", empty_value=None,
     )
+    default_avoid_8am = forms.BooleanField(label="Avoid 8 AM classes by default", required=False)
+    default_avoid_day = forms.TypedChoiceField(
+        label="Keep this day free by default", required=False, empty_value=None,
+        choices=[("", "No preference")] + [(code, DAY_NAMES[code]) for code in DAY_CODES],
+    )
+    avoid_eval_styles = forms.MultipleChoiceField(
+        label="Evaluation styles you'd rather avoid", choices=EVAL_STYLES, required=False,
+        widget=forms.CheckboxSelectMultiple, help_text="Courses with these are ranked a little lower, not removed.",
+    )
 
     class Meta:
         model = Student
-        fields = ("minor", "interests", "goal", "cgpa", "strengths", "weaknesses", "sop_plan")
+        fields = ("second_degree_code", "minor", "interests", "goal", "cgpa", "strengths", "weaknesses", "sop_plan",
+                  "default_avoid_8am", "default_avoid_day", "avoid_eval_styles")
         labels = {"cgpa": "CGPA (optional)"}
         widgets = {"strengths": forms.Textarea(attrs={"rows": 2}), "weaknesses": forms.Textarea(attrs={"rows": 2})}
 
-    def __init__(self, *args, max_year: int, **kwargs) -> None:
+    def __init__(self, *args, planning: tuple[int, int], second_degrees: list[tuple[str, str]], **kwargs) -> None:
+        """planning: the semester being planned. second_degrees: the B.E. options for an M.Sc.-only ID (empty = not asked).
+        Questions that don't apply to that semester are removed, not hidden."""
         kwargs.setdefault("label_suffix", "")
         super().__init__(*args, **kwargs)
-        self.fields["planning"].choices = semester_choices(max_year)
+        self.planning = planning
+        if second_degrees and planning >= SECOND_DEGREE_ASKED_FROM:
+            field = self.fields["second_degree_code"]
+            field.choices = [("", "Not decided yet")] + second_degrees
+            if planning >= SECOND_DEGREE_NEEDED_FROM:
+                field.help_text = "Needed from 2-2: your plan includes its courses from here on."
+            else:
+                field.label = "B.E. degree you expect to get (optional)"
+                field.help_text = "Not needed for 2-1, but picking the one you expect keeps its courses out of your recommendations."
+        else:
+            del self.fields["second_degree_code"]
+        if planning[0] < MINOR_AIM_FROM_YEAR:
+            del self.fields["minor"]
+        else:
+            self.fields["minor"].label = "Minor you're pursuing" if planning[0] >= MINOR_FROM_YEAR else "Minor you're aiming for"
+            self.fields["minor"].help_text = "Minors are declared at the end of 2nd year; before that, pick the one you're aiming for."
         if self.instance.pk:
-            self.initial["planning"] = f"{self.instance.current_year}-{self.instance.current_semester}"
             self.initial["interests"] = ", ".join(self.instance.interests)
             self.initial["sop_plan"] = "" if self.instance.sop_plan is None else str(self.instance.sop_plan)
 
@@ -86,19 +115,25 @@ class ProfileForm(forms.ModelForm):
 
     def clean(self) -> dict:
         cleaned = super().clean()
-        if cleaned.get("planning") and cleaned.get("minor") and int(cleaned["planning"].split("-")[0]) < MINOR_FROM_YEAR:
-            self.add_error("minor", "A minor is declared at the end of the 2nd year, so it applies from 3-1 onwards.")
+        if "second_degree_code" in self.fields:
+            if self.planning >= SECOND_DEGREE_NEEDED_FROM and not cleaned.get("second_degree_code"):
+                self.add_error("second_degree_code", "From 2-2 on your plan includes your B.E. courses, so pick your B.E. degree.")
         return cleaned
 
     def save_for(self, user: User, parsed: ParsedId) -> Student:
         """Fill the ID-derived fields, then save. Called instead of save() so a new Student gets them too."""
         student = super().save(commit=False)
         student.user = user
-        student.programme = resolve_programme(parsed)
+        second = self.cleaned_data.get("second_degree_code") or ""
+        student.second_degree_code = second
+        student.programme = resolve_programme(replace(parsed, second_code=second) if second else parsed)
         student.campus = parsed.campus
         student.admission_year = parsed.admission_year
-        student.current_year, student.current_semester = map(int, self.cleaned_data["planning"].split("-"))
-        student.minor_registered = student.minor is not None
+        student.current_year, student.current_semester = self.planning
+        if "minor" not in self.fields:  # 1st year: no minor yet
+            student.minor = None
+        # 2nd-years only aim for a minor; it's registered (pursued) from 3-1 on
+        student.minor_registered = student.minor is not None and student.current_year >= MINOR_FROM_YEAR
         student.save()
         return student
 

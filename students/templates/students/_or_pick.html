@@ -1,4 +1,4 @@
-{% for slot in slots %}
+{% load text %}{% for slot in slots %}
 <fieldset class="or-pick">
   <legend>{{ prompt }}</legend>
   <div class="or-options">
@@ -7,7 +7,7 @@
       <label class="or-option">
         <input type="radio" name="alt:{{ slot.key }}" value="{{ option.code }}"{% if slot.picked == option.code %} checked{% endif %}>
         <span class="code">{{ option.code }}</span>
-        <span class="title">{{ option.title|title }}</span>
+        <span class="title">{{ option.title|course_title }}</span>
       </label>
     {% endfor %}
   </div>

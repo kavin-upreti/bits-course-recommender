@@ -1,0 +1,654 @@
+"""The get_eligible_courses pipeline (todo.md section 6), one small function per stage.
+
+A: rule filters (offered, category, not done, prerequisites, batch, exclude)  ->  B: handout filters
+->  C: retrieve (embeddings) + rerank (cross-encoder, recommender/ranking.py) + relevance cutoff + dislike
+penalties, then sort  ->  D: timetable preferences  ->  fit with the current courses  ->  E: result.
+Every removal is recorded in `Pipeline.removed` (stage -> codes), for tests and the debug panel.
+"""
+from dataclasses import dataclass, field
+from functools import cmp_to_key
+
+import time
+
+import numpy as np
+from django.db.models import Prefetch
+
+from catalog.models import Course, Offering, Rule
+from students.models import EVAL_STYLES
+from students.templatetags.text import course_title
+
+from . import config
+from .codes import normalise_code, resolve_course
+from .context import StudentContext, resolve_preferences
+from .embeddings import get_embedder, get_reranker
+from .handout_facts import CourseFacts, all_course_facts, get_course_facts, number
+from .history import with_equivalents
+from .piece_index import get_piece_index
+from .ranking import Scored, rerank, retrieve
+from .plan import check_plan
+from .timetable import timetable_term
+
+# filter key -> (CourseFacts field, pass test given the fact value and the filter's argument)
+FILTERS = {
+    "no_midsem": ("has_midsem", lambda value, _: value is False),
+    "no_attendance": ("attendance_required", lambda value, _: value is False),
+    "lenient_makeup": ("makeup_lenient", lambda value, _: value is True),
+    "project_based": ("project_percent", lambda value, _: value > 0),
+    "open_book": ("open_book", lambda value, _: value is True),
+    "max_quizzes": ("quiz_count", lambda value, limit: value <= limit),
+    "max_compre_percent": ("compre_percent", lambda value, limit: value <= limit),
+    "min_project_percent": ("project_percent", lambda value, limit: value >= limit),
+}
+COUNTS_AS_NOTE = "counts as an OPEL, since your {category} requirement is complete"
+HIGHER_DEGREE_NOTE = "higher-degree course: at most 1 per semester, needs a minimum CGPA set by the AGC (the number isn't published)"
+PREREQ_NOTE = "prerequisites couldn't be verified"
+TIMINGS_NOTE = "some class times aren't listed in the timetable"
+SECTION_TYPES = ("lecture", "tutorial", "practical")
+SEARCH_ORDER = ("HUEL", "DEL", "OPEL")
+
+
+@dataclass
+class Candidate:
+    """A course still in the running, and everything the result says about it."""
+
+    course: Course
+    category: str
+    facts: CourseFacts
+    sections: list = field(default_factory=list)   # non-cancelled sections this semester
+    counts_as: str | None = None
+    notes: list[str] = field(default_factory=list)
+    filters_passed: list[str] = field(default_factory=list)
+    unverified: list[str] = field(default_factory=list)
+    unverified_notes: list[str] = field(default_factory=list)
+    embedding: float | None = None                  # best piece similarity (C1)
+    relevance: float | None = None                  # cross-encoder relevance, 0-1 (C2), times domain
+    domain: float | None = None                     # the department-fit multiplier inside relevance
+    penalty: float = 0.0
+    matched_on: str | None = None
+    matched_topic: str | None = None                # the student's topic that matched_on answered
+    why: str = ""
+    rank: int = 0                                   # 1-based, before stage D
+    picked_sections: dict = field(default_factory=dict)  # {"lecture": "L2"}: a fit with the current courses
+
+    @property
+    def code(self) -> str:
+        return self.course.code
+
+    @property
+    def final(self) -> float:
+        return (self.relevance or 0) + self.penalty
+
+
+@dataclass
+class Pipeline:
+    """Resolved settings, the working lists and what each stage did."""
+
+    ctx: StudentContext
+    settings: dict
+    searched: list[str]
+    exclude: set[str]
+    filters: dict
+    warnings: list[str] = field(default_factory=list)
+    removed: dict[str, list[str]] = field(default_factory=dict)
+    excluded: list[dict] = field(default_factory=list)
+    offered_codes: set[str] = field(default_factory=set)
+    timings: dict = field(default_factory=dict)       # stage C: retrieval_ms, rerank_ms, rerank_pairs
+    unoffered: list[Scored] = field(default_factory=list)       # reranked courses not offered this semester
+    next_semester_relevance: dict[str, float] = field(default_factory=dict)
+    next_semester: list[tuple[str, str]] = field(default_factory=list)  # (code, "X needs Y, which you're taking…")
+
+    def remove(self, stage: str, code: str) -> None:
+        self.removed.setdefault(stage, []).append(code)
+
+
+# ---------------------------------------------------------------- 6.0 settings
+
+def resolve_exclude(codes: list[str] | None) -> tuple[set[str], list[str]]:
+    """Normalised codes plus their equivalents, and a warning per unknown code."""
+    found, warnings = set(), []
+    for raw in codes or []:
+        code = normalise_code(raw)
+        course = resolve_course(code)
+        if course is None:
+            warnings.append(f"Unknown course in exclude: {code}")
+            continue
+        found |= {code, course.code}
+    return with_equivalents(found), warnings
+
+
+def max_extra_electives() -> int | None:
+    rule = Rule.objects.filter(rule_id="reg_extra_electives").first()
+    return rule.values.get("max_extra_electives") if rule else None
+
+
+def plural(categories: list[str]) -> str:
+    """["HUEL", "DEL"] -> "HUELs or DELs"."""
+    return " or ".join(f"{category}s" for category in categories)
+
+
+# ---------------------------------------------------------------- 6.1 which categories
+
+def categories_to_search(ctx: StudentContext, category: str | None) -> tuple[list[str], list[str], bool]:
+    """(categories, warnings, stop). stop = everything is complete, so there's nothing to search."""
+    if category:
+        return [category], [], False
+    if ctx.known_gap:
+        return list(SEARCH_ORDER), [ctx.known_gap], False
+    open_ones = [name for name in SEARCH_ORDER if not ctx.remaining[name].complete]
+    if open_ones:
+        return open_ones, [], False
+    extra = max_extra_electives()
+    return [], ["Your HUEL, DEL and OPEL requirements are all complete. Any further elective would be an extra elective"
+                + (f" (the regulations allow at most {extra} extra)." if extra is not None else ".")], True
+
+
+def complete_warnings(ctx: StudentContext, category: str) -> list[str]:
+    """Explicit search for a requirement that's already done: say what the extra courses will count as."""
+    status = ctx.remaining.get(category)
+    if not status or not status.complete:
+        return []
+    extra = max_extra_electives()
+    extra_text = f"will be extra electives (at most {extra} extra allowed)." if extra is not None else "will be extra electives."
+    if status.required_courses == 0:
+        return [f"Your programme has no {category} requirement, so these {extra_text}"]
+    opel_done = ctx.remaining["OPEL"].complete
+    tail = f"Extra {category}s {extra_text}" if category == "OPEL" or opel_done else f"Extra {category}s will count as OPELs instead."
+    return [f"Your {category} requirement is already complete ({status.done_units} of {status.required_units} units). {tail}"]
+
+
+# ---------------------------------------------------------------- 6.2 stage A
+
+def offered_courses(semester_tag: str) -> list[Course]:
+    """Courses with at least one non-cancelled section this semester, sections prefetched."""
+    live = Offering.objects.filter(semester_tag=semester_tag).prefetch_related("sections").order_by("pk")
+    courses = (Course.objects.filter(offerings__semester_tag=semester_tag, offerings__sections__cancelled=False)
+               .distinct().order_by("code").prefetch_related(Prefetch("offerings", queryset=live)))
+    return list(courses)
+
+
+def live_sections(course: Course) -> list:
+    """Non-cancelled sections of the course's first offering with any (the prefetched semester offerings)."""
+    for offering in course.offerings.all():
+        sections = [section for section in offering.sections.all() if not section.cancelled]
+        if sections:
+            return sections
+    return []
+
+
+def category_of(pipeline: Pipeline, code: str) -> tuple[str, str | None] | None:
+    """(category, counts_as) if the course belongs to a searched category; None otherwise.
+    OPEL also takes DELs / HUELs once that requirement is complete."""
+    ctx, category = pipeline.ctx, pipeline.ctx.category_map.get(code)
+    if category in pipeline.searched:
+        return category, None
+    if "OPEL" in pipeline.searched and category in ("DEL", "HUEL") and category in ctx.remaining \
+            and ctx.remaining[category].complete:
+        return category, "OPEL"
+    return None
+
+
+def prerequisite_state(course: Course, completed: set[str], current: set[str]) -> str:
+    """"met", "unknown" (flagged / unparseable), "next_semester" (met once current courses are done) or "unmet".
+    Only completed courses count; a current course satisfies a prerequisite next semester."""
+    if course.needs_verification and not course.prerequisites:
+        return "unknown"
+    groups = course.prerequisites or []
+    if all(set(group) & completed for group in groups):
+        return "met"
+    if all(set(group) & (completed | current) for group in groups):
+        return "next_semester"
+    return "unmet"
+
+
+def newer_batch_only(ctx: StudentContext, course: Course, term: tuple[int, int] | None) -> bool:
+    """A course only the batch admitted in the timetable's year may take (com code rule), for an older student."""
+    return course.only_2026_batch and term is not None and ctx.student.admission_year < term[0]
+
+
+def stage_a(pipeline: Pipeline) -> list[Candidate]:
+    """Rule filters, in the order of todo 6.2. Records removals and warnings."""
+    ctx = pipeline.ctx
+    counts: dict[str, int] = {}
+    candidates = []
+    all_course_facts()  # why: fills the facts cache in two queries instead of one per course
+    term = timetable_term()  # why once: it's a query, and this loop runs over every offered course
+    offered = offered_courses(ctx.semester_tag)
+    pipeline.offered_codes = {course.code for course in offered}
+    for course in offered:
+        placed = category_of(pipeline, course.code)
+        if placed is None:
+            continue
+        counts["category"] = counts.get("category", 0) + 1
+        if course.code in ctx.completed or course.code in ctx.current:
+            pipeline.remove("done", course.code)
+            continue
+        counts["done"] = counts.get("done", 0) + 1
+        state = prerequisite_state(course, ctx.completed, ctx.current)
+        if state in ("unmet", "next_semester"):
+            pipeline.remove("prerequisites", course.code)
+            if state == "next_semester":
+                needed = sorted({code for group in course.prerequisites for code in group if code in ctx.current
+                                 and not set(group) & ctx.completed})
+                pipeline.next_semester.append((course.code, f"{course.code} needs {' and '.join(needed)}, which you're taking this semester, "
+                                     "so you'll be eligible next semester"))
+            continue
+        counts["prerequisites"] = counts.get("prerequisites", 0) + 1
+        if newer_batch_only(ctx, course, term):
+            pipeline.remove("batch", course.code)
+            continue
+        counts["batch"] = counts.get("batch", 0) + 1
+        if course.code in pipeline.exclude:
+            pipeline.remove("exclude", course.code)
+            continue
+        candidate = Candidate(course=course, category=placed[0], counts_as=placed[1], facts=get_course_facts(course),
+                              sections=live_sections(course))
+        if placed[1]:
+            candidate.notes.append(COUNTS_AS_NOTE.format(category=placed[0]))
+        if state == "unknown":
+            candidate.notes.append(PREREQ_NOTE)
+        if course.is_higher_degree:
+            candidate.notes.append(HIGHER_DEGREE_NOTE)
+        candidates.append(candidate)
+    if not candidates:
+        pipeline.warnings.append(empty_reason(pipeline, counts))
+    return candidates
+
+
+def empty_reason(pipeline: Pipeline, counts: dict[str, int]) -> str:
+    """Which stage removed everything, in one sentence."""
+    kinds = plural(pipeline.searched)
+    if not counts.get("category"):
+        return f"No {kinds} are offered this semester."
+    if not counts.get("done"):
+        return f"No {kinds} you haven't already taken are offered this semester."
+    if not counts.get("prerequisites"):
+        return f"Every {kinds[:-1] if len(pipeline.searched) == 1 else 'course'} you haven't taken yet needs prerequisites you haven't completed."
+    if not counts.get("batch"):
+        return f"The remaining {kinds} are only open to the newest batch."
+    return f"Every remaining {kinds[:-1] if len(pipeline.searched) == 1 else 'course'} is in your exclude list."
+
+
+# ---------------------------------------------------------------- 6.3 stage B
+
+def stage_b(pipeline: Pipeline, candidates: list[Candidate]) -> tuple[list[Candidate], list[Candidate]]:
+    """(passed, couldnt_verify). A failed filter removes the course; an unknown one sends it to couldnt_verify."""
+    active = {key: value for key, value in pipeline.filters.items() if value is not False}
+    passed, unknown = [], []
+    for candidate in candidates:
+        failed = False
+        for key, value in active.items():
+            fact_field, test = FILTERS[key]
+            fact = getattr(candidate.facts, fact_field)
+            if fact is None:
+                candidate.unverified.append(key)
+                note = candidate.facts.note_for(fact_field) or "not stated in the handout"
+                if note not in candidate.unverified_notes:
+                    candidate.unverified_notes.append(note)
+            elif test(fact, value):
+                candidate.filters_passed.append(key)
+            else:
+                failed = True
+        if failed:
+            pipeline.remove("filters", candidate.code)
+        elif candidate.unverified:
+            unknown.append(candidate)
+        else:
+            passed.append(candidate)
+    return passed, unknown
+
+
+# ---------------------------------------------------------------- 6.4 stage C
+
+def query_topics(ctx: StudentContext, about: list[str] | None) -> tuple[list[str] | None, str]:
+    """(topics to embed, ranked_by). Each topic is scored on its own; a course counts by its best topic."""
+    if about:
+        return about, "about"
+    if ctx.interests:
+        return list(ctx.interests), "profile_interests"
+    return None, "handout_completeness"
+
+
+def shorten(text: str, limit: int) -> str:
+    return text if len(text) <= limit else text[:limit - 1].rstrip() + "…"
+
+
+def penalties(facts: CourseFacts, styles: list[str]) -> list[str]:
+    """One explanation per disliked evaluation style the course has (unknown facts never count)."""
+    found = {
+        "many_quizzes": facts.quiz_count is not None and facts.quiz_count >= config.MANY_QUIZZES_THRESHOLD
+        and f"{facts.quiz_count} quizzes (you'd rather avoid many quizzes)",
+        "closed_book": facts.open_book is False and "no open-book exams (you'd rather avoid closed-book exams)",
+        "strict_attendance": facts.attendance_required is True and "attendance required (you'd rather avoid strict attendance)",
+        "heavy_compre": facts.compre_percent is not None and facts.compre_percent >= config.HEAVY_COMPRE_PERCENT
+        and f"compre is {number(facts.compre_percent)}% (you'd rather avoid a heavy compre)",
+        "no_makeup": facts.makeup_allowed is False and "no makeups (you'd rather avoid courses without makeups)",
+    }
+    return [found[style] for style, _ in EVAL_STYLES if style in styles and found[style]]
+
+
+def matched_text(index, row: int) -> str:
+    """"topic: Transformers and attention", cut to MATCHED_ON_MAX_CHARS."""
+    return shorten(f"{index.kinds[row].replace('_', ' ')}: {index.texts[row]}", config.MATCHED_ON_MAX_CHARS)
+
+
+def unoffered_pool(pipeline: Pipeline) -> list[str]:
+    """Courses of the searched categories that aren't offered this semester and aren't done."""
+    ctx = pipeline.ctx
+    return [code for code in get_piece_index().rows_by_course
+            if code not in pipeline.offered_codes and code not in ctx.completed and code not in ctx.current
+            and ctx.category_map.get(code) in pipeline.searched]
+
+
+def relevance_scores(pipeline: Pipeline, topics: list[str], ranked_by: str, passed: list[Candidate],
+                     unknown: list[Candidate]) -> tuple[list[Candidate], list[Candidate]]:
+    """C1 + C2. Each list keeps only its top RERANK_CANDIDATES by embedding, now with embedding / relevance /
+    matched_on. Courses not offered (topic searches) and "next semester" ones are reranked in the same call."""
+    index, started = get_piece_index(), time.monotonic()
+    query = get_embedder().embed(topics, kind="query")
+    main = retrieve(index, [candidate.code for candidate in passed], query, config.RERANK_CANDIDATES)
+    unverified = retrieve(index, [candidate.code for candidate in unknown], query, config.RERANK_CANDIDATES)
+    unoffered = retrieve(index, unoffered_pool(pipeline), query, config.RERANK_CANDIDATES) if ranked_by == "about" else []
+    later = retrieve(index, [code for code, _ in pipeline.next_semester], query, len(pipeline.next_semester))
+    retrieved = time.monotonic()
+    groups = [main, unverified, unoffered, later]
+    rerank(groups, topics, query, index, get_reranker(), config.BEST_PIECE_WEIGHT)
+    pipeline.timings = {"retrieval_ms": round(1000 * (retrieved - started)), "rerank_ms": round(1000 * (time.monotonic() - retrieved)),
+                        "rerank_pairs": sum(len(item.rows) for group in groups for item in group)}
+    pipeline.unoffered = unoffered
+    pipeline.next_semester_relevance = {item.code: item.relevance for item in later}
+
+    def attach(candidates: list[Candidate], scored: list[Scored], stage: str) -> list[Candidate]:
+        by_code = {item.code: item for item in scored}
+        kept = []
+        for candidate in candidates:
+            item = by_code.get(candidate.code)
+            if item is None:
+                pipeline.remove(stage, candidate.code)
+                continue
+            candidate.embedding, candidate.relevance, candidate.domain = item.embedding, item.relevance, item.domain
+            candidate.matched_on = matched_text(index, item.best_row)
+            candidate.matched_topic = item.best_topic
+            kept.append(candidate)
+        return kept
+    return attach(passed, main, "retrieval"), attach(unknown, unverified, "retrieval")
+
+
+def apply_penalties(ctx: StudentContext, ranked_by: str, has_query: bool, candidates: list[Candidate]) -> None:
+    """C4: dislike penalties and the `why` text (built here, never by the LLM)."""
+    for candidate in candidates:
+        reasons = penalties(candidate.facts, ctx.avoid_eval_styles)
+        candidate.penalty = -config.DISLIKE_PENALTY * len(reasons)
+        parts = [f"matches {candidate.matched_on}"] if candidate.matched_on and ranked_by == "about" else []
+        if ranked_by != "about":
+            candidate.matched_topic = None  # why: profile interests aren't "your topic", same reason as below
+        if ranked_by == "profile_interests":
+            # why no matched piece here: the model turned "matches topic: X" into "your interest in X"
+            related = candidate.relevance is not None and candidate.relevance >= config.RELEVANCE_CUTOFF
+            parts.append("related to your profile interests" if related else "not closely related to your profile interests")
+        parts += reasons
+        if has_query and not candidate.facts.has_handout:
+            parts.append("no handout, matched on the Bulletin description only")
+        candidate.why = "; ".join(parts)
+
+
+def relevance_cutoff(pipeline: Pipeline, about: list[str], passed: list[Candidate], unknown: list[Candidate],
+                     ranked_by: str) -> tuple[list[Candidate], list[Candidate], list[Candidate]]:
+    """C3 (topic searches only): keep real matches (relevance before penalties >= RELEVANCE_CUTOFF), never pad.
+    No real match at all -> the closest few become `loosely_related`, with a warning."""
+    real = [candidate for candidate in passed if candidate.relevance >= config.RELEVANCE_CUTOFF]
+    for candidate in passed + unknown:
+        if candidate.relevance < config.RELEVANCE_CUTOFF:
+            pipeline.remove("cutoff", candidate.code)
+    loose = []
+    if passed and not real:
+        loose = [candidate for candidate in rank(passed, ranked_by)[:config.LOOSE_MATCH_COUNT]
+                 if candidate.relevance >= config.LOOSE_MATCH_FLOOR]
+        pipeline.warnings.append(f"No course this semester strongly matches '{', '.join(about)}'."
+                                 + (" The closest ones are listed as loosely related." if loose else ""))
+    return real, [candidate for candidate in unknown if candidate.relevance >= config.RELEVANCE_CUTOFF], loose
+
+
+def stage_c(pipeline: Pipeline, about: list[str] | None, passed: list[Candidate],
+            unknown: list[Candidate]) -> tuple[str, list[Candidate], list[Candidate], list[Candidate]]:
+    """Retrieve, rerank, cut off, penalise. Returns (ranked_by, passed, unknown, loosely_related)."""
+    topics, ranked_by = query_topics(pipeline.ctx, about)
+    if topics is not None:
+        scored_passed, scored_unknown = relevance_scores(pipeline, topics, ranked_by, passed, unknown)
+        if ranked_by == "profile_interests" and not any(candidate.relevance >= config.RELEVANCE_CUTOFF
+                                                        for candidate in scored_passed + scored_unknown):
+            # nothing relates to the interests (e.g. HUELs for an ML student): a relevance score would be noise
+            for candidate in passed + unknown:
+                candidate.embedding = candidate.relevance = candidate.domain = None
+                candidate.matched_on = candidate.matched_topic = None
+            pipeline.removed.pop("retrieval", None)
+            topics, ranked_by = None, "handout_completeness"
+        else:
+            passed, unknown = scored_passed, scored_unknown
+    apply_penalties(pipeline.ctx, ranked_by, topics is not None, passed + unknown)
+    loose = []
+    if ranked_by == "about":
+        passed, unknown, loose = relevance_cutoff(pipeline, about, passed, unknown, ranked_by)
+    return ranked_by, passed, unknown, loose
+
+
+def next_semester_warnings(pipeline: Pipeline, has_query: bool) -> list[str]:
+    """"Eligible next semester" notes: with a query, only courses that pass the cutoff (most relevant first)."""
+    notes = pipeline.next_semester
+    if has_query:
+        relevance_of = pipeline.next_semester_relevance
+        notes = sorted(((code, note) for code, note in notes if relevance_of.get(code, 0) >= config.RELEVANCE_CUTOFF),
+                       key=lambda item: (-relevance_of[item[0]], item[0]))
+    return [note for _, note in notes[:config.MAX_NEXT_SEMESTER_WARNINGS]]
+
+
+def unoffered_matches(pipeline: Pipeline, shown: list[Candidate]) -> list[dict]:
+    """Real matches not offered this semester that beat everything shown (so the student hears "System Security
+    isn't offered" instead of nothing)."""
+    best = max((candidate.relevance for candidate in shown if candidate.relevance is not None), default=0.0)
+    better = [item for item in pipeline.unoffered
+              if item.relevance >= config.RELEVANCE_CUTOFF and item.relevance >= best + config.TIE_EPSILON]
+    top = sorted(better, key=lambda item: (-item.relevance, item.code))[:config.MAX_NOT_OFFERED]
+    titles = dict(Course.objects.filter(code__in=[item.code for item in top]).values_list("code", "title"))
+    return [{"code": item.code, "title": course_title(titles.get(item.code, "")),
+             "category": pipeline.ctx.category_map[item.code]} for item in top]
+
+
+# ---------------------------------------------------------------- 6.5 sort
+
+def tie_position(candidate: Candidate) -> int:
+    category = candidate.counts_as or candidate.category
+    return config.CATEGORY_TIE_ORDER.index(category) if category in config.CATEGORY_TIE_ORDER else len(config.CATEGORY_TIE_ORDER)
+
+
+def compare(ranked_by: str):
+    """Final score (ties within TIE_EPSILON), then category order, then completeness, then code.
+    With no query every final is just the penalty, so completeness comes before the category order."""
+    def key_order(a: Candidate, b: Candidate) -> int:
+        if (a.relevance is None) != (b.relevance is None) and ranked_by != "handout_completeness":
+            return 1 if a.relevance is None else -1
+        if abs(a.final - b.final) >= config.TIE_EPSILON:
+            return -1 if a.final > b.final else 1
+        keys = [(tie_position(a), tie_position(b)), (-a.facts.completeness, -b.facts.completeness)]
+        if ranked_by == "handout_completeness":
+            keys.reverse()
+        for left, right in keys + [(a.code, b.code)]:
+            if left != right:
+                return -1 if left < right else 1
+        return 0
+    return cmp_to_key(key_order)
+
+
+def rank(candidates: list[Candidate], ranked_by: str) -> list[Candidate]:
+    """Sorted, with each candidate's 1-based rank (before stage D)."""
+    ordered = sorted(sorted(candidates, key=lambda candidate: candidate.code), key=compare(ranked_by))
+    for position, candidate in enumerate(ordered, 1):
+        candidate.rank = position
+    return ordered
+
+
+# ---------------------------------------------------------------- 6.6 stage D
+
+def section_problem(section, avoid_8am: bool, avoid_day: str | None) -> list[str]:
+    """Which preferences this section breaks: "8am" and / or "day"."""
+    problems = []
+    if avoid_8am and any(set(periods) & config.EARLY_PERIODS for periods in section.timings.values()):
+        problems.append("8am")
+    if avoid_day and section.timings.get(avoid_day):
+        problems.append("day")
+    return problems
+
+
+def preference_reason(candidate: Candidate, avoid_8am: bool, avoid_day: str | None) -> str | None:
+    """Why the course can't meet the timetable preferences (every section of some type breaks one), or None."""
+    reasons = []
+    for kind in SECTION_TYPES:
+        sections = [section for section in candidate.sections if section.type == kind]
+        if not sections or any(not section_problem(section, avoid_8am, avoid_day) for section in sections):
+            continue
+        broken = {problem for section in sections for problem in section_problem(section, avoid_8am, avoid_day)}
+        words = [text for problem, text in (("8am", "has an 8 AM class"), ("day", f"is on {config.DAY_NAMES.get(avoid_day, avoid_day)}"))
+                 if problem in broken]
+        reasons.append(f"every {kind} section {' or '.join(words)}")
+    return "; ".join(reasons) or None
+
+
+def stage_d(pipeline: Pipeline, ranked: list[Candidate], ranked_by: str) -> list[Candidate]:
+    """Drop courses whose every section of some type breaks a timetable preference; the ones that would have been
+    in the top MAX_RESULTS are reported in `excluded`."""
+    avoid_8am, avoid_day = pipeline.settings["avoid_8am"], pipeline.settings["avoid_day"]
+    if not avoid_8am and not avoid_day:
+        return ranked
+    kept = []
+    for candidate in ranked:
+        if any(not section.timings for section in candidate.sections):
+            candidate.notes.append(TIMINGS_NOTE)  # such sections count as OK
+        reason = preference_reason(candidate, avoid_8am, avoid_day)
+        if reason is None:
+            kept.append(candidate)
+            continue
+        pipeline.remove("timetable", candidate.code)
+        if candidate.rank <= config.MAX_RESULTS:
+            pipeline.excluded.append({"code": candidate.code, "title": course_title(candidate.course.title),
+                                      "category": candidate.category, "reason": reason})
+    return kept
+
+
+def stage_fit(pipeline: Pipeline, ranked: list[Candidate], limit: int) -> tuple[list[Candidate], int]:
+    """Keep the first `limit` courses that fit with the student's current courses (classes, exams, lunch, units),
+    with the sections check_plan picked; the ones that can't fit go to `excluded`. Returns (kept, how many checked).
+    why here and not only in the LLM's check_plan calls: the model sometimes skips them, and would then
+    recommend a course the student can't take."""
+    avoid_8am, avoid_day = pipeline.settings["avoid_8am"], pipeline.settings["avoid_day"]
+    kept, checked = [], 0
+    taken: dict[str, Candidate] = {}  # every code of a kept course, and of its equivalents -> the kept course
+    for candidate in ranked:
+        if len(kept) == limit:
+            break
+        checked += 1
+        if candidate.code in taken:  # cross-listed (MAC F212 = CS F213): one card, not two
+            taken[candidate.code].notes.append(f"also offered as {candidate.code} (the same course: take only one)")
+            continue
+        plan = check_plan(pipeline.ctx, [candidate.code], avoid_8am, avoid_day)
+        if plan["ok"] and candidate.code in plan.get("missed_preferences", []):
+            # stage D found a section avoiding the preference, but none of those fits with the current courses
+            wants = [text for on, text in ((avoid_8am, "an 8 AM class"),
+                                           (avoid_day, f"a class on {config.DAY_NAMES.get(avoid_day, avoid_day)}")) if on]
+            plan = {"ok": False, "reason": f"every way it fits with your current courses has {' or '.join(wants)}"}
+        if plan["ok"]:
+            candidate.picked_sections = plan["sections"].get(candidate.code, {})
+            kept.append(candidate)
+            taken.update(dict.fromkeys(with_equivalents({candidate.code}), candidate))
+            continue
+        pipeline.remove("fit", candidate.code)
+        reason = plan.get("reason") or ("no combination of its sections fits with your current courses" if not plan.get("conflicts")
+                                        else f"doesn't fit with your current courses: {plan['problem']}")
+        pipeline.excluded.append({"code": candidate.code, "title": course_title(candidate.course.title),
+                                  "category": candidate.category, "reason": reason})
+    return kept, checked
+
+
+# ---------------------------------------------------------------- 6.7 stage E
+
+def score_object(candidate: Candidate) -> dict:
+    # why + 0.0: turns -0.0 into 0.0
+    rounded = lambda value: None if value is None else round(value, 2)  # noqa: E731
+    return {"embedding": rounded(candidate.embedding), "relevance": rounded(candidate.relevance),
+            "penalty": round(candidate.penalty, 2) + 0.0, "final": round(candidate.final, 2), "why": candidate.why,
+            **({"topic": candidate.matched_topic} if candidate.matched_topic else {}),
+            **({"domain": round(candidate.domain, 2)} if candidate.domain is not None and candidate.domain < 1 else {})}
+
+
+def shortfall(about: list[str], found: int, count: int | None) -> str | None:
+    """Fewer courses than wanted for a topic: say so, so a short list doesn't read as a truncated one."""
+    wanted = count or config.MAX_RESULTS
+    if not 0 < found < wanted:
+        return None
+    topic = ", ".join(about)
+    if count:
+        return (f"Only {found} of the {count} courses you asked for match '{topic}' well and fit your timetable; "
+                "no other course this semester does.")
+    return f"No other course this semester matches '{topic}' well and fits your timetable."
+
+
+def course_entry(ctx: StudentContext, candidate: Candidate, verify: bool = False) -> dict:
+    """One course in `courses` / `couldnt_verify`: exact keys, empty optional ones left out."""
+    entry = {"code": candidate.code, "title": course_title(candidate.course.title), "category": candidate.category}
+    if candidate.counts_as:
+        entry["counts_as"] = candidate.counts_as
+    if candidate.code in ctx.minor_courses:
+        entry["minor"] = ctx.minor_courses[candidate.code]
+    notes = candidate.unverified_notes + candidate.notes if verify else candidate.notes
+    if verify:
+        entry["unverified"] = candidate.unverified
+    if notes:
+        entry["note"] = "; ".join(notes)
+    if candidate.filters_passed:
+        entry["filters_passed"] = candidate.filters_passed
+    if candidate.picked_sections:
+        entry["sections"] = candidate.picked_sections
+    entry["score"] = score_object(candidate)  # why: score.why already says what it matched on
+    return entry
+
+
+def run(ctx: StudentContext, category: str | None, about: list[str] | str | None, filters: dict | None,
+        avoid_8am: bool | None, avoid_day: str | None, exclude: list[str] | None,
+        count: int | None = None) -> tuple[dict, Pipeline]:
+    """The whole pipeline; returns the tool result and the pipeline (for tests / debug)."""
+    settings = resolve_preferences(ctx, avoid_8am, avoid_day)
+    exclude_codes, warnings = resolve_exclude(exclude)
+    searched, search_warnings, stop = categories_to_search(ctx, category)
+    pipeline = Pipeline(ctx, settings, searched, exclude_codes, dict(filters or {}), warnings + search_warnings)
+    courses, unknown, loose, not_offered, unverified_more = [], [], [], [], 0
+    about = [about] if isinstance(about, str) else about  # one topic given as plain text
+    ranked_by = query_topics(ctx, about)[1]
+    if not stop:
+        if category:
+            pipeline.warnings += complete_warnings(ctx, category)
+        passed, unknown = stage_b(pipeline, stage_a(pipeline))
+        ranked_by, passed, unknown, loose = stage_c(pipeline, about, passed, unknown)
+        courses, _ = stage_fit(pipeline, stage_d(pipeline, rank(passed, ranked_by), ranked_by), count or config.MAX_RESULTS)
+        ranked_unknown = stage_d(pipeline, rank(unknown, ranked_by), ranked_by)
+        unknown, checked = stage_fit(pipeline, ranked_unknown, config.MAX_UNVERIFIED)
+        unverified_more = len(ranked_unknown) - checked
+        pipeline.warnings += next_semester_warnings(pipeline, ranked_by != "handout_completeness")
+        if ranked_by == "about":
+            not_offered = unoffered_matches(pipeline, courses + loose)
+        if pipeline.timings:
+            ctx.timings.append(pipeline.timings)
+    result = {
+        "searched": searched,
+        "settings_used": {**settings, "ranked_by": ranked_by},
+        "courses": [course_entry(ctx, candidate) for candidate in courses],
+        "couldnt_verify": [course_entry(ctx, candidate, verify=True) for candidate in unknown],
+        "excluded": pipeline.excluded,
+        "warnings": pipeline.warnings,
+    }
+    if unverified_more:
+        result["couldnt_verify_more"] = unverified_more  # not checked for fit, only counted
+    if loose:
+        result["loosely_related"] = [course_entry(ctx, candidate) for candidate in loose]
+    if not_offered:
+        result["better_matches_not_offered"] = not_offered
+    if ranked_by == "about" and (short := shortfall(about, len(courses), count)):
+        result["shortfall"] = short
+    return result, pipeline

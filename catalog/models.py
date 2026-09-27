@@ -82,9 +82,11 @@ class Handout(Flagged):
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="handouts")
     file = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True, default="")  # description + scope/objectives + outcomes
-    learning_outcomes = models.JSONField(default=list)  # merged into description by the extractor
-    topics = models.JSONField(default=list)
+    description = models.TextField(blank=True, default="")  # the handout's course description paragraph
+    objectives = models.JSONField(default=list)  # ["To understand the Laplace transform ...", ...]
+    learning_outcomes = models.JSONField(default=list)  # what the student will be able to do, one item each
+    topics = models.JSONField(default=list)  # flat, for search
+    topic_groups = models.JSONField(default=list)  # [{"module": str | None, "topics": [str]}], for display
     evaluation = models.JSONField(default=list)
     has_midsem = models.BooleanField(null=True)
     open_book_percent = models.FloatField(null=True, blank=True)
@@ -101,6 +103,19 @@ class Handout(Flagged):
     makeup_per_component = models.JSONField(default=dict)
     makeup_follows_default = models.BooleanField(default=False)
     embedding = models.JSONField(null=True, blank=True)  # filled later for interest matching
+
+
+class CoursePiece(models.Model):
+    """One short piece of text about a course (title, a description sentence, a topic, an outcome) and its embedding.
+    Built by `manage.py build_embeddings` (recommender/pieces.py); a course is matched by its best pieces."""
+
+    KINDS = [(kind, kind) for kind in ("title", "description", "topic", "outcome", "bulletin_description")]
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="pieces")  # FK = indexed
+    kind = models.CharField(max_length=25, choices=KINDS)
+    text = models.TextField()
+    source = models.CharField(max_length=100)  # handout file name, "bulletin", or "timetable" for the title
+    embedding = models.BinaryField()  # float32 bytes, L2-normalised
+    model_name = models.CharField(max_length=100)
 
 
 # ---------------------------------------------------------------- programme data

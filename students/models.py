@@ -4,9 +4,11 @@ why PROTECT on catalog FKs: ingest clears and reloads the catalog; PROTECT makes
 deleting students' courses and plans (see the ingest command's --wipe-students).
 """
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from catalog.models import Course, Minor, PatternSlot, Programme, Section
+from recommender.config import DAY_CODES, DAY_NAMES
 
 GOALS = [("job", "Job / placement"), ("research", "Research / higher studies"), ("not_sure", "Not sure")]
 GRADES = [(g, g) for g in ("A", "A-", "B", "B-", "C", "C-", "D", "E", "NC")]
@@ -14,6 +16,23 @@ COMFORT = [
     ("5", "Very comfortable"), ("4", "Comfortable"), ("3", "Moderate"),
     ("2", "Not too comfortable"), ("1", "Not good at all"),
 ]
+# evaluation styles a student would rather avoid (profile checkboxes); ranked lower, never removed
+EVAL_STYLES = [
+    ("many_quizzes", "Lots of quizzes"),
+    ("closed_book", "Only closed-book exams"),
+    ("strict_attendance", "Strict attendance requirement"),
+    ("heavy_compre", "Compre worth a lot"),
+    ("no_makeup", "No makeup exams"),
+]
+
+
+def validate_eval_styles(value: list) -> None:
+    """Only the known style keys, each at most once."""
+    allowed = {key for key, _ in EVAL_STYLES}
+    if not isinstance(value, list) or any(item not in allowed for item in value):
+        raise ValidationError(f"Allowed evaluation styles: {', '.join(sorted(allowed))}.")
+    if len(set(value)) != len(value):
+        raise ValidationError("Each evaluation style can appear only once.")
 
 
 class Student(models.Model):
@@ -28,6 +47,9 @@ class Student(models.Model):
     current_semester = models.PositiveSmallIntegerField()
     minor = models.ForeignKey(Minor, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     minor_registered = models.BooleanField(default=False)
+    # B.E. code picked on the profile when the ID is M.Sc.-only (dual degrees are allotted after the 1st year, so
+    # the ID may not show it yet); turns programme into the dual one. Blank when the ID already has it.
+    second_degree_code = models.CharField(max_length=2, blank=True, default="")
     interests = models.JSONField(default=list, blank=True)
     # "X or Y" chart slots: {"ECON F211": "MGTS F211"} = took MGTS F211 in the slot the chart lists as ECON F211
     alternative_choices = models.JSONField(default=dict, blank=True)
@@ -37,9 +59,18 @@ class Student(models.Model):
     strengths = models.TextField(blank=True, default="")
     weaknesses = models.TextField(blank=True, default="")
     sop_plan = models.BooleanField(null=True, blank=True)
+    # recommender defaults; a chat message can override them ("8 AM is fine")
+    default_avoid_8am = models.BooleanField(default=False)
+    default_avoid_day = models.CharField(max_length=2, choices=[(code, DAY_NAMES[code]) for code in DAY_CODES],
+                                         null=True, blank=True, default=None)
+    avoid_eval_styles = models.JSONField(default=list, blank=True, validators=[validate_eval_styles])
 
     def __str__(self) -> str:
         return f"{self.user} ({self.programme})"
+
+    def save(self, *args, **kwargs) -> None:
+        validate_eval_styles(self.avoid_eval_styles)  # why: JSONField validators only run in full_clean, not save
+        super().save(*args, **kwargs)
 
 
 class StudentCourse(models.Model):

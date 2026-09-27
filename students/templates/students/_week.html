@@ -1,0 +1,24 @@
+{% comment %}One week grid. Context: tt (a timetable: rows of cells), week [(day code, date)], today, highlight (codes drawn
+dashed). Slots are coloured by course category; L / T / P marks the section type.{% endcomment %}
+<div class="week-scroll">
+  <table class="week">
+    <thead><tr><th scope="col"><span class="sr-only">Time</span></th>
+      {% for code, day in week %}<th scope="col"{% if day == today %} class="today"{% endif %}>{{ day|date:"D" }}<span>{{ day|date:"j M" }}</span></th>{% endfor %}
+    </tr></thead>
+    <tbody>
+      {% for row in tt.rows %}
+      <tr><th scope="row">{{ row.start }}</th>
+        {% for cell in row.cells %}{% if not cell.skip %}
+          {% if cell.pick %}
+          <td rowspan="{{ cell.rowspan }}"><a class="slot t-{{ cell.pick.type }}{% if cell.pick.code in highlight %} new{% endif %}" data-cat="{{ cell.pick.cat }}" data-pick="{{ cell.pick.code }}|{{ cell.pick.type }}" href="{% url 'course' cell.pick.code %}" title="{{ cell.pick.code }} {{ cell.pick.type }} {{ cell.pick.section.section_id }}{% if cell.pick.section.room %}, room {{ cell.pick.section.room }}{% endif %}{% if cell.pick.section.instructors %}, {{ cell.pick.section.instructors|join:', ' }}{% endif %}">
+            <span class="c">{{ cell.pick.code }}</span><span class="kind-letter" aria-label="{{ cell.pick.type }}">{{ cell.pick.letter }}</span>
+            <span class="sid">{{ cell.pick.section.section_id }}</span><span class="room">{{ cell.pick.section.room }}</span>
+            {% if cell.pick.others %}<span class="plus" title="{{ cell.pick.others }} more section{{ cell.pick.others|pluralize }} at exactly this time">+{{ cell.pick.others }}</span>{% endif %}
+          </a></td>
+          {% else %}<td></td>{% endif %}
+        {% endif %}{% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

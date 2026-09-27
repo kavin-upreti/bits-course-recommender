@@ -1,47 +1,62 @@
 {% extends "students/base.html" %}
-{% block title %}Your profile · BITS Course Planner{% endblock %}
+{% block title %}Profile · Planner{% endblock %}
 {% block main_class %}narrow{% endblock %}
 {% block content %}
-<h1>Your profile</h1>
-<p class="lede">Read from your ID. If this is wrong, the ID was entered wrong at sign-up.</p>
-<dl class="id-decode" style="margin:20px 0 8px">
-  {% for text, caption, is_branch in id_parts %}<div{% if is_branch %} class="branch"{% endif %}><dt>{{ text }}</dt><dd>{{ caption }}</dd></div>{% endfor %}
-</dl>
-<p class="muted small">{{ programme.name }}</p>
+<div class="enter stack-page">
+  <header>
+    <p class="kicker muted">{{ programme.name }}</p>
+    <h1>{% if user.student %}Your profile{% else %}Set up your profile{% endif %}</h1>
+    <p class="lede">Read from your BITS ID. If something here is wrong, the ID was mistyped at sign-up.</p>
+    <dl class="id-decode" style="margin-top:20px">
+      {% for text, caption, is_branch in id_parts %}<div{% if is_branch %} class="branch"{% endif %}><dt>{{ text }}</dt><dd>{{ caption }}</dd></div>{% endfor %}
+    </dl>
+  </header>
 
-<form method="post" style="margin-top:24px">{% csrf_token %}
-  {{ form.non_field_errors }}
-  <section class="panel">
-    <h3>Where you are</h3>
-    <p class="lede">Every semester before this one counts as done. Your compulsory courses are filled in from your programme's chart.</p>
-    <div class="fields">
-      <div>{{ form.planning.as_field_group }}</div>
-      <div>{{ form.minor.as_field_group }}<span class="helptext">Only from 3-1 on: minors are declared at the end of 2nd year.</span></div>
-    </div>
-    {% for label, slots in alternatives %}
-    <div class="or-block" data-sem="{{ label }}" hidden>
-      {% include "students/_or_pick.html" with prompt="Your chart gives a choice this semester. Which one are you taking?" %}
-    </div>
-    {% endfor %}
-  </section>
-  <section class="panel">
-    <h3>About you</h3>
-    <p class="lede">Used to rank recommendations. All optional.</p>
-    <div class="fields">
-      <div class="wide">{{ form.interests.as_field_group }}</div>
-      <div>{{ form.goal.as_field_group }}</div>
-      <div>{{ form.cgpa.as_field_group }}</div>
-      <div class="wide">{{ form.sop_plan.as_field_group }}</div>
-      <div>{{ form.strengths.as_field_group }}</div>
-      <div>{{ form.weaknesses.as_field_group }}</div>
-    </div>
-  </section>
-  <div class="actions"><button class="btn">Save profile</button>{% if user.student %}<a class="btn link" href="{% url 'home' %}">Cancel</a>{% endif %}</div>
-</form>
-<script>
-  // why: the "X or Y" question depends on the semester picked, so only that semester's block is shown
-  const planning = document.getElementById('id_planning');
-  const showPicks = () => document.querySelectorAll('.or-block').forEach((block) => { block.hidden = block.dataset.sem !== planning.value; });
-  planning.addEventListener('change', showPicks); showPicks();
-</script>
+  {% if problem %}
+  <p class="notice bad" role="alert">{{ problem }}</p>
+  {% else %}
+  <form method="post" class="stack">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <section class="panel">
+      <h2>Where you are</h2>
+      <p class="going-into">Going into <span class="code">{{ planning }}</span></p>
+      <p class="lede">From your batch and this semester's timetable. Every semester before it counts as done, and your compulsory courses come from your programme's chart.</p>
+      {% if form.second_degree_code or form.minor %}
+      <div class="fields">
+        {% if form.second_degree_code %}<div>{{ form.second_degree_code.as_field_group }}</div>{% endif %}
+        {% if form.minor %}<div>{{ form.minor.as_field_group }}</div>{% endif %}
+      </div>
+      {% endif %}
+      {% for label, slots in alternatives %}
+        {% include "students/_or_pick.html" with prompt="Your chart gives a choice this semester. Which one are you taking?" %}
+      {% endfor %}
+    </section>
+
+    <section class="panel">
+      <h2>How suggestions are picked</h2>
+      <p class="lede">The assistant uses these unless your message says otherwise.</p>
+      <div class="fields">
+        <div class="wide">{{ form.interests.as_field_group }}<p class="helptext">Orders suggestions when you don't name a topic.</p></div>
+        <div class="check">{{ form.default_avoid_8am.as_field_group }}</div>
+        <div>{{ form.default_avoid_day.as_field_group }}</div>
+        <div class="wide checks">{{ form.avoid_eval_styles.as_field_group }}</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>About you</h2>
+      <p class="lede">Optional. Saved for later; not used in suggestions yet.</p>
+      <div class="fields">
+        <div>{{ form.goal.as_field_group }}</div>
+        <div>{{ form.cgpa.as_field_group }}</div>
+        <div class="wide">{{ form.sop_plan.as_field_group }}</div>
+        <div>{{ form.strengths.as_field_group }}</div>
+        <div>{{ form.weaknesses.as_field_group }}</div>
+      </div>
+    </section>
+
+    <div class="actions"><button class="btn">Save profile</button>{% if user.student %}<a class="btn link" href="{% url 'home' %}">Cancel</a>{% endif %}</div>
+  </form>
+  {% endif %}
+</div>
 {% endblock %}

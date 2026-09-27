@@ -1,91 +1,98 @@
 {% extends "students/base.html" %}
+{% load text %}
+{% block title %}{{ planning }} · Planner{% endblock %}
 {% block content %}
-<div class="dash">
-  <aside class="side">
-    <h1>{{ student.user.first_name }}</h1>
-    <p class="programme">{{ student.programme.name }}</p>
-    <dl class="facts">
-      <div><dt>Going into</dt><dd class="code">{{ planning }}</dd></div>
-      <div><dt>Batch</dt><dd>{{ student.admission_year }}</dd></div>
-      <div><dt>Campus</dt><dd>{{ student.campus }}</dd></div>
-      <div><dt>Minor</dt><dd>{{ student.minor.name|default:"None" }}</dd></div>
-      {% if student.cgpa is not None %}<div><dt>CGPA</dt><dd>{{ student.cgpa }}</dd></div>{% endif %}
-      {% if student.goal %}<div><dt>Goal</dt><dd>{{ student.get_goal_display }}</dd></div>{% endif %}
-      {% if student.interests %}<div class="wide"><dt>Interests</dt><dd>{{ student.interests|join:", " }}</dd></div>{% endif %}
-    </dl>
-    <div class="side-actions">
-      {% if has_elective_semesters %}<a class="btn" href="{% url 'electives' %}">Edit courses</a>{% endif %}
-      <a class="btn quiet" href="{% url 'profile' %}">Edit profile</a>
+<div class="enter stack-page">
+  <header class="page-head home-hello">
+    <div>
+      <p class="kicker">{{ student.programme.name }}</p>
+      <h1>{{ planning }}</h1>
+      <p class="who">Hi {{ student.user.first_name }}, this is the semester you're planning.</p>
+      <p class="facts-line">
+        <span>Batch <b>{{ student.admission_year }}</b></span>
+        <span>{{ student.campus }} campus</span>
+        <span>{% if student.minor and not student.minor_registered %}Aiming for{% else %}Minor{% endif %} <b>{{ student.minor.name|default:"none" }}</b></span>
+        {% if student.cgpa is not None %}<span>CGPA <b>{{ student.cgpa }}</b></span>{% endif %}
+        {% if student.interests %}<span>Into <b>{{ student.interests|join:", " }}</b></span>{% endif %}
+      </p>
     </div>
-    {% for warning in warnings %}<p class="notice small">{{ warning }}</p>{% endfor %}
-  </aside>
+    <div class="page-head-actions">
+      <a class="btn" href="{% url 'chat' %}">Ask the assistant</a>
+      {% if grid %}<a class="btn ghost" href="{% url 'semester' %}">Plan this semester</a>{% endif %}
+    </div>
+  </header>
 
-  <section class="board">
-    {% if not grid %}
-      <div class="empty">
-        {% if is_2026_batch %}Your batch's curriculum isn't in the Bulletin, so no courses could be filled in.{% else %}Nothing done yet: you're starting 1-1.{% endif %}
+  {% for warning in warnings %}<p class="notice">{{ warning }}</p>{% endfor %}
+
+  {% if not grid %}
+    <div class="empty">
+      {% if is_2026_batch %}Your batch's curriculum isn't in the Bulletin yet, so your courses couldn't be filled in. The assistant can still suggest courses from this semester's timetable.{% else %}Nothing done yet: you're starting 1-1.{% endif %}
+    </div>
+  {% else %}
+  <div class="home-top">
+    <section class="week-card" aria-labelledby="week-title">
+      <div class="section-head">
+        <h2 id="week-title">This week</h2>
+        <p>{% if week_grid %}The best clash-free timetable for your {{ planning }} courses. <a href="{% url 'semester' %}">See every option</a>{% else %}None of your {{ planning }} courses are in this semester's timetable.{% endif %}</p>
       </div>
-    {% else %}
-    <div class="board-head">
+      {% if week_grid %}{% include "students/_week.html" with tt=week_grid highlight=None %}{% else %}<div class="empty">No timetable to show.</div>{% endif %}
+    </section>
+
+    <aside class="side-stack" aria-labelledby="todo-title">
+      <h2 id="todo-title">Remaining as per academic requirements</h2>
+      <div class="panel stat">
+        <span class="n">{% if load.max_units is None %}?{% else %}{{ load.free_units }}{% endif %}</span>
+        <div><b>credits free for electives in {{ planning }}</b>
+          <p>{% if load.max_units is None %}Your batch's per-semester cap isn't stated yet; {{ load.fixed_units }} credits are compulsory courses.{% else %}{{ load.fixed_units }} of the {{ load.max_units }}-credit cap go to compulsory courses.{% endif %}</p></div>
+      </div>
+      {% if load.over %}<p class="notice bad">This semester's compulsory courses alone are over the {{ load.max_units }}-credit cap.</p>{% endif %}
+      {% include "students/_needs.html" %}
+      <div class="panel stat">
+        <span class="n">{{ compulsory_left }}</span>
+        <div><b>CDCs and foundation courses left</b><p>In your chart after {{ planning }}, up to your final year.</p></div>
+      </div>
+      {% if minor %}
+      <div class="panel minor">
+        <h4>{{ minor.name }} minor</h4>
+        <p class="muted small">{{ minor.done_courses }} of at least {{ minor.required_courses }} courses done{% if minor.electives_left %}, {{ minor.electives_left }} more minor elective{{ minor.electives_left|pluralize }}{% endif %}</p>
+        {% if minor.core_left %}
+          <ul class="minor-core">{% for course in minor.core_left %}<li><a class="code" href="{% url 'course' course.code %}">{{ course.code }}</a> <span class="muted">{{ course.title|course_title }}</span></li>{% endfor %}</ul>
+        {% elif not minor.electives_left %}<p class="small">Course requirements met.</p>{% endif %}
+      </div>
+      {% endif %}
+    </aside>
+  </div>
+
+  <section aria-labelledby="chart-title">
+    <div class="chart-tools">
       <div>
-        <h2>{{ done_units }} units done</h2>
-        <p class="muted small">{{ done_count }} courses so far, plus this semester's compulsory ones (dashed).</p>
+        <h2 id="chart-title">{{ done_units }} credits done</h2>
+        <p class="muted small">{{ done_count }} courses so far. <a href="#you-are-here">Jump to {{ planning }}</a>{% if has_elective_semesters %} · <a href="{% url 'electives' %}">Edit the electives you've taken</a>{% endif %}</p>
       </div>
       <div class="toggle" role="group" aria-label="Show courses">
         <button type="button" aria-pressed="true" data-view="chart">By semester</button>
         <button type="button" aria-pressed="false" data-view="kind">By kind</button>
       </div>
     </div>
-
-    <div class="units-bar" role="img" aria-label="Done units by kind">
-      {% for group in groups %}{% if group.share %}<span data-cat="{{ group.code }}" style="width:{{ group.share }}%" title="{{ group.name }}: {{ group.done_units }} units"></span>{% endif %}{% endfor %}
+    <div class="credits-bar" role="img" aria-label="Completed credits by kind" style="margin-top:16px">
+      {% for group in groups %}{% if group.share %}<span data-cat="{{ group.code }}" style="width:{{ group.share }}%" title="{{ group.short }}: {{ group.done_units }} credits"></span>{% endif %}{% endfor %}
     </div>
     <ul class="legend">
-      {% for group in groups %}<li data-cat="{{ group.code }}" title="{{ group.meaning }}"><span class="swatch"></span>{{ group.name }} <span class="muted">{{ group.done_units }}u</span></li>{% endfor %}
+      {% for group in groups %}<li data-cat="{{ group.code }}" title="{{ group.full }}"><span class="dot"></span>{{ group.short }} <span class="faint">{{ group.done_units }} cr</span></li>{% endfor %}
     </ul>
 
-    <section class="todo" aria-labelledby="todo-title">
-      <h3 id="todo-title">Still to do</h3>
-      <div class="todo-grid">
-        <div>
-          <p class="todo-line"><span class="n">{% if load.max_units is None %}?{% else %}{{ load.free_units }}{% endif %}</span>
-            <span>units free for electives in {{ planning }}
-              <span class="muted">({% if load.max_units is None %}the regulations don't state your batch's per-semester cap yet; {{ load.fixed_units }} units are already your compulsory courses{% else %}{{ load.fixed_units }} of the {{ load.max_units }}-unit cap are already your compulsory courses{% endif %})</span></span></p>
-          {% if load.over %}<p class="notice small">This semester's compulsory courses alone are over the {{ load.max_units }}-unit cap.</p>{% endif %}
-          <p class="todo-line"><span class="n">{{ compulsory_left }}</span> compulsory courses left in your chart after {{ planning }}</p>
-          <ul class="needs">
-            {% for need in needs %}
-            <li data-cat="{{ need.category }}">
-              <span class="n">{{ need.courses_left }}</span>
-              <span>{{ need.label }} <span class="muted">({{ need.done_courses }} of {{ need.required_courses }} done{% if need.units_left %}, {{ need.units_left }} units to go{% endif %})</span>{% if need.note %}<span class="muted small need-note">{{ need.note }}</span>{% endif %}</span>
-            </li>
-            {% endfor %}
-          </ul>
-          <p class="muted small">Counts this semester's compulsory courses as done.</p>
-        </div>
-        {% if minor %}
-        <div class="minor">
-          <h4>For finishing the {{ minor.name }} minor</h4>
-          <p class="muted small">{{ minor.done_courses }} of at least {{ minor.required_courses }} courses done</p>
-          {% if minor.core_left %}
-            <p class="small" style="margin:12px 0 6px"><b>Compulsory for the minor</b></p>
-            <ul class="minor-core">{% for course in minor.core_left %}<li><span class="code">{{ course.code }}</span> {{ course.title|title }}</li>{% endfor %}</ul>
-          {% endif %}
-          {% if minor.electives_left %}<p class="todo-line"><span class="n">{{ minor.electives_left }}</span> more minor elective{{ minor.electives_left|pluralize }}</p>{% endif %}
-          {% if not minor.core_left and not minor.electives_left %}<p>Course requirements met.</p>{% endif %}
-        </div>
-        {% endif %}
-      </div>
-    </section>
-
-    <div data-panel="chart" class="chart">
+    <div data-panel="chart" class="years">
       {% for year in grid %}
       <div class="year">
-        <h3 class="year-label">Year {{ year.year }}</h3>
+        <p class="year-label">Year {{ year.year }}</p>
         {% for sem in year.semesters %}
-        <div class="sem{% if sem.is_current %} current{% endif %}{% if sem.is_future %} future{% endif %}">
-          <h4><span class="code">{{ sem.label }}</span>{% if sem.is_current %}<span>this semester</span>{% elif not sem.is_future %}<span class="muted">{{ sem.rows|length }} courses</span>{% endif %}</h4>
-          {% if sem.rows %}<ul class="tiles">{% for row in sem.rows %}{% include "students/_tile.html" %}{% endfor %}</ul>{% endif %}
+        <div class="sem{% if sem.is_current %} current{% endif %}{% if sem.is_future %} future{% endif %}"{% if sem.is_current %} id="you-are-here"{% endif %}>
+          {% if sem.is_current %}<p class="here"><span class="here-pin">You are here</span><a href="{% url 'semester' %}">Plan it</a></p>{% endif %}
+          <h4 class="sem-head"><span class="code">{{ sem.label }}</span>{% if sem.is_future %}<span>upcoming</span>{% elif not sem.is_current %}<span>{{ sem.rows|length }} courses</span>{% endif %}</h4>
+          {% if sem.rows or sem.electives %}<ul class="tiles">
+            {% for row in sem.rows %}{% include "students/_tile.html" %}{% endfor %}
+            {% for slot in sem.electives %}<li class="tile placeholder" data-cat="{{ slot.cat }}"><div class="code">{{ slot.label }}<small class="tag">elective</small></div><div class="title">To be picked</div></li>{% endfor %}
+          </ul>{% elif sem.is_future %}<p class="note">No courses in your chart for this semester.</p>{% endif %}
           {% if sem.label == "1-1" %}<p class="note">First-year courses follow the current chart; older batches may have had different ones.</p>{% endif %}
         </div>
         {% endfor %}
@@ -96,19 +103,20 @@
     <div data-panel="kind" class="kinds" hidden>
       {% for group in groups %}
       <section class="kind" data-cat="{{ group.code }}">
-        <h3>{{ group.name }} <span class="muted small">{{ group.done_count }} done{% if group.done_units %}, {{ group.done_units }} units{% endif %}</span></h3>
-        <p class="muted small">{{ group.meaning }}</p>
+        <h3><span class="cat-chip">{{ group.short }}</span> <span class="muted small">{{ group.done_count }} done{% if group.done_units %}, {{ group.done_units }} credits{% endif %}</span></h3>
+        <p class="muted small" style="margin-top:6px">{{ group.full }}. {{ group.meaning }}</p>
         <table>
           {% for row in group.rows %}
-          <tr><td><span class="code">{{ row.course.code }}</span>{% for alt in row.alternatives %} <span class="muted">or</span> <span class="code">{{ alt.code }}</span>{% endfor %}<span class="title">{{ row.course.title|title }}</span></td>
+          <tr><td><a class="code" href="{% url 'course' row.course.code %}">{{ row.course.code }}</a>{% for alt in row.alternatives %} <span class="faint">or</span> <a class="code" href="{% url 'course' alt.code %}">{{ alt.code }}</a>{% endfor %}<span class="title">{{ row.course.title|course_title }}</span></td>
               <td class="sem">{{ row.semester_taken }}{% if row.status == "current" %}, now{% endif %}</td></tr>
           {% endfor %}
         </table>
       </section>
       {% endfor %}
     </div>
-    {% endif %}
   </section>
+  {% include "students/_key.html" %}
+  {% endif %}
 </div>
 
 <script>

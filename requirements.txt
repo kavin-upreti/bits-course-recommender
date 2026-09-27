@@ -4,3 +4,6 @@ torch
 pytest  # tests/ only
 django
 python-dotenv
+google-genai  # recommender/llm.py only
+numpy
+matplotlib  # embedding_eda chart

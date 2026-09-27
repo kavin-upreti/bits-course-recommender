@@ -26,6 +26,7 @@ class Need:
     done_courses: int
     done_units: int
     note: str = ""
+    degree: str = ""  # dual degrees: which degree this DEL count belongs to
 
     @property
     def courses_left(self) -> int:
@@ -60,51 +61,62 @@ def _units(course: Course) -> int:
     return course.units or 0
 
 
-def opel_requirement(degree: Programme, categories: dict[str, str], huel: CategoryRequirement) -> tuple[int, int]:
-    """(courses, units) of open electives for one degree.
+# From students' degree audits (A7 and B5A8, 2026-09-26): coursework is 44 courses / 129 units and the GIR sub-total
+# 21 courses / 54 units. The Bulletin edition we have predates the 6-course Science Foundation (it says 41 / 51).
+COURSEWORK_TOTAL = (44, 129)
+GIR_TOTAL = (21, 54)
 
-    The Bulletin gives OPEL only as a range ("15 to 27 units, 5 to 9 courses"); the exact amount is whatever is
-    left to reach the coursework totals (41 courses, 129 units) after the common core, discipline core, DELs and
-    HUELs, never below the range's minimum.
-    """
+
+def opel_requirement(degree: Programme, categories: dict[str, str]) -> tuple[int, int]:
+    """(courses, units) of open electives for a single degree: what's left of the coursework total after the GIRs,
+    the discipline core and the DELs, never below the Bulletin's minimum (5 courses / 15 units).
+    Matches the A7 audit: 44 - 21 - 14 - 4 = 5 courses, 129 - 54 - 48 - 12 = 15 units."""
     opel = _requirement(code="OPEL")
-    total = _requirement(category__startswith="Course-work")
-    common = {slot.course.code: slot.course for slot in course_slots(degree) if categories.get(slot.course.code) in ("GIR", "CHART")}
     cdc = [code for code, category in categories.items() if category == "CDC"]
     core_courses = degree.core_courses or len(cdc)
     core_units = degree.core_units or sum(_units(course) for course in Course.objects.filter(code__in=cdc))
-    courses = total.min_courses - len(common) - core_courses - (degree.del_courses or 0) - huel.min_courses
-    units = total.min_units - sum(map(_units, common.values())) - core_units - (degree.del_units or 0) - huel.min_units
+    courses = COURSEWORK_TOTAL[0] - GIR_TOTAL[0] - core_courses - (degree.del_courses or 0)
+    units = COURSEWORK_TOTAL[1] - GIR_TOTAL[1] - core_units - (degree.del_units or 0)
     return max(opel.min_courses, courses), max(opel.min_units, units)
 
 
-def elective_needs(student: Student) -> list[Need]:
-    """HUEL once; DEL and OPEL per degree (a dual degree meets each degree's requirements separately, and the other
-    degree's courses count as its open electives, per dual_degree_rules)."""
-    rows = list(StudentCourse.objects.filter(student=student).select_related("course"))
-    courses = sorted({row.course.code: row.course for row in rows}.values(), key=lambda course: course.code)
+def elective_needs(student: Student, typed_codes: list[str] | None = None) -> list[Need]:
+    """HUEL once; DEL per degree (a dual degree meets each degree's discipline requirements separately); OPEL for a
+    single degree only: a dual degree's audit has no open-elective requirement at all.
+
+    typed_codes replaces the student's saved electives: the live preview while they edit them."""
+    rows = StudentCourse.objects.filter(student=student).select_related("course")
+    if typed_codes is not None:
+        rows = rows.filter(source="pattern")
+    by_code = {row.course.code: row.course for row in rows}
+    if typed_codes is not None:
+        by_code.update({course.code: course for course in Course.objects.filter(code__in=typed_codes)})
+    courses = sorted(by_code.values(), key=lambda course: course.code)
     huel = _requirement(code="HUEL")
     student_categories = category_map(student.programme)
     huel_used = [course for course in courses if student_categories.get(course.code) == "HUEL"][: huel.min_courses]
-    needs = [Need("HUEL", "Humanities electives", huel.min_courses, huel.min_units,
+    needs = [Need("HUEL", "HUEL", huel.min_courses, huel.min_units,
                   len(huel_used), sum(map(_units, huel_used)))]
 
     parts = degrees(student.programme)
     for degree in parts:
         categories = category_map(degree)
-        suffix = f" ({degree.name})" if len(parts) > 1 else ""
+        degree_name = degree.name if len(parts) > 1 else ""
         dels = [course for course in courses if categories.get(course.code) == "DEL"]
         del_used = dels[: degree.del_courses or 0]
-        note = "" if degree.del_courses else "The Bulletin gives no discipline-elective count for this programme."
-        needs.append(Need("DEL", f"Discipline electives{suffix}", degree.del_courses or 0, degree.del_units or 0,
-                          len(del_used), sum(map(_units, del_used)), note))
+        note = "" if degree.del_courses else "The Bulletin gives no DEL count for this programme."
+        needs.append(Need("DEL", "DEL", degree.del_courses or 0, degree.del_units or 0,
+                          len(del_used), sum(map(_units, del_used)), note, degree_name))
 
-        used = {course.code for course in del_used + huel_used}
-        opel_done = [course for course in courses if categories.get(course.code) not in COMPULSORY and course.code not in used]
-        opel_courses, opel_units = opel_requirement(degree, categories, huel)
-        needs.append(Need("OPEL", f"Open electives{suffix}", opel_courses, opel_units,
-                          len(opel_done), sum(map(_units, opel_done)),
-                          "Counts extra DELs / HUELs and the other degree's courses." if len(parts) > 1 else ""))
+    if len(parts) > 1:
+        # why: a dual degree's audit lists GIR, both cores and both DEL pools, and no open requirement (B5A8 audit,
+        # 2026-09-26); the dual charts have no OPEL slots either
+        return needs
+    # single degree: `categories`, `del_used` are the (only) degree's from the loop above
+    used = {course.code for course in del_used + huel_used}
+    opel_done = [course for course in courses if categories.get(course.code) not in COMPULSORY and course.code not in used]
+    opel_courses, opel_units = opel_requirement(student.programme, categories)
+    needs.append(Need("OPEL", "OPEL", opel_courses, opel_units, len(opel_done), sum(map(_units, opel_done))))
     return needs
 
 

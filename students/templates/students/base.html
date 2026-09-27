@@ -1,25 +1,44 @@
-{% load static %}<!doctype html>
+{% load static assets %}<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}BITS Course Planner{% endblock %}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'students/app.css' %}">
+<title>{% block title %}Planner{% endblock %}</title>
+<meta name="color-scheme" content="dark light">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% versioned_static 'students/planner.css' %}">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%23f2b544'/%3E%3C/svg%3E">
 </head>
 <body>
-<header class="topbar"><div class="topbar-inner">
-  <a class="wordmark" href="{% url 'home' %}">BITS Course Planner</a>
-  {% if user.is_authenticated %}
-  <form class="who" method="post" action="{% url 'logout' %}">{% csrf_token %}
-    <span>{{ user.first_name }} <span class="code">{{ user.username }}</span></span>
-    <button class="btn link">Log out</button>
-  </form>
+{% with page=request.resolver_match.url_name rail=user.student %}
+<div class="{% if user.is_authenticated and rail %}shell{% else %}solo{% endif %}">
+  {% if user.is_authenticated and rail %}
+  <aside class="rail" aria-label="Main">
+    <a class="wordmark" href="{% url 'home' %}"><span class="wordmark-dot" aria-hidden="true"></span>Planner</a>
+    <nav>
+      <a class="rail-link" href="{% url 'home' %}"{% if page == 'home' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Home</a>
+      <a class="rail-link" href="{% url 'semester' %}"{% if page == 'semester' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Semester</a>
+      <a class="rail-link" href="{% url 'chat' %}"{% if page == 'chat' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 13.9 9l5.6 1.9-5.6 1.9L12 18.5l-1.9-5.7L4.5 10.9 10.1 9z"/><path d="M19 17v4M17 19h4"/></svg>Assistant</a>
+      <a class="rail-link" href="{% url 'profile' %}"{% if page == 'profile' or page == 'electives' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profile</a>
+    </nav>
+    <form class="rail-foot" method="post" action="{% url 'logout' %}">{% csrf_token %}
+      <span class="who-name">{{ user.first_name }}</span>
+      <span class="who-id">{{ user.username }}</span>
+      <button class="btn link">Log out</button>
+    </form>
+  </aside>
+  {% elif user.is_authenticated %}
+  <form class="solo-out" method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn link">Log out {{ user.username }}</button></form>
   {% endif %}
-</div></header>
-<main class="{% block main_class %}{% endblock %}">
-  {% for message in messages %}<p class="toast" role="status">{{ message }}</p>{% endfor %}
-  {% block content %}{% endblock %}
-</main>
+  <main class="page {% block main_class %}{% endblock %}">
+    {% for message in messages %}<p class="toast" role="status">{{ message }}</p>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endwith %}
 </body>
 </html>

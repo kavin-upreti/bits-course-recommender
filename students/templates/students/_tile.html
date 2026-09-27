@@ -1,17 +1,19 @@
-{% if row.options %}
-<li class="tile split" data-cat="{{ row.category }}">
+{% load text %}{% if row.options %}
+<li class="tile split" data-cat="{{ row.cat }}">
   {% for option in row.options %}
     {% if not forloop.first %}<span class="or" aria-label="or">or</span>{% endif %}
-    <div class="half{% if row.chosen == option.code %} chosen{% elif row.chosen %} dim{% endif %}">
-      <div class="code">{{ option.code }}</div><div class="title">{{ option.title|title }}</div>
-    </div>
+    <a class="half{% if row.chosen == option.code %} chosen{% elif row.chosen %} dim{% endif %}" href="{% url 'course' option.code %}">
+      <div class="code">{{ option.code }}</div><div class="title">{{ option.title|course_title }}</div>
+    </a>
   {% endfor %}
-  <small class="tag">{% if row.chosen %}{{ row.tag }}{% else %}{{ row.tag }}, pick one on {% if row.status == "current" %}your profile{% else %}the courses page{% endif %}{% endif %}</small>
+  <small class="tag">{% if row.chosen or row.status == "planned" %}{{ row.tag }}{% else %}{{ row.tag }}, pick one on {% if row.status == "current" %}your profile{% else %}the courses page{% endif %}{% endif %}</small>
 </li>
 {% else %}
-<li class="tile" data-cat="{{ row.category }}">
+<li class="tile-item"><a class="tile" data-cat="{{ row.cat }}" href="{% url 'course' row.course.code %}">
   <div class="code">{{ row.course.code }}<small class="tag">{{ row.tag }}</small></div>
-  <div class="title">{{ row.course.title|title }}</div>
-  {% if row.source == "user" %}<div class="meta">{{ row.get_comfort_display }}{% if row.grade %}, {{ row.grade }}{% endif %}</div>{% endif %}
+  <div class="title">{{ row.course.title|course_title }}</div>
+  {% if row.source == "user" and row.comfort %}<div class="meta">{{ row.get_comfort_display }}{% if row.grade %}, {{ row.grade }}{% endif %}</div>{% endif %}
+</a>{% if removable and row.source == "user" and row.status == "current" %}
+  <form method="post" action="{% url 'remove_course' %}" class="tile-remove">{% csrf_token %}<input type="hidden" name="code" value="{{ row.course.code }}"><button class="btn link" aria-label="Remove {{ row.course.code }}">Remove</button></form>{% endif %}
 </li>
 {% endif %}

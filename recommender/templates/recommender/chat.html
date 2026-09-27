@@ -1,0 +1,226 @@
+{% extends "students/base.html" %}{% load static %}
+{% block title %}Assistant · Planner{% endblock %}
+{% block content %}
+<script src="{% static 'students/timetable.js' %}" defer></script>
+<div class="enter stack-page">
+<header class="page-head">
+  <div>
+    <p class="kicker">Course assistant</p>
+    <h1>What do you want to take?</h1>
+    <p class="lede">Ask for HUELs, DELs or OPELs: a topic, handout wishes like no midsem or lenient makeups, or timetable ones like no 8 AM. Select what you like, check it in a timetable, then add it.</p>
+  </div>
+</header>
+
+<div class="chat-layout">
+  <div class="chat-main">
+    <form id="ask" class="panel chat-box">{% csrf_token %}
+      <label for="message" class="visually-hidden">Your question</label>
+      <textarea id="message" name="message" rows="3" maxlength="1000" placeholder="I need a HUEL and a DEL on machine learning, no 8 AM classes" required></textarea>
+      <div class="chips">{% for example in examples %}<button type="button" class="chip">{{ example }}</button>{% endfor %}</div>
+      <div class="chat-actions">
+        <p>Each question is answered on its own. Include everything you want in one message.</p>
+        <button class="btn" id="send">Send</button>
+      </div>
+    </form>
+
+    <section id="answer" aria-live="polite" hidden>
+      <div id="reply" class="reply"></div>
+      <div id="cards" class="rec-cards"></div>
+      {% if debug %}<details id="debug" class="debug"><summary>Debug</summary><pre></pre></details>{% endif %}
+    </section>
+  </div>
+
+  <aside class="panel picked" aria-labelledby="picked-title">
+    <h3 id="picked-title">Selected courses</h3>
+    <p class="muted small" id="picked-empty">Nothing yet. Use "Select" on a suggestion.</p>
+    <ul id="picked" class="picked-list"></ul>
+    <button type="button" class="btn ghost wide" id="picked-tt">See timetables with these</button>
+    <button type="button" class="btn wide" id="finalise">Add to my semester</button>
+    <p class="faint small">Kept until you add them or log out. Added courses can be removed on the <a href="{% url 'semester' %}">semester page</a>.</p>
+  </aside>
+</div>
+</div>
+
+<dialog id="tt-dialog" class="sheet" aria-label="Timetables">
+  <div class="sheet-head"><span class="muted small">Your current courses, plus the ones you're considering (dashed)</span>
+    <form method="dialog"><button class="btn link">Close</button></form></div>
+  <div id="tt-body"></div>
+</dialog>
+
+<dialog id="confirm-dialog" class="sheet small" aria-labelledby="confirm-title">
+  <div class="sheet-head"><h2 id="confirm-title">Add these to this semester?</h2>
+    <form method="dialog"><button class="btn link">Cancel</button></form></div>
+  <table class="confirm-table"><thead><tr><th>Code</th><th>Title</th><th>Category</th></tr></thead><tbody id="confirm-rows"></tbody></table>
+  <p class="muted small">They'll count towards your requirements and show in your semester's timetables. You can remove them there.</p>
+  <p id="confirm-error" class="notice bad" hidden></p>
+  <div class="actions" style="margin-top:16px"><button type="button" class="btn" id="confirm">Add to my semester</button></div>
+</dialog>
+
+{{ selection|json_script:"initial-selection" }}
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const form = $("ask"), box = $("message"), send = $("send"), answer = $("answer"), reply = $("reply"), cards = $("cards");
+  const debug = document.querySelector("#debug pre");
+  const csrf = form.querySelector("[name=csrfmiddlewaretoken]").value;
+  let selection = JSON.parse($("initial-selection").textContent);
+
+  const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text != null) node.textContent = text; return node; };
+  const post = (url, body) => fetch(url, {method: "POST", headers: {"Content-Type": "application/json", "X-CSRFToken": csrf}, body: JSON.stringify(body)})
+    .then(async (response) => ({ok: response.ok, data: await response.json()}));
+
+  // The model may use **bold**, *italics* and "- " bullets; everything is escaped first, so no HTML gets through.
+  function formatted(text) {
+    const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const inline = (s) => escape(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/(^|[\s(])\*(\S.*?)\*(?=[\s).,;:!?]|$)/g, "$1<em>$2</em>");
+    let html = "", list = false;
+    for (const raw of text.split("\n")) {
+      const line = raw.trim(), bullet = line.match(/^[-*•]\s+(.*)/);
+      if (bullet && !list) { html += "<ul>"; list = true; }
+      if (!bullet && list) { html += "</ul>"; list = false; }
+      if (bullet) html += `<li>${inline(bullet[1])}</li>`;
+      else if (line) html += `<p>${inline(line)}</p>`;
+    }
+    return html + (list ? "</ul>" : "");
+  }
+
+  const selected = (code) => selection.some((item) => item.code === code);
+
+  function renderSelection() {
+    const list = $("picked");
+    list.replaceChildren(...selection.map((item) => {
+      const row = el("li"), label = el("label"), tick = el("input");
+      tick.type = "checkbox"; tick.checked = true;
+      tick.addEventListener("change", () => toggle(item.code, false));
+      label.append(tick, el("span", "code", item.code), " ", el("span", null, item.title), el("small", "picked-cat", item.category));
+      row.append(label);
+      return row;
+    }));
+    $("picked-empty").hidden = selection.length > 0;
+    $("finalise").disabled = $("picked-tt").disabled = selection.length === 0;
+    document.querySelectorAll("[data-select]").forEach((button) => {
+      const on = selected(button.dataset.select);
+      button.setAttribute("aria-pressed", on);
+      button.textContent = on ? "✓ Selected" : "Select";
+    });
+  }
+
+  async function toggle(code, on) {
+    const {ok, data} = await post("{% url 'plan_select' %}", {code, selected: on});
+    if (ok) selection = data.selection; else alertInline(data.error);
+    renderSelection();
+  }
+
+  function alertInline(message) {
+    const note = el("p", "notice small", message);
+    answer.prepend(note);
+    setTimeout(() => note.remove(), 6000);
+  }
+
+  async function showTimetables(code) {
+    $("tt-body").innerHTML = '<span class="thinking" aria-label="Finding timetables"><i></i><i></i><i></i></span>';
+    $("tt-dialog").showModal();
+    const response = await fetch("{% url 'plan_timetables' %}" + (code ? "?with=" + encodeURIComponent(code) : ""));
+    $("tt-body").innerHTML = await response.text();  // server-rendered, auto-escaped template
+  }
+
+  function scoreBreakdown(score) {
+    // why <details>: a native toggle, keyboard-accessible, no state to manage
+    const box = el("details", "rec-score small");
+    const summary = el("summary");
+    summary.append(el("strong", null, "Relevance " + score.final.toFixed(2)), el("span", "breakdown-link", "See breakdown"));
+    box.append(summary);
+    const rows = [];
+    if (score.topic) rows.push(["Your topic", score.topic]);
+    const [kind, ...text] = (score.why || "").replace(/^matches /, "").split(";")[0].split(": ");
+    if (text.length) rows.push(["Best match in the course", `${kind}: ${text.join(": ")}`]);
+    if (score.domain) rows.push(["Subject-area fit (department)", `× ${score.domain.toFixed(2)}`]);
+    rows.push(["Topic relevance (0 to 1)", score.relevance.toFixed(2)]);
+    if (score.penalty) rows.push(["Penalty", `${score.penalty.toFixed(2)} (${score.why.split("; ").filter((part) => !part.startsWith("matches ")).join("; ")})`]);
+    rows.push(["Final score", score.final.toFixed(2)]);
+    const list = el("dl", "breakdown");
+    rows.forEach(([label, value]) => { const item = el("div"); item.append(el("dt", null, label), el("dd", null, value)); list.append(item); });
+    box.append(list);
+    return box;
+  }
+
+  function card(c) {
+    const node = el("article", "rec-card");
+    node.dataset.cat = c.counts_as || c.category;
+    const head = el("h3"), link = el("a", "code", c.code);
+    link.href = "/course/" + encodeURIComponent(c.code) + "/";
+    head.append(link, el("span", "rec-title", c.title));
+    node.append(head);
+    const meta = el("p", "rec-meta");
+    const chip = el("span", "cat-chip", c.category + (c.counts_as ? " as " + c.counts_as : ""));
+    meta.append(chip);
+    if (c.units != null) meta.append(el("span", null, c.units + " credits"));
+    if (c.sections) meta.append(el("span", null, Object.entries(c.sections).map(([type, id]) => type + " " + id).join(", ")));
+    node.append(meta);
+    if (c.score && c.score.relevance != null) node.append(scoreBreakdown(c.score));
+    if (c.note) node.append(el("p", "rec-note small", c.note));
+    const facts = el("dl", "rec-facts small");
+    c.facts.forEach((f) => {
+      const item = el("div");
+      item.append(el("dt", null, f.label), el("dd", f.value.startsWith("Couldn't verify") ? "muted" : null, f.value));
+      facts.append(item);
+    });
+    node.append(facts);
+    if (c.description) node.append(el("p", "rec-desc small", c.description));
+    if (c.sources.length) node.append(el("p", "rec-sources", "Sources: " + c.sources.join("; ")));
+    const actions = el("div", "rec-actions"), pick = el("button", "btn"), look = el("button", "btn quiet", "See timetables with this course");
+    pick.type = look.type = "button";
+    pick.dataset.select = c.code;
+    pick.addEventListener("click", () => toggle(c.code, !selected(c.code)));
+    look.addEventListener("click", () => showTimetables(c.code));
+    actions.append(pick, look);
+    node.append(actions);
+    return node;
+  }
+
+  async function ask() {
+    const message = box.value.trim();
+    if (!message) return;
+    send.disabled = true; send.textContent = "Thinking…";
+    answer.hidden = false; cards.replaceChildren();
+    reply.innerHTML = '<span class="thinking" aria-label="Thinking"><i></i><i></i><i></i></span>';
+    try {
+      const {data} = await post("{% url 'recommend' %}", {message});
+      reply.innerHTML = formatted(data.reply || data.error || "Something went wrong. Please try again.");
+      (data.cards || []).forEach((c) => cards.append(card(c)));
+      renderSelection();
+      if (debug) debug.textContent = data.debug ? JSON.stringify(data.debug, null, 1) : "";
+    } catch (error) {
+      reply.textContent = "Couldn't reach the server. Please try again.";
+    } finally {
+      send.disabled = false; send.textContent = "Send";
+    }
+  }
+
+  function openConfirm() {
+    $("confirm-rows").replaceChildren(...selection.map((item) => {
+      const row = el("tr");
+      row.append(el("td", "code", item.code), el("td", null, item.title), el("td", null, item.category));
+      return row;
+    }));
+    $("confirm-error").hidden = true;
+    $("confirm-dialog").showModal();
+  }
+
+  $("confirm").addEventListener("click", async () => {
+    const {ok, data} = await post("{% url 'plan_finalise' %}", {codes: selection.map((item) => item.code)});
+    if (ok) { window.location.href = data.redirect; return; }
+    $("confirm-error").textContent = data.error; $("confirm-error").hidden = false;
+  });
+  $("finalise").addEventListener("click", openConfirm);
+  $("picked-tt").addEventListener("click", () => showTimetables(null));
+  document.querySelectorAll("dialog").forEach((dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); }));
+  form.addEventListener("submit", (event) => { event.preventDefault(); ask(); });
+  box.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); ask(); } });
+  document.querySelectorAll(".chip").forEach((chip) => chip.addEventListener("click", () => { box.value = chip.textContent; box.focus(); }));
+  renderSelection();
+  const preset = new URLSearchParams(location.search).get("q");  // "Find one" links from the semester page
+  if (preset) { box.value = preset; box.focus(); }
+})();
+</script>
+{% endblock %}

@@ -6,6 +6,9 @@ Dual-degree layer, minor tags and the "not classifiable" flag come later with th
 from catalog.models import AuditCourse, Course, GirCourse, HuelPoolCourse, PatternSlot, Programme, ProgrammeCourse
 
 ELECTIVE_CATEGORIES = ("DEL", "HUEL", "OPEL")
+# The Bulletin's "Mathematics Foundation" GIR heading names no courses; students' degree audits list it as these
+# 4 courses / 12 units (checked on an A7 and a B5A8 audit, 2026-09-26).
+MATHS_FOUNDATION = {"MATH F101", "MATH F102", "MATH F113", "MATH F211"}
 
 
 def _with_alternatives(links) -> set[str]:
@@ -23,14 +26,14 @@ def own_disciplines(programme: Programme) -> set[str]:
     return {part.discipline_code for part in parts if part and part.discipline_code}
 
 
-def chart_slots(programme: Programme) -> list[PatternSlot]:
-    """The programme's named chart slots. A dual chart starts at year 2 ("Same as First degree Programme"),
-    so its missing years come from the first degree's chart."""
-    slots = list(PatternSlot.objects.filter(programme=programme, slot_type="named").select_related("course"))
+def chart_slots(programme: Programme, slot_type: str = "named") -> list[PatternSlot]:
+    """The programme's chart slots of one type (named courses, or elective placeholders). A dual chart starts at
+    year 2 ("Same as First degree Programme"), so its missing years come from the first degree's chart."""
+    slots = list(PatternSlot.objects.filter(programme=programme, slot_type=slot_type).select_related("course"))
     if programme.type == "dual" and programme.first_component:
         covered_years = {slot.year for slot in slots}
         slots += [
-            slot for slot in PatternSlot.objects.filter(programme=programme.first_component, slot_type="named").select_related("course")
+            slot for slot in PatternSlot.objects.filter(programme=programme.first_component, slot_type=slot_type).select_related("course")
             if slot.year not in covered_years
         ]
     return sorted(slots, key=lambda slot: (slot.year, slot.semester, slot.pk))
@@ -40,14 +43,14 @@ def category_map(programme: Programme) -> dict[str, str]:
     """code -> AUDIT / GIR / CDC / CHART / DEL / HUEL / OPEL for every course in the catalog. First match wins,
     in the order of ideation 6.3.
 
-    CHART = named in the programme's chart but in neither the GIR nor the CDC list (e.g. the maths courses:
-    the Bulletin's Mathematics Foundation heading names no courses). Compulsory, so never an elective;
-    which requirement it counts towards is left open rather than guessed.
+    CHART = named in the programme's chart but in neither the GIR nor the CDC list (a long tail: code-mapping
+    leftovers, programme-specific foundation courses). Compulsory, so never an elective; which requirement it
+    counts towards is left open rather than guessed.
     """
     links = ProgrammeCourse.objects.filter(programme=programme)
     cdc = _with_alternatives(links.filter(category="CDC").values_list("course__code", "alternative_group"))
     dels = _with_alternatives(links.exclude(category="CDC").values_list("course__code", "alternative_group"))
-    gir = _with_alternatives(GirCourse.objects.values_list("course__code", "alternative_group"))
+    gir = _with_alternatives(GirCourse.objects.values_list("course__code", "alternative_group")) | MATHS_FOUNDATION
     audit = set(AuditCourse.objects.values_list("code", flat=True))
     huel = set(HuelPoolCourse.objects.values_list("course__code", flat=True))
     chart = {slot.course.code for slot in chart_slots(programme) if slot.course}

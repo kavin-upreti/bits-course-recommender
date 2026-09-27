@@ -1,0 +1,126 @@
+{% extends "students/base.html" %}
+{% load text %}
+{% block title %}{{ course.code }} · Planner{% endblock %}
+{% block content %}
+<div class="enter stack-page" data-cat="{{ cat }}">
+  <a class="back" href="{% url 'home' %}">← Home</a>
+  <header class="course-head">
+    <p class="course-code">{{ course.code }}</p>
+    <h1>{{ course.title|course_title|default:"Untitled course" }}</h1>
+    <ul class="course-facts">
+      {% if category %}<li><b>{{ category.0 }}</b> for you, {{ category.1|lower }}</li>{% endif %}
+      {% if course.units is not None %}<li><b class="tnum">{{ course.units }}</b> credits</li>{% endif %}
+      {% if course.L is not None %}<li title="Lecture hours, practical hours and credits, as the Bulletin writes them">L-P-U <b class="tnum">{{ course.L }}-{{ course.P|default:0 }}-{{ course.units|default:"?" }}</b></li>{% endif %}
+      {% if taken %}<li><b>{% if taken.status == "current" %}Doing it this semester{% else %}Done in {{ taken.semester_taken }}{% if taken.grade %}, {{ taken.grade }}{% endif %}{% endif %}</b></li>{% endif %}
+      {% if course.only_2026_batch %}<li>2026 batch onwards only</li>{% endif %}
+    </ul>
+  </header>
+
+  <div class="course-body">
+    <div class="course-main">
+      {% if course.description %}
+      <section>
+        <h2>About</h2>
+        {% with points=course.description|as_points %}
+          {% if points %}<ul class="points">{% for point in points %}<li>{{ point }}</li>{% endfor %}</ul>
+          {% else %}<p class="prose">{{ course.description }}</p>{% endif %}
+        {% endwith %}
+      </section>
+      {% endif %}
+
+      <section>
+        <h2>Prerequisites</h2>
+        {% if prerequisites %}
+        <ul class="points">
+          {% for group in prerequisites %}<li>{% for code, known in group %}{% if not forloop.first %} <span class="faint">or</span> {% endif %}{% if known %}<a class="code" href="{% url 'course' code %}">{{ code }}</a>{% else %}<span class="code">{{ code }}</span>{% endif %}{% endfor %}</li>{% endfor %}
+        </ul>
+        <p class="muted small" style="margin-top:8px">You need one course from every line.</p>
+        {% else %}<p class="muted">None listed.</p>{% endif %}
+      </section>
+
+      {% for handout in handouts %}
+      <section class="handout">
+        <h2>From the handout{% if handouts|length > 1 %} <span class="faint small">{{ forloop.counter }} of {{ handouts|length }}</span>{% endif %}</h2>
+        {% if handout.extra %}<p class="prose">{{ handout.extra }}</p>{% endif %}
+
+        {% if handout.objectives or handout.learning_outcomes %}
+        <div class="goals">
+          {% if handout.objectives %}
+          <div class="goal-card"><h3>What the course aims to do</h3>
+            <ul class="points">{% for item in handout.objectives %}<li>{{ item }}</li>{% endfor %}</ul></div>
+          {% endif %}
+          {% if handout.learning_outcomes %}
+          <div class="goal-card"><h3>By the end, you should be able to</h3>
+            <ul class="points checks">{% for item in handout.learning_outcomes %}<li>{{ item }}</li>{% endfor %}</ul></div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {% if handout.topic_groups %}
+        <h3>Course plan <span class="faint small">{{ handout.topics|length }} topics</span></h3>
+        <ol class="plan">
+          {% for group in handout.topic_groups %}
+          <li class="module">
+            {% if group.module %}<p class="module-name">{{ group.module }}</p>{% endif %}
+            {% if group.topics %}<ul class="module-topics">{% for topic in group.topics %}<li>{{ topic }}</li>{% endfor %}</ul>{% endif %}
+          </li>
+          {% endfor %}
+        </ol>
+        {% endif %}
+
+        {% if handout.evaluation %}
+        <h3>Evaluation</h3>
+        <div class="week-scroll">
+          <table class="eval">
+            <thead><tr><th>Component</th><th class="num">Weight</th><th>Duration</th><th>Book</th><th>When</th></tr></thead>
+            <tbody>
+              {% for part in handout.evaluation %}
+              <tr><td>{{ part.name }}{% if part.is_group %} <span class="faint small">(group)</span>{% endif %}</td>
+                  <td class="num">{% if part.weightage_percent is not None %}{{ part.weightage_percent|floatformat:"-1" }}%{% endif %}</td>
+                  <td>{% if part.duration_minutes %}{{ part.duration_minutes }} min{% endif %}</td>
+                  <td>{% if part.nature == "OB" %}Open{% elif part.nature == "CB" %}Closed{% else %}{{ part.nature|default:"" }}{% endif %}</td>
+                  <td class="muted">{{ part.date|default:"" }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+
+        {% if handout.attendance_text or handout.makeup_text %}
+        <div class="policies">
+          {% if handout.attendance_text %}<div class="policy"><h3>Attendance</h3><p>{{ handout.attendance_text }}</p></div>{% endif %}
+          {% if handout.makeup_text %}<div class="policy"><h3>Make-up</h3><p>{{ handout.makeup_text }}</p></div>{% endif %}
+        </div>
+        {% endif %}
+      </section>
+      {% empty %}
+      <section><h2>Handout</h2><p class="muted">We don't have this course's handout.</p></section>
+      {% endfor %}
+    </div>
+
+    <aside class="course-side panel">
+      <h3>This semester</h3>
+      {% if offering %}
+        <dl class="facts" style="margin-top:12px">
+          {% if offering.instructor_in_charge %}<div class="wide"><dt>Instructor in charge</dt><dd>{{ offering.instructor_in_charge }}</dd></div>{% endif %}
+          <div><dt>Midsem</dt><dd>{% if midsem %}{{ midsem|date:"j M" }}, {{ offering.midsem_session }}{% else %}Not set{% endif %}</dd></div>
+          <div><dt>Compre</dt><dd>{% if compre %}{{ compre|date:"j M" }}, {{ offering.compre_session }}{% else %}Not set{% endif %}</dd></div>
+        </dl>
+        {% for type, rows in sections.items %}
+        <h4 class="sec-type">{{ type|capfirst }}s <span class="faint">{{ rows|length }}</span></h4>
+        <table class="sections">
+          {% for row in rows %}
+          <tr{% if row.section.cancelled %} class="cancelled"{% endif %}>
+            <td class="code">{{ row.section.section_id }}</td>
+            <td>{{ row.when|default:"No time set" }}{% if row.section.room %} <span class="faint">{{ row.section.room }}</span>{% endif %}<span class="muted small who-teaches">{{ row.section.instructors|join:", " }}{% if row.section.cancelled %}, cancelled{% endif %}</span></td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% endfor %}
+      {% else %}
+        <p class="muted" style="margin-top:8px">Not offered this semester.</p>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+{% endblock %}

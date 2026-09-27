@@ -1,0 +1,8 @@
+<details class="key panel">
+  <summary>What do CDC, Foundation, DEL, HUEL, OPEL and Audit mean?</summary>
+  <dl>
+    {% for code, short, full, meaning in key %}
+    <div data-cat="{{ code }}"><dt><span class="dot"></span>{{ short }}</dt><dd><b>{{ full }}.</b> {{ meaning }}</dd></div>
+    {% endfor %}
+  </dl>
+</details>

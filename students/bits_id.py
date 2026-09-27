@@ -81,3 +81,10 @@ def resolve_programme(parsed: ParsedId) -> Programme:
     if dual is None:
         raise BitsIdError(f"The Bulletin has no dual-degree chart for {first.name} + {BRANCH_CODES[parsed.second_code]}.")
     return dual
+
+
+def second_degree_options(first_code: str) -> list[tuple[str, str]]:
+    """(code, name) of every B.E. an M.Sc. can pair with: the ones the Bulletin gives a dual chart for."""
+    names = set(Programme.objects.filter(type="dual", first_component__name=BRANCH_CODES.get(first_code))
+                .values_list("second_component__name", flat=True))
+    return [(code, name) for code, name in BRANCH_CODES.items() if code.startswith("A") and name in names]

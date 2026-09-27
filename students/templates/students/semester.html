@@ -1,0 +1,89 @@
+{% extends "students/base.html" %}
+{% load static %}
+{% block title %}{{ planning }} timetable · Planner{% endblock %}
+{% block content %}
+<script src="{% static 'students/timetable.js' %}" defer></script>
+<div class="enter stack-page">
+  <header class="page-head">
+    <div>
+      <p class="kicker">This semester</p>
+      <h1>{{ planning }}</h1>
+      <p class="lede"><b class="tnum">{{ load.fixed_units }}</b> credits so far{% if load.max_units %} of the {{ load.max_units }}-credit cap{% endif %}. Electives appear here once you add them from the assistant.</p>
+    </div>
+    <div class="page-head-actions">
+      {% if exams %}<button type="button" class="btn ghost" id="open-exams">Exam calendar</button>{% endif %}
+      <a class="btn" href="{% url 'chat' %}">Find electives</a>
+    </div>
+  </header>
+
+  <section aria-labelledby="now-title">
+    <div class="section-head">
+      <h2 id="now-title">Your courses</h2>
+      <p>{{ rows|length }} course{{ rows|length|pluralize }}, {{ load.fixed_units }} credits</p>
+    </div>
+    {% if rows %}
+    <ul class="tiles">{% for row in rows %}{% include "students/_tile.html" with removable=True %}{% endfor %}</ul>
+    {% else %}<div class="empty">No courses in {{ planning }} yet.</div>{% endif %}
+    {% if electives %}
+    <div class="elective-strip">
+      {% for kind in electives %}
+      <div class="elective" data-cat="{{ kind.code }}">
+        <span class="cat-chip" title="{{ kind.full }}">{{ kind.short }}</span>
+        <p>{% if kind.complete %}Requirement met{% else %}<b class="tnum">{{ kind.left }}</b> still needed{% endif %}{% if kind.added %}<span class="faint">, {{ kind.added }} added this semester</span>{% endif %}</p>
+        {% if not kind.complete %}<a class="btn small ghost" href="{% url 'chat' %}?q={{ kind.query|urlencode }}">Find one</a>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  {% if not_offered %}
+  <p class="notice">Not in this semester's timetable, so left out of the grids: {% for course in not_offered %}<a class="code" href="{% url 'course' course.code %}">{{ course.code }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
+  {% endif %}
+
+  {% include "students/_timetables.html" with heading="Possible timetables" %}
+  {% include "students/_key.html" %}
+</div>
+
+{% if exams %}
+<dialog id="exams" class="sheet" aria-labelledby="exams-title">
+  <div class="sheet-head">
+    <h2 id="exams-title">Exam calendar</h2>
+    <div class="toggle" role="group" aria-label="Which exams">
+      {% for cal in exams %}<button type="button" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}" data-exam="{{ cal.kind }}">{{ cal.kind }}</button>{% endfor %}
+    </div>
+    <form method="dialog"><button class="btn link">Close</button></form>
+  </div>
+  {% for cal in exams %}
+  <div data-exam-panel="{{ cal.kind }}"{% if not forloop.first %} hidden{% endif %}>
+    {% if cal.dates %}
+    <p class="muted small" style="margin-bottom:12px">{{ cal.kind }} week, {{ cal.dates.0|date:"j M" }} to {{ cal.dates|last|date:"j M" }}. Sundays left out.</p>
+    <div class="week-scroll">
+      <table class="exam-grid">
+        <thead><tr><th></th>{% for day in cal.dates %}<th scope="col">{{ day|date:"D j M" }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for row in cal.grid %}
+          <tr><th scope="row">{{ row.session }}<span>{{ row.time }}</span></th>
+            {% for codes in row.cells %}<td>{% for code in codes %}<a class="exam-chip code" href="{% url 'course' code %}">{{ code }}</a>{% endfor %}</td>{% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="empty">No {{ cal.kind|lower }} dates in the timetable for these courses.</p>{% endif %}
+    {% for warning in cal.warnings %}<p class="notice" style="margin-top:12px">{{ warning }}</p>{% endfor %}
+    {% if cal.undated %}<p class="muted small" style="margin-top:12px">No date in the timetable (lab courses' compres are set by the instructor): {{ cal.undated|join:", " }}.</p>{% endif %}
+  </div>
+  {% endfor %}
+</dialog>
+<script>
+  const dialog = document.getElementById('exams');
+  document.getElementById('open-exams').addEventListener('click', () => dialog.showModal());
+  dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });  // click on the backdrop
+  dialog.querySelectorAll('[data-exam]').forEach((button) => button.addEventListener('click', () => {
+    dialog.querySelectorAll('[data-exam]').forEach((other) => other.setAttribute('aria-pressed', other === button));
+    dialog.querySelectorAll('[data-exam-panel]').forEach((panel) => { panel.hidden = panel.dataset.examPanel !== button.dataset.exam; });
+  }));
+</script>
+{% endif %}
+{% endblock %}

@@ -1,14 +1,15 @@
 {% extends "students/base.html" %}
-{% block title %}Log in · BITS Course Planner{% endblock %}
+{% block title %}Log in · Planner{% endblock %}
 {% block content %}
-<div class="auth">
+<div class="auth enter">
   <section>
-    <h1>Welcome back.</h1>
-    <p class="lede">Log in with your BITS ID and password.</p>
+    <p class="wordmark" style="padding:0;margin-bottom:24px"><span class="wordmark-dot" aria-hidden="true"></span>Planner</p>
+    <h1>Pick up where you left off.</h1>
+    <p class="lede">Your courses, your requirements and this semester's timetable, in one place.</p>
   </section>
   <form class="panel stack" method="post">{% csrf_token %}
-    <h2 style="margin-bottom:16px">Log in</h2>
-    {% if form.non_field_errors %}<ul class="errorlist nonfield"><li>Wrong BITS ID or password.</li></ul>{% endif %}
+    <h2>Log in</h2>
+    {% if form.non_field_errors %}<p class="notice bad">Wrong BITS ID or password.</p>{% endif %}
     <div><label for="id_username">BITS ID</label>{{ form.username }}</div>
     <div><label for="id_password">Password</label>{{ form.password }}</div>
     <div class="actions"><button class="btn">Log in</button><span class="muted small">New here? <a href="{% url 'register' %}">Create an account</a></span></div>

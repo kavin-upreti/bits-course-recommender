@@ -1,0 +1,17 @@
+[
+  {"query": "large language models, natural language processing, transformers", "category": "DEL",
+   "expected": ["BITS F471", "CS F429", "CS F425", "CS G569"], "expected_status": "confirmed (drafted by the assistant; the user delegated the check)"},
+  {"query": "finance, investments, financial markets", "category": null,
+   "expected": ["ECON F312", "ECON F412", "FIN F313", "FIN F315", "ECON F315"], "expected_status": "confirmed (drafted by the assistant; the user delegated the check)"},
+  {"query": "psychology, human behaviour", "category": "HUEL",
+   "expected": ["GS F232", "HSS F323"], "expected_status": "confirmed (drafted by the assistant; the user delegated the check)"},
+  {"query": "current affairs, politics, society", "category": null,
+   "expected": ["GS F243", "GS F211", "GS F233", "HSS F346"], "expected_status": "confirmed (drafted by the assistant; the user delegated the check)"},
+  {"query": "robotics, control systems", "category": null,
+   "expected": ["BITS F327", "ME G511", "ME G552", "EEE F422", "MF F315"], "expected_status": "confirmed (drafted by the assistant; the user delegated the check)"},
+  {"query": "cybersecurity", "category": null,
+   "expected": ["BITS F463"], "expected_status": "confirmed (drafted by the assistant; the user delegated the check)"},
+  {"query": "marine biology", "category": null, "expected": [], "no_match": true},
+  {"query": "fashion design", "category": null, "expected": [], "no_match": true},
+  {"query": "culinary arts, cooking", "category": null, "expected": [], "no_match": true}
+]

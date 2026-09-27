@@ -18,3 +18,27 @@ Still flagged: `017_BIO_G523.pdf` (really the BIO F212 handout), `160_CS_F111.pd
 ### CDCs (bulletin)
 
 Each discipline's CDCs are the `core` courses of its entry in `course_lists` (`dataset/code processed/bulletin.json`), read by code from the Bulletin's "List of Courses". Every programme has `cdc_lists` naming the list(s) that apply (dual degrees: one per component). All 28 lists were checked against the "Discipline Core - N Units (M Courses)" footer of the programme charts; where the Bulletin contradicts itself, `CDC_CORRECTIONS` in `extractors/bulletin.py` fixes it and the list's `note` says why (Environmental & Sustainability: 13 -> 16 courses from the chart; ECE: ECE F331 -> ECE F314; Pharmacy: PHA F243 replaced by PHA F215 per the Bulletin's own footnote). The BBA list's heading is an image in the PDF, so it is named `BUSINESS ADMINISTRATION` from its courses.
+
+## Running the app and the recommender
+
+Setup: `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt`, then `cp .env.example .env` and fill in:
+
+| Variable | What |
+|---|---|
+| `DJANGO_SECRET_KEY`, `DJANGO_DEBUG` | Django basics (`DJANGO_DEBUG=1` also shows the chat page's Debug panel) |
+| `BITS_DATA_DIR` | optional; defaults to `./dataset` |
+| `LLM_PROVIDERS` | `provider:model` list tried in order; a rate-limited or failing provider falls through to the next. Default: `groq:openai/gpt-oss-120b,openrouter:nvidia/nemotron-3-super-120b-a12b:free,gemini:gemini-3.5-flash` |
+| `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY` | free keys (console.groq.com, openrouter.ai, aistudio.google.com); a provider without a key is skipped |
+
+Commands (all `.venv/bin/python manage.py ...`):
+
+- `migrate`, then `ingest`: clears and reloads the catalog, then builds course pieces and their embeddings (`build_embeddings`, ~20 s, local all-MiniLM-L6-v2). `--skip-embeddings` skips that step; `--wipe-students` is needed if students exist.
+- `build_embeddings [--model NAME]`: rebuild pieces + embeddings only.
+- `handout_facts_report`: how many courses have each handout fact unknown, evaluation kinds, sample quiz counts.
+- `embedding_eda [--models A B] [--n 1 2 3 5]`: compares embedding models and top-N on `recommender/eda/queries.json`; writes `docs/eda/embedding_eda.md`. Fill each query's `expected` codes to get hit@5.
+- `llm_smoke_test`: sends "Say hello" to each provider in `LLM_PROVIDERS` on its own (checks keys and model names).
+- `runserver`, then log in and use **Ask the course assistant** on the home page (`/chat/`).
+
+Tests: `.venv/bin/python manage.py test` (Django: students, catalog, recommender; no network: sockets are blocked and a fake embedder / fake LLM are used, see `recommender/testing.py`) and `.venv/bin/python -m pytest tests/` (extractor rules).
+
+The recommender's design and every decision made while building it: `docs/recommender_build_report.md`.

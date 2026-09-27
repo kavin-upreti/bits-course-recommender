@@ -1,0 +1,82 @@
+{% comment %}Week grids with filters and a pager. Context: heading, timetables, clashes, week, today, highlight (codes drawn
+dashed), filters, filter_notes, teacher_options, chosen_teachers, avoid_keys, periods, day_names; filters_url + with_code in the popup.{% endcomment %}
+<section class="tt-wrap" aria-label="{{ heading }}">
+  <div class="tt-head">
+    <div>
+      <h2>{{ heading }}</h2>
+      <p class="muted small">Every option keeps a lunch hour free each day. Best first: your sort choices, then fewest free hours between classes, fewest 8 AMs, fewest days on campus.</p>
+    </div>
+    {% if timetables|length > 1 %}
+    <div class="pager">
+      <button type="button" class="btn ghost" data-step="-1" aria-label="Previous timetable">‹</button>
+      <span><b class="tt-index">1</b> of {{ timetables|length }}</span>
+      <button type="button" class="btn ghost" data-step="1" aria-label="Next timetable">›</button>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if timetables or filters.teachers or filters.avoid %}
+  <form class="tt-filters" method="get" action="{{ filters_url|default:'' }}"{% if filters_url %} data-fetch{% endif %}>
+    {% if with_code %}<input type="hidden" name="with" value="{{ with_code }}">{% endif %}
+    <label><input type="checkbox" name="no_8am" value="1"{% if filters.no_8am %} checked{% endif %}> Fewest 8 AMs</label>
+    <label><input type="checkbox" name="compact" value="1"{% if filters.compact %} checked{% endif %}> Fewest gaps</label>
+    <label>Keep free
+      <select name="free_day"><option value="">no day</option>{% for day, name in day_names %}<option value="{{ day }}"{% if filters.free_day == day %} selected{% endif %}>{{ name }}</option>{% endfor %}</select>
+    </label>
+    {% if teacher_options %}
+    <span class="teacher-pick">
+      <select data-teacher-course aria-label="Course to pick a teacher for"><option value="">Teacher for…</option>
+        {% for option in teacher_options %}<option value="{{ option.code }}" data-names="{{ option.names|join:'||' }}">{{ option.code }}</option>{% endfor %}
+      </select>
+      <select name="teacher" data-teacher-name aria-label="Teacher" hidden disabled></select>
+    </span>
+    {% endif %}
+    {% for key, code, name in chosen_teachers %}
+    <label class="picked-teacher" title="Untick to remove"><input type="checkbox" name="teacher" value="{{ key }}" checked> {{ code }}: {{ name }}</label>
+    {% endfor %}
+    <details class="avoid-times"{% if avoid_keys %} open{% endif %}>
+      <summary>Times to keep free{% if avoid_keys %} ({{ avoid_keys|length }}){% endif %}</summary>
+      <table>
+        <thead><tr><th></th>{% for day, name in day_names %}<th scope="col">{{ day }}</th>{% endfor %}</tr></thead>
+        <tbody>{% for period, time in periods %}<tr><th scope="row">{{ time }}</th>
+          {% for day, name in day_names %}{% with key=day|add:"-"|add:period %}<td><input type="checkbox" name="avoid" value="{{ key }}" aria-label="{{ day }} {{ time }}"{% if key in avoid_keys %} checked{% endif %}></td>{% endwith %}{% endfor %}
+        </tr>{% endfor %}</tbody>
+      </table>
+    </details>
+    <button class="btn small">Sort</button>
+  </form>
+  {% for note in filter_notes %}<p class="notice">{{ note }}</p>{% endfor %}
+  {% endif %}
+
+  {% if not timetables %}
+    <div class="empty">
+      {% if clashes %}No clash-free timetable: {% for first, second in clashes %}{{ first }} and {{ second }}{% if not forloop.last %}; {% endif %}{% endfor %} always overlap.
+      {% else %}Nothing to lay out yet: none of these courses are in the timetable.{% endif %}
+    </div>
+  {% else %}
+  <ul class="tt-legend">
+    <li><b>L</b> lecture</li><li><b>T</b> tutorial</li><li><b>P</b> practical</li>
+    {% if highlight %}<li class="new-key">dashed: courses you're considering</li>{% endif %}
+  </ul>
+  {% for tt in timetables %}
+  <div class="tt" data-tt="{{ forloop.counter }}"{% if not forloop.first %} hidden{% endif %}>
+    <p class="tt-stats">{{ tt.score.eight_ams }} at 8 AM · {{ tt.score.gaps }} free hour{{ tt.score.gaps|pluralize }} between classes · {{ tt.score.days }} day{{ tt.score.days|pluralize }} on campus</p>
+    {% include "students/_week.html" %}
+    <details class="tt-sections">
+      <summary>Sections in this timetable</summary>
+      {% if tt.has_alternatives %}<p class="muted small">"+n" in the grid and "n more at this time" here are other sections at exactly the same times (another teacher or room). Pick one to see it in the grid.</p>{% endif %}
+      <table>
+        {% for pick in tt.picks %}
+        <tr data-pick="{{ pick.code }}|{{ pick.type }}"><td class="code">{{ pick.code }}</td><td class="sec-id">{{ pick.section.section_id }}</td>
+            <td class="muted">{{ pick.when }}</td><td class="sec-profs">{{ pick.section.instructors|join:", " }}</td>
+            <td class="sec-alt">{% if pick.others %}
+              <details class="alt-pick"><summary>{{ pick.others }} more at this time</summary>
+                <ul>{% for section in pick.sections %}<li><button type="button" class="alt-choice{% if forloop.first %} chosen{% endif %}" data-id="{{ section.section_id }}" data-profs="{{ section.instructors|join:', ' }}" data-room="{{ section.room }}">{{ section.section_id }} · {{ section.instructors|join:", "|default:"no teacher listed" }}{% if section.room %} · {{ section.room }}{% endif %}</button></li>{% endfor %}</ul>
+              </details>{% endif %}</td></tr>
+        {% endfor %}
+      </table>
+    </details>
+  </div>
+  {% endfor %}
+  {% endif %}
+</section>

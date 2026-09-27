@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'catalog',
     'students',
+    'recommender',
 ]
 
 MIDDLEWARE = [
@@ -111,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'  # why: the timetable week rolls over at Sunday midnight IST
 
 USE_I18N = True
 
@@ -139,3 +140,6 @@ DATA_DIR = Path(os.environ.get('BITS_DATA_DIR', BASE_DIR / 'dataset'))
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
+
+# no network and a fake embedder during tests (recommender/testing.py)
+TEST_RUNNER = 'recommender.testing.NoNetworkRunner'

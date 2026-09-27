@@ -16,6 +16,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from django.conf import settings
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
@@ -26,6 +27,10 @@ EXPECTED_MINORS = 23  # Bulletin 2025-26; a different count after re-extraction 
 DEFAULT_POLICY = re.compile(r"as per (the )?(institute|augs|agsr|academic|university)|(augs|agsr)\w*\s*(division\s*)?(guidelines|rules|norms)"
                             r"|institute (rules|norms|guidelines)|see part[- ]i\b", re.I)
 CODE = re.compile(r"^[A-Z]{2,5} [A-Z]\d{3}[A-Z]?(-\d+)?$")
+# "Equivalent: CS F213/IS F213: Object Oriented Programming" at the end of a Bulletin description; codes up to the
+# next colon (the colon starts the title). Case-sensitive: "equivalent circuit" in a syllabus isn't one.
+EQUIVALENT = re.compile(r"\bEquivalent\s*:\s*([^:]*)")
+CODE_IN_TEXT = re.compile(r"\b([A-Z]{2,5}) ?([A-Z]\d{3})\b")
 
 
 def load(path: Path):
@@ -35,6 +40,13 @@ def load(path: Path):
         raise CommandError(f"Missing input: {path} (run the extractors first; see README)")
     except ValueError as error:
         raise CommandError(f"Not valid JSON: {path} ({error})")
+
+
+def bulletin_equivalents(description: str, own_code: str) -> list[str]:
+    """Codes a Bulletin description names as equivalent ("Equivalent: CS F213/IS F213: ..."), own code left out."""
+    codes = [f"{dept} {number}" for match in EQUIVALENT.finditer(description or "")
+             for dept, number in CODE_IN_TEXT.findall(match.group(1))]
+    return [code for code in dict.fromkeys(codes) if code != own_code]
 
 
 def department(code: str) -> str:
@@ -55,8 +67,11 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--wipe-students", action="store_true",
                             help="also delete all student data (needed if students exist: they reference catalog rows)")
+        parser.add_argument("--skip-embeddings", action="store_true",
+                            help="don't rebuild course pieces and their embeddings (build_embeddings) afterwards")
 
     def handle(self, *args, **options):
+        from recommender.handout_facts import clear_facts_cache
         from students.models import Student
 
         base = Path(settings.DATA_DIR)
@@ -70,6 +85,7 @@ class Command(BaseCommand):
             raise CommandError("Students exist and reference catalog rows; rerun with --wipe-students to delete them too.")
 
         self.report: dict[str, list] = defaultdict(list)
+        clear_facts_cache()
         with transaction.atomic():
             if options["wipe_students"]:
                 Student.objects.all().delete()
@@ -84,6 +100,8 @@ class Command(BaseCommand):
         (base / "ingest_report.json").write_text(json.dumps(self.report, indent=1, ensure_ascii=False))
         self.print_counts()
         self.stdout.write(f"Full cross-check lists: {base / 'ingest_report.json'}")
+        if not options["skip_embeddings"]:
+            call_command("build_embeddings", stdout=self.stdout)
 
     # ------------------------------------------------------------ clear
     def clear(self):
@@ -192,7 +210,9 @@ class Command(BaseCommand):
             if h["course_no"] not in offered:
                 self.report["handout course not in timetable"].append(h["file"])
             rows.append(m.Handout(
-                course=courses[h["course_no"]], file=h["file"], description=h.get("about") or "", topics=h["topics"],
+                course=courses[h["course_no"]], file=h["file"], description=h.get("description") or "", topics=h["topics"],
+                objectives=h.get("objectives") or [], learning_outcomes=h.get("outcomes") or [],
+                topic_groups=h.get("topic_groups") or [],
                 evaluation=evaluation, has_midsem=has("midsem"), has_project=has("project"), has_quiz=has("quiz"),
                 open_book_percent=round(sum(c["weightage_percent"] or 0 for c in evaluation if c["nature"] == "OB"), 2) if evaluation else None,
                 project_percent=weight({"project"}) if evaluation else None, compre_percent=weight({"compre"}) if evaluation else None,
@@ -278,6 +298,10 @@ class Command(BaseCommand):
             course=courses[c["code"]], heading=r["category"], alternative_group=c.get("alternatives") or [],
             sources={"requirement": r.get("source")})
             for r in manual_bulletin["category_requirements"] for c in r.get("named_courses") or []])
+        m.CourseEquivalent.objects.bulk_create([
+            m.CourseEquivalent(course=courses[d["code"]], equivalent_code=code)
+            for d in bulletin["course_descriptions"] if d["code"] in courses
+            for code in bulletin_equivalents(d["description"], d["code"])], ignore_conflicts=True)
         m.CodeMapping.objects.bulk_create([m.CodeMapping(
             from_code=x["from"], to_course=courses[x["to"]], inferred=x.get("inferred", True), reason=x.get("reason") or "",
             needs_verification=x.get("needs_verification", True), sources={"mapping": x.get("id")})

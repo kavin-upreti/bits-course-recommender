@@ -1,25 +1,34 @@
 {% extends "students/base.html" %}
-{% block title %}Your electives · BITS Course Planner{% endblock %}
+{% block title %}Courses you've taken · Planner{% endblock %}
 {% block main_class %}narrow{% endblock %}
 {% block content %}
-<h1>Courses you've taken</h1>
-<p class="lede">Your compulsory courses are already filled in. {% if alternatives %}Tell us which option you took where your chart gives a choice, then add{% else %}Add{% endif %} your electives, semester by semester.</p>
-{% if error %}<p class="notice" role="alert" style="margin-top:16px">{{ error }}</p>{% endif %}
+<div class="enter stack-page">
+<header>
+  <h1>Courses you've taken</h1>
+  <p class="lede">Your compulsory courses are already filled in. {% if alternatives %}Say which option you took where your chart gives a choice, then add{% else %}Add{% endif %} your electives, semester by semester.</p>
+</header>
+{% if error %}<p class="notice bad" role="alert">{{ error }}</p>{% endif %}
 
 {% for category, courses in choices.items %}
 <datalist id="dl-{{ category }}">{% for course in courses %}<option value="{{ course.code }}">{{ course.title }}</option>{% endfor %}</datalist>
 {% endfor %}
 
-<form method="post" style="margin-top:24px">{% csrf_token %}
+<form method="post" id="courses-form">{% csrf_token %}
 {% if alternatives %}
-  <section class="sem-block">
-    <h3>Choices in your chart</h3>
+  <section class="panel sem-block">
+    <h2>Choices in your chart</h2>
     {% for label, slots in alternatives %}
       {% include "students/_or_pick.html" with prompt="In "|add:label|add:", which one did you take?" %}
     {% endfor %}
   </section>
 {% endif %}
-{% if formsets %}<h2 style="margin:32px 0 4px">Electives</h2><p class="muted small" style="margin:0 0 16px">Pick the kind first and the course list narrows to match.</p>{% endif %}
+{% if formsets %}
+<section class="live-needs" aria-live="polite">
+  <h2>Remaining as per academic requirements</h2>
+  <p class="muted small" style="margin:4px 0 12px">Updates as you type. Pick the kind first and the course list narrows to match.</p>
+  <div id="needs-live" data-url="{% url 'remaining_preview' %}">{% include "students/_needs.html" %}</div>
+</section>
+{% endif %}
 {% for semester, formset in formsets %}
   <section class="sem-block">
     <h3>{{ semester }} <span class="muted">leave rows empty if you took none</span></h3>
@@ -35,11 +44,12 @@
     {% endfor %}
     </div>
     <template><div class="erow" data-cat="">{{ formset.empty_form.category }}{{ formset.empty_form.course }}{{ formset.empty_form.grade }}{{ formset.empty_form.comfort }}</div></template>
-    <button type="button" class="btn quiet add-row" data-prefix="{{ formset.prefix }}">Add another course</button>
+    <button type="button" class="btn ghost small add-row" data-prefix="{{ formset.prefix }}">Add another course</button>
   </section>
 {% endfor %}
-<div class="actions"><button class="btn">Save courses</button><a class="btn link" href="{% url 'home' %}">Skip for now</a></div>
+<div class="actions" style="margin-top:32px"><button class="btn">Save courses</button><a class="btn link" href="{% url 'home' %}">Skip for now</a></div>
 </form>
+</div>
 
 <script>
   // why: one shared <datalist> per kind keeps the page small (~2,000 open electives listed once, not per row)
@@ -58,5 +68,22 @@
     const row = block.querySelector('.rows').lastElementChild;
     wire(row); row.querySelector('select').focus();
   }));
+  // why: the counts come from the server (same allocation as the home page), re-asked whenever a course changes
+  const live = document.getElementById('needs-live');
+  if (live) {
+    const form = document.getElementById('courses-form');
+    let pending;
+    const refresh = (event) => {
+      if (!event.target.name || !event.target.name.endsWith('-course')) return;
+      clearTimeout(pending);
+      pending = setTimeout(async () => {
+        try {
+          const response = await fetch(live.dataset.url, { method: 'POST', body: new FormData(form) });
+          if (response.ok) live.innerHTML = await response.text();
+        } catch (error) { console.warn('Could not refresh the remaining counts', error); }
+      }, 300);
+    };
+    form.addEventListener('input', refresh); form.addEventListener('change', refresh);
+  }
 </script>
 {% endblock %}

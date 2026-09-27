@@ -1,0 +1,14 @@
+<ul class="needs">
+  {% for need in needs %}
+  <li class="need{% if not need.courses_left %} met{% endif %}" data-cat="{{ need.category }}">
+    <div class="need-top">
+      <span class="n">{% if need.courses_left %}{{ need.courses_left }}{% else %}✓{% endif %}</span>
+      <span class="need-label"><b>{{ need.label }}{% if need.courses_left %}{{ need.courses_left|pluralize }}{% endif %}</b>{% if need.courses_left %} left{% else %} met{% endif %}</span>
+    </div>
+    {% if need.degree %}<p class="need-degree">{{ need.degree }}</p>{% endif %}
+    <div class="need-bar" aria-hidden="true"><span style="width:{% widthratio need.done_courses need.required_courses|default:1 100 %}%"></span></div>
+    <p class="need-meta">{{ need.done_courses }} of {{ need.required_courses }} courses done{% if need.units_left %} · {{ need.units_left }} credits to go{% endif %}</p>
+    {% if need.note %}<p class="need-note">{{ need.note }}</p>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
