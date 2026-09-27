@@ -44,13 +44,15 @@ class Scored:
     domains: list[float] = field(default_factory=list)    # the department-fit multiplier for each topic
 
 
-def retrieve(index: PieceIndex, codes: list[str], queries: np.ndarray, candidates: int) -> list[Scored]:
-    """C1: the `candidates` courses with the highest best-piece similarity to any topic (ties by code). Each topic
+def retrieve(index: PieceIndex, codes: list[str], queries: np.ndarray, candidates: int,
+             own: int | None = None) -> list[Scored]:
+    """C1: the `candidates` courses with the highest best-piece similarity to any topic (ties by code), plus the
+    `candidates` best on the first `own` topics (the student's), so related topics can't crowd those out. Each topic
     gets the course's RERANK_PIECES_PER_COURSE best pieces FOR THAT TOPIC, plus the title.
     why per topic: with "NLP" and "machine learning", the AI course's three ML lines would otherwise crowd out its
     one NLP line, and its NLP score would be computed without it. Courses without any piece are left out."""
     queries = np.atleast_2d(queries)
-    scored = []
+    scored, own_sim = [], {}
     for code in codes:
         rows = index.rows_by_course.get(code)
         if not rows:
@@ -63,7 +65,14 @@ def retrieve(index: PieceIndex, codes: list[str], queries: np.ndarray, candidate
             by_topic.append(best + [row for row in titles if row not in best])
         union = list(dict.fromkeys(row for chosen in by_topic for row in chosen))
         scored.append(Scored(code, float(sims.max()), union, by_topic))
-    return sorted(scored, key=lambda item: (-item.embedding, item.code))[:candidates]
+        own_sim[code] = float(sims[:, :own].max()) if own else 0.0
+    # ponytail: up to 2 x `candidates` reach the reranker when related topics are given; split the budget if that's slow
+    shortlist = sorted(scored, key=lambda item: (-item.embedding, item.code))[:candidates]
+    if own:
+        listed = {item.code for item in shortlist}
+        shortlist += [item for item in sorted(scored, key=lambda item: (-own_sim[item.code], item.code))[:candidates]
+                      if item.code not in listed]
+    return sorted(shortlist, key=lambda item: (-item.embedding, item.code))
 
 
 STEM_LETTERS = 7  # "politics" / "political" -> "politic"; "statistics" / "statistical" -> "statist"

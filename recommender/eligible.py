@@ -353,16 +353,16 @@ def relevance_scores(pipeline: Pipeline, topics: list[str], ranked_by: str, pass
     matched_on. Courses not offered (topic searches) and "next semester" ones are reranked in the same call."""
     index, started = get_piece_index(), time.monotonic()
     query = get_embedder().embed(topics, kind="query")
-    main = retrieve(index, [candidate.code for candidate in passed], query, config.RERANK_CANDIDATES)
-    unverified = retrieve(index, [candidate.code for candidate in unknown], query, config.RERANK_CANDIDATES)
-    unoffered = retrieve(index, unoffered_pool(pipeline), query, config.RERANK_CANDIDATES) if ranked_by == "about" else []
+    own = pipeline.own_topics
+    main = retrieve(index, [candidate.code for candidate in passed], query, config.RERANK_CANDIDATES, own)
+    unverified = retrieve(index, [candidate.code for candidate in unknown], query, config.RERANK_CANDIDATES, own)
+    unoffered = retrieve(index, unoffered_pool(pipeline), query, config.RERANK_CANDIDATES, own) if ranked_by == "about" else []
     later = retrieve(index, [code for code, _ in pipeline.next_semester], query, len(pipeline.next_semester))
     retrieved = time.monotonic()
     groups = [main, unverified, unoffered, later]
     rerank(groups, topics, query, index, get_reranker(), config.BEST_PIECE_WEIGHT)
     pipeline.timings = {"retrieval_ms": round(1000 * (retrieved - started)), "rerank_ms": round(1000 * (time.monotonic() - retrieved)),
                         "rerank_pairs": sum(len(rows) for group in groups for item in group for rows in item.rows_by_topic)}
-    own = pipeline.own_topics
     for item in unoffered + later:  # "better match" / "eligible next semester" notes: the student's own topics only
         item.relevance = max(item.by_topic[:own])
     pipeline.unoffered = unoffered
@@ -645,11 +645,15 @@ def fill(pipeline: Pipeline, ranked: list[Candidate], count: int | None, topics:
     if count or len(pipeline.searched) == 1:
         places = count or default_count(pipeline)
         return stage_fit(pipeline, ranked, places, topics)[0], places
-    kept = []
+    kept, every_short = [], True
     for category in pipeline.searched:
         pool = [candidate for candidate in ranked if (candidate.counts_as or candidate.category) == category]
-        kept += stage_fit(pipeline, pool, default_count(pipeline), topics)[0]
-    return sorted(kept, key=lambda candidate: candidate.rank), default_count(pipeline) * len(pipeline.searched)
+        found = stage_fit(pipeline, pool, default_count(pipeline), topics)[0]
+        every_short = every_short and len(found) < default_count(pipeline)
+        kept += found
+    # why: a category that filled its places may have more matches, so "no other course matches" would be false
+    places = default_count(pipeline) * len(pipeline.searched) if every_short else len(kept)
+    return sorted(kept, key=lambda candidate: candidate.rank), places
 
 
 # ---------------------------------------------------------------- 6.7 stage E

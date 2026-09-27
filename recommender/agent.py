@@ -158,7 +158,7 @@ def loop(run: Run, messages: list[dict]) -> str:
         if not response.tool_calls:
             run.debug["rounds"].append({"round": number, "calls": [], "usage": response.usage})
             missing = sorted(run.named - run.searched)
-            if not missing or run.reminded:
+            if not missing or run.reminded or number == config.MAX_AGENT_ROUNDS:  # why: no round left to search in
                 return response.text or ""
             # why in Python: "courses on AI, and a HUEL on media" was answered from one no-category search, so the
             # media topic was never searched among HUELs. One reminder, then whatever the model says goes.
