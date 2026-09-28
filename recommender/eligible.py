@@ -1,10 +1,11 @@
 """The get_eligible_courses pipeline (todo.md section 6), one small function per stage.
 
 A: rule filters (offered, category, not done, prerequisites, batch, exclude)  ->  B: handout filters
-->  C: retrieve (embeddings) + rerank (cross-encoder, recommender/ranking.py) + relevance cutoff + dislike
-penalties, then sort  ->  D: timetable preferences  ->  fit with the current courses  ->  E: result.
+->  C: retrieve (embeddings) + rerank (cross-encoder, recommender/ranking.py) + relevance cutoff + profile boost +
+dislike penalties, then sort  ->  D: timetable preferences  ->  fit with the current courses  ->  E: result.
 Every removal is recorded in `Pipeline.removed` (stage -> codes), for tests and the debug panel.
 """
+import re
 from dataclasses import dataclass, field
 from functools import cmp_to_key
 
@@ -22,7 +23,7 @@ from .embeddings import get_embedder, get_reranker
 from .handout_facts import CourseFacts, all_course_facts, get_course_facts, number
 from .history import same_class_groups, with_equivalents
 from .piece_index import get_piece_index
-from .ranking import Scored, neighbours, rerank, retrieve
+from .ranking import Scored, closest, neighbours, rerank, retrieve
 from .plan import check_plan
 from .timetable import timetable_term
 
@@ -41,6 +42,8 @@ COUNTS_AS_NOTE = "counts as an OPEL, since your {category} requirement is comple
 HIGHER_DEGREE_NOTE = "higher-degree course: at most 1 per semester, needs a minimum CGPA set by the AGC (the number isn't published)"
 PREREQ_NOTE = "prerequisites couldn't be verified"
 TIMINGS_NOTE = "some class times aren't listed in the timetable"
+SOP_NOTE = ("You said you're planning an SOP (study-oriented project): keep a slot free for it, and decide after talking "
+            "to a professor.")
 SECTION_TYPES = ("lecture", "tutorial", "practical")
 SEARCH_ORDER = ("HUEL", "DEL", "OPEL")
 
@@ -61,6 +64,8 @@ class Candidate:
     embedding: float | None = None                  # best piece similarity (C1)
     relevance: float | None = None                  # cross-encoder relevance, 0-1 (C2); a neighbour's content similarity
     penalty: float = 0.0
+    personal: float = 0.0                           # profile boost (apply_profile); negative for "struggled with"
+    personal_why: list[str] = field(default_factory=list)
     matched_on: str | None = None
     matched_topic: str | None = None                # the student's topic that matched_on answered
     by_topic: list[float] = field(default_factory=list)  # relevance per topic
@@ -77,7 +82,7 @@ class Candidate:
 
     @property
     def final(self) -> float:
-        return (self.relevance or 0) + self.penalty
+        return (self.relevance or 0) + self.penalty + self.personal
 
 
 @dataclass
@@ -97,6 +102,7 @@ class Pipeline:
     next_semester_relevance: dict[str, float] = field(default_factory=dict)
     next_semester: list[tuple[str, str]] = field(default_factory=list)  # (code, "X needs Y, which you're taking…")
     topics: list[str] = field(default_factory=list)  # the student's topics (or profile interests)
+    branches: list[str] = field(default_factory=list)  # Course.department codes named as a subject ("maths")
 
     def remove(self, stage: str, code: str) -> None:
         self.removed.setdefault(stage, []).append(code)
@@ -125,6 +131,21 @@ def max_extra_electives() -> int | None:
 def plural(categories: list[str]) -> str:
     """["HUEL", "DEL"] -> "HUELs or DELs"."""
     return " or ".join(f"{category}s" for category in categories)
+
+
+def split_branches(about: list[str] | None) -> tuple[list[str], list[str]]:
+    """(department codes, remaining topics). A topic that is only a branch word (config.BRANCH_ALIASES, filler like
+    "courses" ignored) becomes a department filter; anything longer ("financial markets", "maths for ML") stays a topic.
+    why whole-topic only: matching words inside topics would turn "financial markets" into a finance filter."""
+    branches, topics = [], []
+    for topic in about or []:
+        key = " ".join(word for word in re.findall(r"[a-z]+", topic.lower()) if word not in config.BRANCH_FILLER)
+        codes = config.BRANCH_ALIASES.get(key)
+        if codes:
+            branches += [code for code in codes if code not in branches]
+        else:
+            topics.append(topic)
+    return branches, topics
 
 
 # ---------------------------------------------------------------- 6.1 which categories
@@ -220,6 +241,10 @@ def stage_a(pipeline: Pipeline) -> list[Candidate]:
         if placed is None:
             continue
         counts["category"] = counts.get("category", 0) + 1
+        if pipeline.branches and course.department not in pipeline.branches:
+            pipeline.remove("branch", course.code)
+            continue
+        counts["branch"] = counts.get("branch", 0) + 1
         if course.code in ctx.completed or course.code in ctx.current:
             pipeline.remove("done", course.code)
             continue
@@ -260,6 +285,8 @@ def empty_reason(pipeline: Pipeline, counts: dict[str, int]) -> str:
     kinds = plural(pipeline.searched)
     if not counts.get("category"):
         return f"No {kinds} are offered this semester."
+    if not counts.get("branch"):
+        return f"No {kinds} from {', '.join(pipeline.branches)} are offered this semester."
     if not counts.get("done"):
         return f"No {kinds} you haven't already taken are offered this semester."
     if not counts.get("prerequisites"):
@@ -364,6 +391,79 @@ def relevance_scores(pipeline: Pipeline, ranked_by: str, passed: list[Candidate]
     return attach(passed, main, "retrieval"), attach(unknown, unverified, "retrieval")
 
 
+def profile_phrases(ctx: StudentContext, ranked_by: str) -> list[tuple[str, str]]:
+    """(phrase to search, why text) for each interest and each strengths phrase.
+    why split the strengths on commas / "and": probe 2026-09-28, "programming and algorithms" as one phrase found only
+    Data Structures and Algorithms; "programming" + "algorithms" found OOP, Computer Programming and PL too."""
+    # why no interests when they ARE the query: they'd count twice
+    phrases = [(interest, f"matches your interest in {interest}") for interest in
+               ([] if ranked_by == "profile_interests" else ctx.interests)]
+    for part in re.split(r"[,;/&\n]|\band\b", ctx.strengths):
+        if part.strip():
+            phrases.append((part.strip(), f"matches your strength '{part.strip()}'"))
+    return phrases
+
+
+def text_boosts(ctx: StudentContext, ranked_by: str, codes: list[str]) -> dict[str, tuple[float, str]]:
+    """code -> (boost, why) from the profile phrases, scored exactly like a topic (retrieve + rerank); only real
+    matches (relevance >= RELEVANCE_CUTOFF) count, by their best phrase."""
+    found, searched = {}, []
+    for phrase, why in profile_phrases(ctx, ranked_by):
+        # a branch word ("maths") is a department, as in a query; the search can't match the abbreviation
+        departments, _ = split_branches([phrase])
+        for code in codes if departments else []:
+            if code.split()[0] in departments and code not in found:
+                found[code] = (config.PROFILE_TEXT_WEIGHT, why)
+        if not departments:
+            searched.append((phrase, why))
+    if not searched or not codes:
+        return found
+    index, topics = get_piece_index(), [phrase for phrase, _ in searched]
+    vectors = get_embedder().embed(topics, kind="query")
+    scored = retrieve(index, codes, vectors, config.RERANK_CANDIDATES)
+    rerank([scored], topics, vectors, index, get_reranker())
+    for item in scored:
+        best = int(np.argmax(item.by_topic))
+        boost = config.PROFILE_TEXT_WEIGHT * item.by_topic[best]
+        if item.by_topic[best] >= config.RELEVANCE_CUTOFF and boost > found.get(item.code, (0.0, ""))[0]:
+            found[item.code] = (boost, searched[best][1])
+    return found
+
+
+def course_parts(ctx: StudentContext) -> list[tuple[dict, float, str]]:
+    """(label -> course vector, weight, why text) for the did well / struggled with courses."""
+    index = get_piece_index()
+    titles = dict(Course.objects.filter(code__in=ctx.did_well + ctx.struggled).values_list("code", "title"))
+
+    def courses(codes: list[str]) -> dict:
+        return {f"{code} {course_title(titles.get(code, ''))}": index.course_vectors[code]
+                for code in codes if code in index.course_vectors}
+    well_weight = config.PROFILE_WEIGHT * (config.GRADE_ORIENTED_FACTOR if ctx.grade_oriented else 1)
+    return [(vectors, weight, text) for vectors, weight, text in
+            ((courses(ctx.did_well), well_weight, "close to {}, which you did well in"),
+             (courses(ctx.struggled), -config.PROFILE_WEIGHT, "close to {}, which you struggled with")) if vectors]
+
+
+def apply_profile(ctx: StudentContext, ranked_by: str, candidates: list[Candidate]) -> None:
+    """C4a: interests / strengths add PROFILE_TEXT_WEIGHT x relevance when a phrase really matches the course (the
+    topic search); did well / struggled with add weight x (cosine - floor) for the closest such course, when above the
+    floor (stricter with a topic, see config). It never removes a course, and the cutoff (C3) already ran on relevance
+    alone, so with a topic it only reorders real matches."""
+    texts = text_boosts(ctx, ranked_by, [candidate.code for candidate in candidates])
+    parts = course_parts(ctx)
+    floor = config.PROFILE_FLOOR_TOPIC if ranked_by == "about" else config.PROFILE_FLOOR
+    for candidate in candidates:
+        if candidate.code in texts:
+            boost, why = texts[candidate.code]
+            candidate.personal += boost
+            candidate.personal_why.append(why)
+        for vectors, weight, text in parts:
+            found = closest(get_piece_index(), candidate.code, vectors)
+            if found and found[1] >= floor:
+                candidate.personal += weight * (found[1] - floor)
+                candidate.personal_why.append(text.format(found[0]))
+
+
 def apply_penalties(ctx: StudentContext, ranked_by: str, has_query: bool, candidates: list[Candidate]) -> None:
     """C4: dislike penalties and the `why` text (built here, never by the LLM)."""
     for candidate in candidates:
@@ -380,7 +480,7 @@ def apply_penalties(ctx: StudentContext, ranked_by: str, has_query: bool, candid
             # why no matched piece here: the model turned "matches topic: X" into "your interest in X"
             related = candidate.relevance is not None and candidate.relevance >= config.RELEVANCE_CUTOFF
             parts.append("related to your profile interests" if related else "not closely related to your profile interests")
-        parts += reasons
+        parts += candidate.personal_why + reasons
         if has_query and not candidate.facts.has_handout:
             parts.append("no handout, matched on the Bulletin description only")
         candidate.why = "; ".join(parts)
@@ -401,7 +501,8 @@ def add_neighbours(pipeline: Pipeline, eligible: list[Candidate], real: list[Can
         found = anchors(pipeline, topic) if direct < places else []
         titles = dict(Course.objects.filter(code__in=found).values_list("code", "title"))
         pool = {candidate.code: candidate for candidate in eligible if candidate.code not in taken}
-        close = neighbours(get_piece_index(), found, list(pool))[:min(places - direct, config.NEIGHBOURS_PER_TOPIC)] if found else []
+        close = [(code, similarity) for code, similarity in (neighbours(get_piece_index(), found, list(pool)) if found else [])
+                 if similarity >= config.NEIGHBOUR_MIN_SIMILARITY][:min(places - direct, config.NEIGHBOURS_PER_TOPIC)]
         for code, similarity in close:
             candidate = pool[code]
             candidate.relevance, candidate.neighbour_of, candidate.matched_topic = similarity, topic, name
@@ -444,6 +545,7 @@ def stage_c(pipeline: Pipeline, ranked_by: str, passed: list[Candidate], unknown
             pipeline.topics, ranked_by = [], "handout_completeness"
         else:
             passed, unknown = scored_passed, scored_unknown
+    apply_profile(pipeline.ctx, ranked_by, passed + unknown)
     apply_penalties(pipeline.ctx, ranked_by, bool(pipeline.topics), passed + unknown)
     return ranked_by, passed, unknown
 
@@ -466,6 +568,7 @@ def unoffered_matches(pipeline: Pipeline, shown: list[Candidate]) -> list[dict]:
     better = [item for item in pipeline.catalogue
               if item.code not in pipeline.offered_codes and item.code not in ctx.completed and item.code not in ctx.current
               and ctx.category_map.get(item.code) in pipeline.searched
+              and (not pipeline.branches or item.code.split()[0] in pipeline.branches)
               and item.relevance >= config.RELEVANCE_CUTOFF and item.relevance >= best + config.TIE_EPSILON]
     top = sorted(better, key=lambda item: (-item.relevance, item.code))[:config.MAX_NOT_OFFERED]
     titles = dict(Course.objects.filter(code__in=[item.code for item in top]).values_list("code", "title"))
@@ -501,13 +604,16 @@ def tie_position(candidate: Candidate) -> int:
 
 
 def compare(ranked_by: str):
-    """Final score (ties within TIE_EPSILON), then category order, then completeness, then code.
-    With no query every final is just the penalty, so completeness comes before the category order."""
+    """Direct matches before neighbours, lecture courses before projects, then final score (ties within TIE_EPSILON),
+    then category order, then completeness, then code. With no query every final is just the penalty, so completeness comes before the category order."""
     def key_order(a: Candidate, b: Candidate) -> int:
         if (a.relevance is None) != (b.relevance is None) and ranked_by != "handout_completeness":
             return 1 if a.relevance is None else -1
         if (a.neighbour_of is None) != (b.neighbour_of is None):  # a direct match beats a neighbour
             return 1 if a.neighbour_of is not None else -1
+        # why: a study / lab / design project is arranged with a professor, not picked like a lecture course
+        if a.course.is_project_course != b.course.is_project_course:
+            return 1 if a.course.is_project_course else -1
         if abs(a.final - b.final) >= config.TIE_EPSILON:
             return -1 if a.final > b.final else 1
         keys = [(tie_position(a), tie_position(b)), (-a.facts.completeness, -b.facts.completeness)]
@@ -711,6 +817,7 @@ def run(ctx: StudentContext, category: str | None, about: list[str] | str | None
     pipeline = Pipeline(ctx, settings, searched, exclude_codes, dict(filters or {}), warnings + search_warnings)
     courses, unknown, not_offered, unverified_more = [], [], [], 0
     about = [about] if isinstance(about, str) else about  # one topic given as plain text
+    pipeline.branches, about = split_branches(about)
     pipeline.topics, ranked_by = query_topics(ctx, about)
     places = 0
     if not stop:
@@ -727,9 +834,11 @@ def run(ctx: StudentContext, category: str | None, about: list[str] | str | None
         pipeline.warnings += next_semester_warnings(pipeline, ranked_by != "handout_completeness")
         if ranked_by == "about":
             not_offered = unoffered_matches(pipeline, courses)
+        if ctx.sop_plan and courses:
+            pipeline.warnings.append(SOP_NOTE)
     result = {
         "searched": searched,
-        "settings_used": {**settings, "ranked_by": ranked_by},
+        "settings_used": {**settings, "ranked_by": ranked_by, **({"branches": pipeline.branches} if pipeline.branches else {})},
         "courses": [course_entry(ctx, candidate) for candidate in courses],
         "couldnt_verify": [course_entry(ctx, candidate, verify=True) for candidate in unknown],
         "excluded": pipeline.excluded,

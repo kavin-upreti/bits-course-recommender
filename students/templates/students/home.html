@@ -12,7 +12,6 @@
         <span>Batch <b>{{ student.admission_year }}</b></span>
         <span>{{ student.campus }} campus</span>
         <span>{% if student.minor and not student.minor_registered %}Aiming for{% else %}Minor{% endif %} <b>{{ student.minor.name|default:"none" }}</b></span>
-        {% if student.cgpa is not None %}<span>CGPA <b>{{ student.cgpa }}</b></span>{% endif %}
         {% if student.interests %}<span>Into <b>{{ student.interests|join:", " }}</b></span>{% endif %}
       </p>
     </div>

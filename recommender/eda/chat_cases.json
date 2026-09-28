@@ -28,5 +28,14 @@
   {"student": "2025A4PS0137P", "message": "what HUELs are there on history?", "ideal": [{"category": "HUEL", "about": ["history"]}]},
   {"student": "2025A4PS0137P", "message": "project based courses on sustainable energy", "ideal": [{"about": ["sustainable energy"], "filters": {"project_based": true}}]},
   {"student": "2025A4PS0137P", "message": "suggest electives on journalism", "ideal": [{"about": ["journalism"]}]},
-  {"student": "2025A4PS0137P", "message": "give me 4 OPELs, no 8 am", "ideal": [{"category": "OPEL", "count": 4, "avoid_8am": true}]}
+  {"student": "2025A4PS0137P", "message": "give me 4 OPELs, no 8 am", "ideal": [{"category": "OPEL", "count": 4, "avoid_8am": true}]},
+  {"student": "2025A7PS0832P", "message": "Suggest some maths courses", "ideal": [{"about": ["maths"]}]},
+  {"student": "2025A7PS0832P", "message": "Maths courses related to probability?", "ideal": [{"about": ["maths", "probability"]}]},
+  {"student": "2025A7PS0832P", "message": "suggest me a course related to media in maths", "ideal": [{"about": ["maths", "media"]}]},
+  {"student": "2024A3PS0832P", "message": "Any economics electives I can take?", "ideal": [{"about": ["economics"]}]},
+  {"student": "2025A4PS0137P", "message": "electrical courses on power systems", "ideal": [{"about": ["electrical", "power systems"]}]},
+  {"student": "2025A7PS0932P", "message": "Finance OPELs please", "ideal": [{"category": "OPEL", "about": ["finance"]}]},
+  {"student": "2024A3PS0832P", "message": "suggest physics courses", "ideal": [{"about": ["physics"]}]},
+  {"student": "2024A3PS0832P", "message": "I want a HUEL in maths", "ideal": [{"category": "HUEL", "about": ["maths"]}]},
+  {"student": "2025A7PS0832P", "message": "computer science courses on machine learning", "ideal": [{"about": ["computer science", "machine learning"]}]}
 ]

@@ -11,7 +11,7 @@
       {% if category %}<li><b>{{ category.0 }}</b> for you, {{ category.1|lower }}</li>{% endif %}
       {% if course.units is not None %}<li><b class="tnum">{{ course.units }}</b> credits</li>{% endif %}
       {% if course.L is not None %}<li title="Lecture hours, practical hours and credits, as the Bulletin writes them">L-P-U <b class="tnum">{{ course.L }}-{{ course.P|default:0 }}-{{ course.units|default:"?" }}</b></li>{% endif %}
-      {% if taken %}<li><b>{% if taken.status == "current" %}Doing it this semester{% else %}Done in {{ taken.semester_taken }}{% if taken.grade %}, {{ taken.grade }}{% endif %}{% endif %}</b></li>{% endif %}
+      {% if taken %}<li><b>{% if taken.status == "current" %}Doing it this semester{% else %}Done in {{ taken.semester_taken }}{% endif %}</b></li>{% endif %}
       {% if course.only_2026_batch %}<li>2026 batch onwards only</li>{% endif %}
     </ul>
   </header>

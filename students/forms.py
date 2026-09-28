@@ -10,7 +10,7 @@ from dataclasses import replace
 from .bits_id import BitsIdError, ParsedId, parse_bits_id, resolve_programme
 from recommender.config import DAY_CODES, DAY_NAMES
 
-from .models import COMFORT, EVAL_STYLES, GRADES, Student
+from .models import EVAL_STYLES, MAX_PICKED_COURSES, Student
 
 YES_NO = [("", "Not decided"), ("True", "Yes"), ("False", "No")]
 MINOR_AIM_FROM_YEAR = 2  # 2nd-years can name the minor they're aiming for
@@ -71,16 +71,24 @@ class ProfileForm(forms.ModelForm):
         label="Evaluation styles you'd rather avoid", choices=EVAL_STYLES, required=False,
         widget=forms.CheckboxSelectMultiple, help_text="Courses with these are ranked a little lower, not removed.",
     )
+    grade_oriented = forms.BooleanField(label="Grades matter a lot to me", required=False)
+    did_well = forms.MultipleChoiceField(label="Courses you did well in", required=False,
+                                         widget=forms.CheckboxSelectMultiple, help_text=f"Up to {MAX_PICKED_COURSES}.")
+    struggled = forms.MultipleChoiceField(label="Courses you struggled with", required=False,
+                                          widget=forms.CheckboxSelectMultiple, help_text=f"Up to {MAX_PICKED_COURSES}.")
 
     class Meta:
         model = Student
-        fields = ("second_degree_code", "minor", "interests", "goal", "cgpa", "strengths", "weaknesses", "sop_plan",
-                  "default_avoid_8am", "default_avoid_day", "avoid_eval_styles")
-        labels = {"cgpa": "CGPA (optional)"}
-        widgets = {"strengths": forms.Textarea(attrs={"rows": 2}), "weaknesses": forms.Textarea(attrs={"rows": 2})}
+        fields = ("second_degree_code", "minor", "interests", "strengths", "sop_plan", "did_well", "struggled",
+                  "grade_oriented", "default_avoid_8am", "default_avoid_day", "avoid_eval_styles")
+        help_texts = {"strengths": "Subjects you're good at, comma-separated and in full words, e.g. programming, "
+                                   "algorithms, statistics. Courses on them rank a little higher."}
+        widgets = {"strengths": forms.Textarea(attrs={"rows": 2})}
 
-    def __init__(self, *args, planning: tuple[int, int], second_degrees: list[tuple[str, str]], **kwargs) -> None:
+    def __init__(self, *args, planning: tuple[int, int], second_degrees: list[tuple[str, str]],
+                 completed: list[tuple[str, str]] | None = None, **kwargs) -> None:
         """planning: the semester being planned. second_degrees: the B.E. options for an M.Sc.-only ID (empty = not asked).
+        completed: (code, label) of the student's completed courses, for the did well / struggled pickers (none = not asked).
         Questions that don't apply to that semester are removed, not hidden."""
         kwargs.setdefault("label_suffix", "")
         super().__init__(*args, **kwargs)
@@ -100,6 +108,10 @@ class ProfileForm(forms.ModelForm):
         else:
             self.fields["minor"].label = "Minor you're pursuing" if planning[0] >= MINOR_FROM_YEAR else "Minor you're aiming for"
             self.fields["minor"].help_text = "Minors are declared at the end of 2nd year; before that, pick the one you're aiming for."
+        if completed:
+            self.fields["did_well"].choices = self.fields["struggled"].choices = completed
+        else:  # why: a new profile has no courses until it's saved (they come from the programme chart)
+            del self.fields["did_well"], self.fields["struggled"], self.fields["grade_oriented"]
         if self.instance.pk:
             self.initial["interests"] = ", ".join(self.instance.interests)
             self.initial["sop_plan"] = "" if self.instance.sop_plan is None else str(self.instance.sop_plan)
@@ -107,14 +119,22 @@ class ProfileForm(forms.ModelForm):
     def clean_interests(self) -> list[str]:
         return [item.strip() for item in self.cleaned_data["interests"].split(",") if item.strip()]
 
-    def clean_cgpa(self):
-        cgpa = self.cleaned_data["cgpa"]
-        if cgpa is not None and not 0 <= cgpa <= 10:
-            raise forms.ValidationError("CGPA is out of 10.")
-        return cgpa
+    def clean_did_well(self) -> list[str]:
+        return self.picked("did_well")
+
+    def clean_struggled(self) -> list[str]:
+        return self.picked("struggled")
+
+    def picked(self, name: str) -> list[str]:
+        codes = self.cleaned_data[name]
+        if len(codes) > MAX_PICKED_COURSES:
+            raise forms.ValidationError(f"Pick at most {MAX_PICKED_COURSES}.")
+        return codes
 
     def clean(self) -> dict:
         cleaned = super().clean()
+        if both := sorted(set(cleaned.get("did_well") or []) & set(cleaned.get("struggled") or [])):
+            self.add_error("struggled", f"Picked as both did well and struggled: {', '.join(both)}.")
         if "second_degree_code" in self.fields:
             if self.planning >= SECOND_DEGREE_NEEDED_FROM and not cleaned.get("second_degree_code"):
                 self.add_error("second_degree_code", "From 2-2 on your plan includes your B.E. courses, so pick your B.E. degree.")
@@ -144,8 +164,6 @@ class ElectiveForm(forms.Form):
 
     category = forms.ChoiceField(choices=[("", "—"), ("DEL", "DEL"), ("HUEL", "HUEL"), ("OPEL", "OPEL")], required=False)
     course = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Start typing a code"}))
-    grade = forms.ChoiceField(choices=[("", "—")] + GRADES, required=False)
-    comfort = forms.ChoiceField(choices=[("", "—")] + COMFORT, required=False)
 
     def __init__(self, *args, codes_by_category: dict[str, set[str]], **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -164,8 +182,6 @@ class ElectiveForm(forms.Form):
             actual = next((cat for cat, codes in self.codes_by_category.items() if code in codes), None)
             hint = f" For your programme it's a {actual}." if actual else " It's compulsory, an audit course, or not in the Bulletin."
             self.add_error("course", f"{code} isn't a {category} option.{hint}")
-        if not cleaned.get("comfort"):
-            self.add_error("comfort", "Say how comfortable you were with it.")
         return cleaned
 
 

@@ -12,7 +12,6 @@
 <li class="tile-item"><a class="tile" data-cat="{{ row.cat }}" href="{% url 'course' row.course.code %}">
   <div class="code">{{ row.course.code }}<small class="tag">{{ row.tag }}</small></div>
   <div class="title">{{ row.course.title|course_title }}</div>
-  {% if row.source == "user" and row.comfort %}<div class="meta">{{ row.get_comfort_display }}{% if row.grade %}, {{ row.grade }}{% endif %}</div>{% endif %}
 </a>{% if removable and row.source == "user" and row.status == "current" %}
   <form method="post" action="{% url 'remove_course' %}" class="tile-remove">{% csrf_token %}<input type="hidden" name="code" value="{{ row.course.code }}"><button class="btn link" aria-label="Remove {{ row.course.code }}">Remove</button></form>{% endif %}
 </li>

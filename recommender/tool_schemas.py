@@ -20,7 +20,7 @@ TOOL_SCHEMAS: list[dict] = [
                 "category": {"type": "string", "enum": ["HUEL", "DEL", "OPEL"],
                              "description": "Leave empty to search every category the student still needs."},
                 "about": {"type": "array", "items": {"type": "string", "maxLength": 100}, "maxItems": config.MAX_QUERY_TOPICS,
-                          "description": "The student's own topics for this category, one per item, in full words, abbreviations spelled out (e.g. 'ML and NLP' -> ['machine learning', 'natural language processing']). 'AI in electronics' is ONE topic. Don't add topics the student didn't name; leave empty if none."},
+                          "description": "The student's own topics for this category, one per item, in full words, abbreviations spelled out (e.g. 'ML and NLP' -> ['machine learning', 'natural language processing']). 'AI in electronics' is ONE topic. A subject area named as such is its own item: 'maths courses on probability' -> ['maths', 'probability']. Don't add topics the student didn't name; leave empty if none."},
                 "filters": {
                     "type": "object",
                     "additionalProperties": False,

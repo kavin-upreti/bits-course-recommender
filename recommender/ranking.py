@@ -38,12 +38,16 @@ class Scored:
 
 
 def retrieve(index: PieceIndex, codes: list[str], queries: np.ndarray, candidates: int) -> list[Scored]:
-    """C1: the `candidates` courses with the highest best-piece similarity to any topic (ties by code). Each topic
-    gets the course's RERANK_PIECES_PER_COURSE best pieces FOR THAT TOPIC, plus the title.
+    """C1: for EACH topic, the `candidates` courses with the highest best-piece similarity to it (ties by code); the
+    union, sorted by the best similarity to any topic. Each topic gets the course's RERANK_PIECES_PER_COURSE best
+    pieces FOR THAT TOPIC, plus the title.
     why per topic: with "NLP" and "machine learning", the AI course's three ML lines would otherwise crowd out its
-    one NLP line, and its NLP score would be computed without it. Courses without any piece are left out."""
+    one NLP line, and its NLP score would be computed without it. Courses without any piece are left out.
+    why `candidates` per topic, not shared: "programming, algorithms" lost Object Oriented Programming (15th for
+    "programming" alone) to algorithm courses. probe 2026-09-28: labelled queries unchanged (hit@5 0.80, MRR 0.82),
+    +0.05 s; "ML, NLP, statistics" found 9 real matches instead of 4."""
     queries = np.atleast_2d(queries)
-    scored = []
+    scored, best_by_topic = [], []
     for code in codes:
         rows = index.rows_by_course.get(code)
         if not rows:
@@ -55,7 +59,12 @@ def retrieve(index: PieceIndex, codes: list[str], queries: np.ndarray, candidate
             best = [rows[i] for i in np.argsort(-sims[:, topic], kind="stable")[:config.RERANK_PIECES_PER_COURSE]]
             by_topic.append(best + [row for row in titles if row not in best])
         scored.append(Scored(code, float(sims.max()), by_topic))
-    return sorted(scored, key=lambda item: (-item.embedding, item.code))[:candidates]
+        best_by_topic.append(sims.max(axis=0))
+    kept = set()
+    for topic in range(queries.shape[0]):
+        order = sorted(range(len(scored)), key=lambda i: (-best_by_topic[i][topic], scored[i].code))
+        kept.update(order[:candidates])
+    return sorted((scored[i] for i in kept), key=lambda item: (-item.embedding, item.code))
 
 
 # longest first; a closed list of word endings, so word forms of one root meet on the same base
@@ -128,6 +137,14 @@ def rerank(groups: list[list[Scored]], topics: list[str], queries: np.ndarray, i
             item.by_topic.append(score)
             item.best_rows.append(rows[best])
         item.relevance = max(item.by_topic)
+
+
+def closest(index: PieceIndex, code: str, profile: dict[str, np.ndarray]) -> tuple[str, float] | None:
+    """(label, cosine) of the profile vector closest to the course's content; None without vectors on either side."""
+    course = index.course_vectors.get(code)
+    if course is None or not profile:
+        return None
+    return max(((label, float(course @ vector)) for label, vector in profile.items()), key=lambda pair: (pair[1], pair[0]))
 
 
 def neighbours(index: PieceIndex, anchors: list[str], codes: list[str]) -> list[tuple[str, float]]:

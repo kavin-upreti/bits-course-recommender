@@ -165,6 +165,20 @@ label { font-weight: 600; font-size: 0.875rem; }
 .checks fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .checks legend { font-weight: 600; font-size: 0.875rem; padding: 0; margin-bottom: 6px; }
 .checks #id_avoid_eval_styles { display: flex; flex-wrap: wrap; gap: var(--s2); }
+/* did well / struggled: a search box + chips (profile.html script); the checkbox list stays for no-JS */
+.grades-box { border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s2) var(--s3); }
+.grades-box summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+.grades-box[open] summary { margin-bottom: var(--s2); }
+.picker { margin-top: var(--s3); }
+.picker fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.picker legend { font-weight: 600; font-size: 0.875rem; padding: 0; margin-bottom: 6px; }
+.picker.enhanced #id_did_well, .picker.enhanced #id_struggled { display: none; }
+.picker.enhanced input[type="text"] { width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.chips:empty { display: none; }
+.chip { font: 500 0.8125rem/1.2 var(--font); padding: 6px 12px; border: 1px solid var(--accent); background: var(--accent-soft); color: inherit; border-radius: var(--r-pill); cursor: pointer; }
+.chip::after { content: " \00d7"; font-weight: 700; }
+.chip:hover, .chip:focus-visible { background: var(--accent); color: var(--accent-ink); }
 .checks label { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; padding: 8px 14px; border: 1px solid var(--line); border-radius: var(--r-pill); cursor: pointer; transition: border-color 0.2s, background 0.2s; }
 .checks label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
 .stack { display: flex; flex-direction: column; gap: var(--s4); }
@@ -479,7 +493,7 @@ dialog.sheet[open] { animation: sheet-in 0.4s var(--ease-out); }
 .sem-block { margin-top: var(--s5); }
 .sem-block h3 { display: flex; align-items: baseline; gap: var(--s3); margin-bottom: var(--s3); }
 .sem-block h3 span { font-weight: 500; font-size: 0.8125rem; color: var(--text-3); }
-.col-heads, .erow { display: grid; grid-template-columns: 110px minmax(0, 1.4fr) 130px minmax(0, 1.2fr); gap: var(--s2); }
+.col-heads, .erow { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: var(--s2); }
 .col-heads { font-size: 0.75rem; color: var(--text-3); font-weight: 600; margin-bottom: 6px; }
 .rows { display: flex; flex-direction: column; gap: var(--s2); }
 .erow { padding: 6px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--cat, var(--line)); }

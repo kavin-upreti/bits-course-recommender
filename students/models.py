@@ -10,12 +10,7 @@ from django.db import models
 from catalog.models import Course, Minor, PatternSlot, Programme
 from recommender.config import DAY_CODES, DAY_NAMES
 
-GOALS = [("job", "Job / placement"), ("research", "Research / higher studies"), ("not_sure", "Not sure")]
-GRADES = [(g, g) for g in ("A", "A-", "B", "B-", "C", "C-", "D", "E", "NC")]
-COMFORT = [
-    ("5", "Very comfortable"), ("4", "Comfortable"), ("3", "Moderate"),
-    ("2", "Not too comfortable"), ("1", "Not good at all"),
-]
+MAX_PICKED_COURSES = 5  # "did well in" / "struggled with": a few telling courses, not a grade for every course
 # evaluation styles a student would rather avoid (profile checkboxes); ranked lower, never removed
 EVAL_STYLES = [
     ("many_quizzes", "Lots of quizzes"),
@@ -54,10 +49,11 @@ class Student(models.Model):
     # "X or Y" chart slots: {"ECON F211": "MGTS F211"} = took MGTS F211 in the slot the chart lists as ECON F211
     alternative_choices = models.JSONField(default=dict, blank=True)
     # optional extras for ranking
-    cgpa = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    goal = models.CharField(max_length=30, choices=GOALS, blank=True, default="")
     strengths = models.TextField(blank=True, default="")
-    weaknesses = models.TextField(blank=True, default="")
+    # completed course codes the student picked; courses close to them in content rank higher / lower
+    did_well = models.JSONField(default=list, blank=True)
+    struggled = models.JSONField(default=list, blank=True)
+    grade_oriented = models.BooleanField(default=False)  # the "did well" boost counts double
     sop_plan = models.BooleanField(null=True, blank=True)
     # recommender defaults; a chat message can override them ("8 AM is fine")
     default_avoid_8am = models.BooleanField(default=False)
@@ -78,8 +74,6 @@ class StudentCourse(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="courses")
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="+")
     status = models.CharField(max_length=10, choices=STATUS)
-    grade = models.CharField(max_length=3, choices=GRADES, null=True, blank=True)
-    comfort = models.CharField(max_length=1, choices=COMFORT, blank=True, default="")  # electives only
     # CDC / GIR / DEL / HUEL / OPEL / AUDIT for this student's programme, set when the row is saved
     # (recommender/categories.py). Stored so "done courses by category" is one query; recomputed on every save.
     category = models.CharField(max_length=10, blank=True, default="")

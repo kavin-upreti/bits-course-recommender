@@ -31,12 +31,32 @@ MAX_QUERY_TOPICS = 8                    # "AI, ML, DL, NLP": each topic scored o
 NEIGHBOUR_ANCHORS = 3
 NEIGHBOURS_PER_TOPIC = 3                # probe 2026-09-28: the 4th-5th for 'video editing' were noise (Advanced Manufacturing)
 NEIGHBOUR_ANCHOR_FLOOR = 0.3            # an anchor needs at least this relevance; no anchor -> no neighbours
+# probe 2026-09-28: every sensible neighbour was >= 0.40 (video editing -> Cinematic Art 0.47, power systems -> Advanced
+# Power Electronics 0.45); inside a branch filter the closest can be far ("maths" + "media" -> Graphs and Networks 0.10).
+# Random course pairs: p95 0.28.
+NEIGHBOUR_MIN_SIMILARITY = 0.3
 
 # Same class under two codes (recommender/equivalents.py). EDA 2026-09-27 (docs/eda/equivalence_eda.md): best F1 on
 # listed pairs (precision 0.87, recall 0.62; the 12 "wrong" pairs above it are renamed titles of the same course)
 EQUIVALENT_TWIN_SIM = 0.99              # two pieces this similar are the same sentence
 EQUIVALENT_OVERLAP = 0.9                # share of the smaller course's pieces with a twin in the other
 EQUIVALENT_MEASURE = "smaller"          # beat "both" at every threshold (F1 0.72 vs 0.47)
+
+# Branch words (eligible.split_branches): a topic that is exactly one of these ("maths", "maths courses") limits the
+# search to those Course.department codes instead of being searched for. Codes checked against the catalogue 2026-09-28.
+BRANCH_ALIASES = {
+    "math": ["MATH"], "maths": ["MATH"], "mathematics": ["MATH"], "mathematical": ["MATH"],
+    "eco": ["ECON"], "econ": ["ECON"], "economics": ["ECON"], "finance": ["FIN", "ECON"],
+    "eee": ["EEE"], "electrical": ["EEE"], "electrical and electronics": ["EEE"],
+    "electronics": ["EEE", "ECE", "INSTR"], "ece": ["ECE"], "electronics and communication": ["ECE"],
+    "instrumentation": ["INSTR"], "electronics and instrumentation": ["INSTR"],
+    "cs": ["CS"], "cse": ["CS"], "computer science": ["CS"],
+    "mech": ["ME"], "mechanical": ["ME"], "civil": ["CE"], "chemical": ["CHE"], "manufacturing": ["MF"],
+    "chemistry": ["CHEM"], "physics": ["PHY"], "bio": ["BIO"], "biology": ["BIO"], "biological sciences": ["BIO"],
+    "biotech": ["BIOT"], "biotechnology": ["BIOT"], "pharma": ["PHA"], "pharmacy": ["PHA"],
+    "humanities": ["HSS"], "general studies": ["GS"], "management": ["MGTS"],
+}
+BRANCH_FILLER = {"course", "courses", "elective", "electives", "subject", "subjects", "department", "branch", "engineering"}
 
 # Results
 MAX_RESULTS = 5                         # courses returned per get_eligible_courses call, unless the student asks for a number
@@ -47,6 +67,21 @@ CATEGORY_TIE_ORDER = ["DEL", "OPEL", "HUEL"]   # tie-break order
 MATCHED_ON_MAX_CHARS = 80
 MAX_NOT_OFFERED = 3                     # better-matching courses that aren't offered this semester, named in the result
 MAX_NEXT_SEMESTER_WARNINGS = 3          # "you'll be eligible next semester" warnings per call
+
+# Profile boost (eligible.apply_profile). Never removes a course; with a topic it only reorders courses past the cutoff.
+# Interests / strengths phrases are searched like topics; a real match adds PROFILE_TEXT_WEIGHT x relevance.
+# probe 2026-09-28 (14 labelled queries x 5 profiles, weights 0.05-0.3): hit@5 and MRR exactly unchanged. The centred
+# course-vector version missed "programming and algorithms" -> Object Oriented Programming (0.19).
+PROFILE_TEXT_WEIGHT = 0.15              # 0.11-0.15: about a strong did-well match, 0.3 x (0.7 - 0.2)
+# Did well / struggled with: cosine of centred course vectors (like neighbours), above a floor.
+# Two floors, because the probe (2026-09-28, 14 labelled queries x 5 profiles, did well doubled) found: floor 0.3 never
+# lowered hit@5 at weights 0.2-0.4 (MRR within +-0.015), floor 0.2 did (hit@5 -0.018, MRR -0.045). Without a topic the
+# order was only handout completeness, so there's nothing to make worse, and 0.3 hid real pairs (Signals -> DSP 0.32,
+# Programming -> OOP 0.44: most "should match" pairs score 0.25-0.75; random course pairs p90 0.18, p95 0.28).
+PROFILE_FLOOR_TOPIC = 0.3               # with a topic: only strong profile matches reorder the real matches
+PROFILE_FLOOR = 0.2                     # without a topic: the profile is what orders the list
+PROFILE_WEIGHT = 0.3                    # boost = weight x (cosine - floor); weights 0.2-0.4 gave the same probe numbers
+GRADE_ORIENTED_FACTOR = 2               # "grades matter a lot": the "did well" part counts this many times
 
 # Evaluation-style dislikes (profile checkboxes) — placeholders, confirm with the user
 DISLIKE_PENALTY = 0.05                  # subtracted from the score once per matching dislike

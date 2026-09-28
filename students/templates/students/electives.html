@@ -34,16 +34,16 @@
     <h3>{{ semester }} <span class="muted">leave rows empty if you took none</span></h3>
     {{ formset.management_form }}
     {{ formset.non_form_errors }}
-    <div class="col-heads"><span>Kind</span><span>Course code</span><span>Grade (optional)</span><span>How comfortable were you?</span></div>
+    <div class="col-heads"><span>Kind</span><span>Course code</span></div>
     <div class="rows">
     {% for form in formset %}
       <div class="erow" data-cat="{{ form.category.value|default:'' }}">
-        {{ form.category }}{{ form.course }}{{ form.grade }}{{ form.comfort }}
+        {{ form.category }}{{ form.course }}
         {% for field in form %}{{ field.errors }}{% endfor %}{{ form.non_field_errors }}
       </div>
     {% endfor %}
     </div>
-    <template><div class="erow" data-cat="">{{ formset.empty_form.category }}{{ formset.empty_form.course }}{{ formset.empty_form.grade }}{{ formset.empty_form.comfort }}</div></template>
+    <template><div class="erow" data-cat="">{{ formset.empty_form.category }}{{ formset.empty_form.course }}</div></template>
     <button type="button" class="btn ghost small add-row" data-prefix="{{ formset.prefix }}">Add another course</button>
   </section>
 {% endfor %}

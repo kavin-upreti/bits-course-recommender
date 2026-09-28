@@ -11,7 +11,8 @@ from recommender.agent import run_agent
 from recommender.embeddings import SentenceTransformerEmbedder
 from recommender.handout_facts import clear_facts_cache
 from recommender.llm import LLMResponse, ToolCall
-from recommender.ranking import Scored, rerank
+from recommender.piece_index import PieceIndex
+from recommender.ranking import Scored, rerank, retrieve
 from recommender.testing import FakeLLM
 
 from .fixtures import add_handout, equivalent, link, make_course, offer
@@ -233,7 +234,8 @@ class NeighbourTests(Catalog):
         self.reranker.scores["Video Production"] = 0.4  # over the anchor floor, under the cutoff
         with patch.object(config, "NEIGHBOURS_PER_TOPIC", 2):
             result = self.result(category="DEL", about="video editing")
-        self.assertEqual(self.codes(result), ["XX F412", "XX F411"])
+        # XX F411 (NLP) is the 2nd closest, but far from Video Production: under NEIGHBOUR_MIN_SIMILARITY, so left out
+        self.assertEqual(self.codes(result), ["XX F412"])
         self.assertEqual(result["courses"][0]["score"]["similar_to"], "XX F499 Video Production")
         self.assertIn("no direct match for 'video editing'", result["courses"][0]["score"]["why"])
         self.assertIn("Nothing this semester matches 'video editing' directly; the courses listed for it are the closest "
@@ -292,3 +294,12 @@ class NamedCategoryTests(SimpleTestCase):
         self.assertEqual(named_categories("no HUELs please, just OPELs"), {"OPEL"})
         self.assertEqual(named_categories("a DEL with no midsem"), {"DEL"})  # negation after the word is about the DEL
         self.assertEqual(named_categories("I don't want OPELs"), set())
+
+
+class RetrieveTests(SimpleTestCase):
+    def test_each_topic_gets_its_own_candidates(self):
+        # A and B are both closer to topic 0 than C is to anything; C still comes back for topic 1
+        index = PieceIndex("fake", np.array([[1, 0], [0.9, 0.1], [0, 1]], dtype=np.float32),
+                           ["A", "B", "C"], ["title"] * 3, ["a", "b", "c"])
+        found = retrieve(index, ["A", "B", "C"], np.array([[1, 0], [0, 1]], dtype=np.float32), 1)
+        self.assertEqual([item.code for item in found], ["A", "C"])

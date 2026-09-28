@@ -26,6 +26,7 @@ from recommender.timetable import (
 from .bits_id import BRANCH_CODES, BitsIdError, ParsedId, parse_bits_id, resolve_programme, second_degree_options
 from .forms import MINOR_FROM_YEAR, ElectiveFormSet, ProfileForm, RegisterForm
 from .models import Student, StudentCourse
+from .templatetags.text import course_title
 
 FIRST_ELECTIVE_SEMESTER = (2, 1)  # electives start in 2-1; earlier semesters are all compulsory
 
@@ -92,6 +93,23 @@ def mark_picked(semesters: list[tuple[str, list[dict]]], chosen: dict[str, str])
     return semesters
 
 
+def completed_choices(student: Student | None, programme: Programme, planning: tuple[int, int],
+                      admission_year: int) -> list[tuple[str, str]]:
+    """(code, "CODE Title (1-2)") for the did well / struggled pickers: the student's completed courses, or for a new
+    profile the chart's courses before the planned semester (the same ones saving will fill in), by code."""
+    if student is not None:
+        rows = StudentCourse.objects.filter(student=student, status="completed").select_related("course")
+        found = {row.course.code: (row.course, row.semester_taken) for row in rows}
+    else:  # why: the chart comes from the ID, so the first screen can ask too (typed-in electives come later)
+        found = {}
+        # same rule as rebuild_inferred_courses: no chart for the 2026+ curriculum
+        for slot in course_slots(programme) if admission_year < 2026 else []:
+            if (slot.year, slot.semester) < planning:
+                found.setdefault(slot.course.code, (slot.course, f"{slot.year}-{slot.semester}"))
+    return [(code, f"{code} {course_title(course.title)}" + (f" ({taken})" if taken else ""))
+            for code, (course, taken) in sorted(found.items())]
+
+
 def needs_electives_page(student: Student) -> bool:
     return bool(past_elective_semesters(student) or past_alternative_slots(student))
 
@@ -111,7 +129,8 @@ def profile(request: HttpRequest) -> HttpResponse:
     if problem:
         return render(request, "students/profile.html", {"problem": problem, "id_parts": id_parts(request.user.username, parsed), "programme": programme})
     label = f"{planning[0]}-{planning[1]}"
-    form = ProfileForm(request.POST if request.method == "POST" else None, instance=student, planning=planning, second_degrees=second_degrees)
+    form = ProfileForm(request.POST if request.method == "POST" else None, instance=student, planning=planning,
+                       second_degrees=second_degrees, completed=completed_choices(student, programme, planning, parsed.admission_year))
     slots = alternative_slots(programme).get(label, [])
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
@@ -191,8 +210,7 @@ def electives(request: HttpRequest) -> HttpResponse:
     formsets = []
     for semester in past_elective_semesters(student):
         initial = [
-            {"category": _category_of(row.course.code, codes_by_category), "course": row.course.code,
-             "grade": row.grade or "", "comfort": row.comfort}
+            {"category": _category_of(row.course.code, codes_by_category), "course": row.course.code}
             for row in saved if row.semester_taken == semester
         ]
         formset = ElectiveFormSet(
@@ -219,7 +237,7 @@ def electives(request: HttpRequest) -> HttpResponse:
             StudentCourse.objects.bulk_create(
                 StudentCourse(
                     student=student, course=courses[data["course"]], status="completed", semester_taken=semester,
-                    source="user", grade=data["grade"] or None, comfort=data["comfort"],
+                    source="user",
                     category=_category_of(data["course"], codes_by_category),
                 )
                 for semester, data in rows

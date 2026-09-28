@@ -48,6 +48,11 @@ class StudentContext:
     default_avoid_day: str | None
     avoid_eval_styles: list[str]
     interests: list[str]
+    strengths: str = ""
+    did_well: list[str] = field(default_factory=list)   # completed codes only (a removed course drops out)
+    struggled: list[str] = field(default_factory=list)
+    grade_oriented: bool = False
+    sop_plan: bool = False
     minor_courses: dict[str, str] = field(default_factory=dict)  # code -> "core" | "elective"
     max_units: int | None = None         # from the Rule table; None if not stated for this batch
 
@@ -95,10 +100,11 @@ def build_context(student: Student) -> StudentContext:
     minor = {}
     if student.minor_id:
         minor = dict(MinorCourse.objects.filter(minor_id=student.minor_id).values_list("course__code", "role"))
+    completed = done_codes(student, "completed")
     return StudentContext(
         student=student,
         semester_tag=Offering.objects.order_by("pk").values_list("semester_tag", flat=True).first() or "",
-        completed=done_codes(student, "completed"),
+        completed=completed,
         current=done_codes(student, "current"),
         current_courses=sorted(StudentCourse.objects.filter(student=student, status="current")
                                .values_list("course__code", flat=True)),
@@ -109,6 +115,11 @@ def build_context(student: Student) -> StudentContext:
         default_avoid_day=student.default_avoid_day or None,
         avoid_eval_styles=list(student.avoid_eval_styles),
         interests=list(student.interests),
+        strengths=student.strengths.strip(),
+        did_well=[code for code in student.did_well if code in completed],
+        struggled=[code for code in student.struggled if code in completed],
+        grade_oriented=student.grade_oriented,
+        sop_plan=bool(student.sop_plan),
         minor_courses=minor,
         max_units=semester_load(student).max_units,
     )

@@ -61,8 +61,9 @@ selection is finalised, so a clash is refused with its reason instead of being s
 
 | Part | Model / method | Tuned on |
 |---|---|---|
-| Matching a topic to courses | Every course is split into short pieces (handout topics, objectives, Bulletin text; 15,506 pieces for 2,131 courses). `intfloat/e5-small-v2` embeds them; the 30 closest courses per question are rescored by the cross-encoder `cross-encoder/ms-marco-MiniLM-L-6-v2`. A course's relevance = the mean of its best 3 piece scores, or 1.0 if its title contains the topic. Each topic of a question is scored on its own. | `embedding_eda`: 3 embedders × 3 rerankers (incl. none) on 14 labelled queries; picks the model pair; the cutoff (0.75) is explained under Evaluation |
+| Matching a topic to courses | Every course is split into short pieces (handout topics, objectives, Bulletin text; 15,506 pieces for 2,131 courses). `intfloat/e5-small-v2` embeds them; the 30 closest courses per topic of a question are rescored by the cross-encoder `cross-encoder/ms-marco-MiniLM-L-6-v2`. A course's relevance = the mean of its best 3 piece scores, or 1.0 if its title contains the topic. Each topic of a question is scored on its own. | `embedding_eda`: 3 embedders × 3 rerankers (incl. none) on 14 labelled queries; picks the model pair; the cutoff (0.75) is explained under Evaluation |
 | Vocabulary gaps ("video editing": no handout uses the words) | **Course neighbours**: the catalogue's best matches for the topic (offered or not, reranker score ≥ 0.3, e.g. GS F343 Short Film and Video Production) are anchors; the offered courses whose content is closest to them (cosine of centred mean piece vectors) fill the places the direct matches leave, at most 3 per topic, labelled as "no direct match; content close to …". No anchor above 0.3 → nothing (cooking, fashion design, marine biology) | anchor floor and cap from a probe of real and nonsense topics |
+| Personalisation (profile) | Interests and strengths phrases (split on commas / "and") are searched exactly like a topic; a real match (relevance ≥ 0.75) adds 0.15 × relevance, and a branch word ("maths") boosts that department. "Did well in" / "struggled with" courses: the cosine of centred mean piece vectors (as for neighbours); above a floor it adds 0.3 × (cosine − floor), "struggled" subtracts, "grades matter a lot" doubles "did well". Never removes a course; with a topic it only reorders courses past the cutoff, with a stricter floor (0.3 vs 0.2). The card says why ("matches your strength 'programming'", "close to EEE F243 Signals & Systems, which you did well in"). A topic that is only a branch word limits the search to that department | probe on the 14 labelled queries × 5 profiles: hit@5 unchanged, MRR within ±0.015; the floors from should-match course pairs (mostly 0.25–0.75) vs random pairs (p90 0.18) |
 | One class under two codes (EEE F434 = ECE F434) | Pieces whose embeddings are ≥ 0.99 similar are "twins"; two courses sharing twins for ≥ 90 % of the smaller one's pieces are one class. The student sees one card and takes only one | `equivalence_eda`: precision 0.87, recall 0.62 on 126 listed equivalents |
 | Attendance / make-up wording in handouts | local `nli-deberta-v3-small` + MiniLM (extractor only) | hand-checked handouts |
 
@@ -96,15 +97,15 @@ Reporting and Writing for Media) are checked in the chat evaluation.
 from three students (CS, EEE, Mech), including the four examples from the brief, filters, counts, two-category asks,
 "I've already finished my HUELs", vocabulary gaps (video editing, journalism) and topics no course covers (cooking,
 marine biology). Each message has the tool call a person would make; the pipeline's answer to that call is the
-reference, so this measures only the LLM's part. Run of 2026-09-28:
+reference, so this measures only the LLM's part. Run of 2026-09-28, after the personalisation changes (case 30 left out: no free provider was reachable):
 
 | | |
 |---|---|
-| tool called with the right category / filters / count / preferences | 29 of 31 calls (the two others were reasonable: "a HUEL" read as count 1; "what suits me" split into one search per category) |
-| reference courses that reached the student's cards | 69 of 85 (81 %); the rest the model left out of its answer (e.g. listing 1 of 5 finance OPELs) |
+| tool called with the right category / filters / count / preferences | 28 of 30 calls (the two others were reasonable: "a HUEL" read as count 1, twice) |
+| reference courses that reached the student's cards | 69 of 82 (84 %; 81 % before); the rest the model left out of its answer |
 | topics nothing matches: no cards, "nothing matches" said | 3 of 3 |
 | courses invented by the model / tool errors | 0 / 0 |
-| median time per message | 6.2 s (free tiers; up to ~70 s when every provider is rate-limited and it backs off) |
+| median time per message | 9.0 s (free tiers, rate-limited during the run; up to ~70 s when every provider is busy and it backs off) |
 
 The first run found two things that were then fixed: the model dropped filters the student asked for ("no
 attendance requirement", "open book") in 3 of 30 cases, fixed by naming those phrases in the prompt (0 since); and a
@@ -122,7 +123,19 @@ provider answering "200 OK" with an error body crashed the request instead of fa
 - Course neighbours are "similar content", not "about the topic"; they are labelled that way and ranked after
   direct matches.
 - One message at a time: no chat history ("swap the second one" is answered with a question).
-- Profile strengths / weaknesses / goals / CGPA are stored but not used for ranking.
+- The profile boost is content similarity, not a grade prediction. Strengths are
+  searched like topics, so abbreviations other than branch words ("ML", "DSA") find nothing: write them out.
+- Branch cases (`chat_cases.json` 31-39, e.g. "maths courses related to probability") were added but not fully run:
+  the free quotas ran out. Before the prompt line naming branch words, the model dropped the branch in 2 of 5
+  (searching only "probability"); the search still worked, without the department filter. Not re-measured since.
+- Old-curriculum courses (e.g. MATH F111 Mathematics I, CHEM F111 General Chemistry) can be suggested to newer batches
+  who did the new-code version (MATH F101, CHEM F101): the data has no mapping saying they're the same course.
+- 2+2 International Collaborative Programmes (two years at BITS, then RMIT, Iowa State, Buffalo or RPI) aren't
+  supported; the brief names only single and dual degrees. The bulletin (IV-142 to IV-223) gives them different rules:
+  their own split of HUEL / DEL / OPEL counts between BITS and the partner, two Capstone Projects instead of Practice
+  School II or thesis, some first-year courses replaced (e.g. BITS F235 Digital Fundamentals for CS F111 at RMIT),
+  partner courses counting as BITS electives, and (for Iowa State) HUELs only from a pool "defined for BITS-ISU
+  students" that the bulletin never lists. A 2+2 student would get a regular B.E. plan here.
 - A prerequisite satisfied by a current course blocks the course this semester (the Regulations may allow
   concurrent registration).
 - Caches (handout facts, piece index) are per process: after a separate `ingest`, restart the server.

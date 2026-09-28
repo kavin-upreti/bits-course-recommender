@@ -2,6 +2,7 @@
 
 Run: .venv/bin/python manage.py test students
 """
+import re
 from io import StringIO
 
 from django.core.management import call_command
@@ -38,7 +39,7 @@ class ProfileFlowTests(TestCase):
         })
 
     def profile(self, **extra):
-        return self.client.post("/profile/", {"goal": "job", "interests": "ml, finance", **extra})
+        return self.client.post("/profile/", {"interests": "ml, finance", **extra})
 
     def test_dual_id_resolves_to_dual_chart(self):
         programme = resolve_programme(parse_bits_id("2024B3A7PS0832P"))
@@ -74,19 +75,19 @@ class ProfileFlowTests(TestCase):
 
         # a DEL typed under OPEL is refused, with the right category named
         response = self.client.post("/profile/electives/", {
-            **rows, "s21-0-category": "OPEL", "s21-0-course": del_code, "s21-0-comfort": "4",
+            **rows, "s21-0-category": "OPEL", "s21-0-course": del_code,
         })
         self.assertContains(response, "For your programme it&#x27;s a DEL")
 
         response = self.client.post("/profile/electives/", {
             **rows,
-            "s21-0-category": "DEL", "s21-0-course": del_code.lower(), "s21-0-comfort": "4", "s21-0-grade": "A-",
-            "s22-0-category": "OPEL", "s22-0-course": opel_code, "s22-0-comfort": "2",
+            "s21-0-category": "DEL", "s21-0-course": del_code.lower(),
+            "s22-0-category": "OPEL", "s22-0-course": opel_code,
         })
         self.assertRedirects(response, "/")
         self.assertEqual(
-            sorted(StudentCourse.objects.filter(source="user").values_list("semester_taken", "course__code", "comfort")),
-            [("2-1", del_code, "4"), ("2-2", opel_code, "2")],
+            sorted(StudentCourse.objects.filter(source="user").values_list("semester_taken", "course__code")),
+            [("2-1", del_code), ("2-2", opel_code)],
         )
         self.assertEqual(StudentCourse.objects.get(course__code=del_code).category, "DEL")
         self.assertContains(self.client.get("/"), del_code)
@@ -159,7 +160,7 @@ class ChoicesAndRequirementsTests(TestCase):
         student = Student.objects.get()
         del_code = elective_choices(student.programme, student.admission_year)["DEL"][0].code
         rows = {**self.empty_rows(), "s21-TOTAL_FORMS": 1}
-        self.client.post("/profile/electives/", {**rows, "s21-0-category": "DEL", "s21-0-course": del_code, "s21-0-comfort": "3"})
+        self.client.post("/profile/electives/", {**rows, "s21-0-category": "DEL", "s21-0-course": del_code})
 
         from recommender.requirements import elective_needs, minor_progress
         needs = {need.category: need for need in elective_needs(student)}
@@ -353,6 +354,26 @@ class RecommenderPreferenceTests(TestCase):
         self.assertFalse(Student.objects.exists())
         response = self.client.post("/profile/", {"avoid_eval_styles": ["closed_book", "closed_book"]})
         self.assertContains(response, "only once")
+
+    def test_did_well_and_struggled_pickers(self):
+        # the first screen already lists the chart's courses (from the ID), and a pick there is saved with the profile
+        first = self.client.get("/profile/").content.decode()
+        self.assertIn('name="did_well"', first)
+        self.assertLess(first.index("Grades matter a lot"), first.index("Courses you did well in"))
+        picked = re.search(r'name="did_well" value="([^"]+)"', first).group(1)
+        self.client.post("/profile/", {"did_well": [picked]})
+        student = Student.objects.get()
+        self.assertEqual(student.did_well, [picked])
+        done = sorted(StudentCourse.objects.filter(student=student, status="completed").values_list("course__code", flat=True))
+        self.assertIn(picked, done)
+        self.assertContains(self.client.get("/profile/"), f'value="{done[0]}"')
+        response = self.client.post("/profile/", {"did_well": done[:6]})
+        self.assertContains(response, "Pick at most 5")
+        response = self.client.post("/profile/", {"did_well": done[:2], "struggled": done[1:3]})
+        self.assertContains(response, f"Picked as both did well and struggled: {done[1]}")
+        self.client.post("/profile/", {"did_well": done[:2], "struggled": [done[3]], "grade_oriented": "on"})
+        student.refresh_from_db()
+        self.assertEqual((student.did_well, student.struggled, student.grade_oriented), (done[:2], [done[3]], True))
 
     def test_model_save_validates(self):
         from django.core.exceptions import ValidationError
