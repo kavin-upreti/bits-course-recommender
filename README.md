@@ -61,7 +61,7 @@ selection is finalised, so a clash is refused with its reason instead of being s
 
 | Part | Model / method | Tuned on |
 |---|---|---|
-| Matching a topic to courses | Every course is split into short pieces (handout topics, objectives, Bulletin text; 15,506 pieces for 2,131 courses). `intfloat/e5-small-v2` embeds them; the 30 closest courses per question are rescored by the cross-encoder `cross-encoder/ms-marco-MiniLM-L-6-v2`. A course's relevance = the mean of its best 3 piece scores, or 1.0 if its title contains the topic. Each topic of a question is scored on its own. | `embedding_eda`: 3 embedders × 3 rerankers (incl. none) on 14 labelled queries; picks the model pair and the relevance cutoff (0.75) |
+| Matching a topic to courses | Every course is split into short pieces (handout topics, objectives, Bulletin text; 15,506 pieces for 2,131 courses). `intfloat/e5-small-v2` embeds them; the 30 closest courses per question are rescored by the cross-encoder `cross-encoder/ms-marco-MiniLM-L-6-v2`. A course's relevance = the mean of its best 3 piece scores, or 1.0 if its title contains the topic. Each topic of a question is scored on its own. | `embedding_eda`: 3 embedders × 3 rerankers (incl. none) on 14 labelled queries; picks the model pair; the cutoff (0.75) is explained under Evaluation |
 | Vocabulary gaps ("video editing": no handout uses the words) | **Course neighbours**: the catalogue's best matches for the topic (offered or not, reranker score ≥ 0.3, e.g. GS F343 Short Film and Video Production) are anchors; the offered courses whose content is closest to them (cosine of centred mean piece vectors) fill the places the direct matches leave, at most 3 per topic, labelled as "no direct match; content close to …". No anchor above 0.3 → nothing (cooking, fashion design, marine biology) | anchor floor and cap from a probe of real and nonsense topics |
 | One class under two codes (EEE F434 = ECE F434) | Pieces whose embeddings are ≥ 0.99 similar are "twins"; two courses sharing twins for ≥ 90 % of the smaller one's pieces are one class. The student sees one card and takes only one | `equivalence_eda`: precision 0.87, recall 0.62 on 126 listed equivalents |
 | Attendance / make-up wording in handouts | local `nli-deberta-v3-small` + MiniLM (extractor only) | hand-checked handouts |
@@ -76,7 +76,21 @@ model didn't search, it is reminded once; no student data is sent to the LLM, on
 
 Two separate checks, so a miss can be blamed on the right part.
 
-**Ranking, no LLM** (`python manage.py embedding_eda`, report in `docs/eda/embedding_eda.md`): RANKING_RESULTS
+**Ranking, no LLM** (`python manage.py embedding_eda`, report in `docs/eda/embedding_eda.md`): 14 topic queries
+with hand-picked correct courses (`recommender/eda/queries.json`, 3 of them should match nothing), ranked over the
+539 offered courses with exactly the app's code, for 3 embedders × (no reranker, ms-marco, bge-reranker-base).
+
+| | hit@5 | MRR | latency / query |
+|---|---|---|---|
+| **e5-small-v2 + ms-marco reranker (used)** | **0.80** | **0.82** | 0.15 s |
+| best without a reranker (bge-small) | 0.79 | 0.84 | 0.01 s |
+| e5-small-v2 + bge-reranker-base | 0.63 | 0.78 | 0.77 s |
+
+hit@5 = share of a query's correct courses in its top 5; MRR = 1 / rank of the first correct one. All 3 nonsense
+queries find no real match. The F1-best cutoff on these queries is 0.58; the app keeps 0.75 (more precise, and course
+neighbours fill a short list), since 14 queries are too few to tune it finely. These numbers are for direct
+matches only: "video editing" has no direct match, and its neighbours (Cinematic Art, Mass Media Content & Design,
+Reporting and Writing for Media) are checked in the chat evaluation.
 
 **The whole assistant, real LLM** (`python manage.py chat_eval`, report in `docs/eda/chat_eval.md`): 30 messages
 from three students (CS, EEE, Mech), including the four examples from the brief, filters, counts, two-category asks,

@@ -15,15 +15,14 @@ EMBEDDING_PREFIXES = {
 }
 
 # Reranking (stage C2) and the relevance cutoff (C3)
-# EDA 2026-09-27 (docs/eda/embedding_eda.md), with each topic scored on its own: e5 + this reranker won
-# (hit@5 0.85, precision 0.79 at the cutoff). None = relevance from the embedding similarities instead.
+# EDA 2026-09-28 (docs/eda/embedding_eda.md): e5 + this reranker won (hit@5 0.80, MRR 0.82, 0.15 s per query).
 RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 RERANK_CANDIDATES = 30                  # courses (by embedding score) that reach the reranker
 RERANK_PIECES_PER_COURSE = 3            # best pieces per candidate by embedding, plus its title piece
 RERANK_BATCH_SIZE = 64
 TITLE_STRONG = 0.8                      # a title scoring this high counts on its own; below, the title is ignored
 RELEVANCE_TOP_PIECES = 3                # relevance = mean of a course's best 3 piece scores (one passing mention can't carry it)
-RELEVANCE_CUTOFF = 0.75                 # EDA 2026-09-27; only a few judged queries, so 0.47-0.75 is within noise
+RELEVANCE_CUTOFF = 0.75                 # EDA 2026-09-28: F1-best 0.58 on 14 queries; kept higher for precision (neighbours fill short lists)
 MAX_QUERY_TOPICS = 8                    # "AI, ML, DL, NLP": each topic scored on its own, best one counts
 # Neighbours (ranking.neighbours): a topic with fewer real matches than places is topped up with the courses whose
 # content is closest to the catalogue's best matches for it ("anchors"). probe 2026-09-28: every nonsense topic
