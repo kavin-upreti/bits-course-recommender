@@ -1,9 +1,21 @@
-pdfplumber
-sentence-transformers
-torch
-pytest  # tests/ only
-django
-python-dotenv
-httpx  # recommender/llm.py (all LLM providers)
-numpy
-matplotlib  # embedding_eda chart
+# Exact versions this project was built and evaluated with (Python 3.12+; built on 3.14).
+Django==6.1.1
+python-dotenv==1.2.3
+httpx==0.28.1                 # recommender/llm.py: every LLM provider
+numpy==2.5.3
+# local models: embeddings, reranker, handout NLI (pinned so a fresh install ranks exactly the same)
+sentence-transformers==6.1.0
+transformers==5.17.0
+tokenizers==0.23.2
+huggingface_hub==1.33.0
+safetensors==0.8.0
+torch==2.14.0
+scikit-learn==1.9.1
+scipy==1.18.1
+# PDF extraction (extractors/)
+pdfplumber==0.11.10
+pdfminer.six==20260107
+pypdfium2==5.13.0
+# tests and the evaluation chart
+pytest==9.1.1
+matplotlib==3.11.2

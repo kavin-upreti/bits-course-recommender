@@ -36,7 +36,8 @@ How each point is met:
 
 ## Run it
 
-Needs Python 3.11 or newer (built on 3.14). About 2 GB of disk for the local models.
+Needs Python 3.12 or newer (built on 3.14), internet for the first run (packages and two small models), and about 2 GB of disk.
+`requirements.txt` pins the exact versions used here, so a fresh install ranks and answers the same way.
 
 ```bash
 python3 -m venv .venv
