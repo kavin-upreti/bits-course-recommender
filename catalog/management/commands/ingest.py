@@ -22,8 +22,8 @@ from django.db import transaction
 
 from catalog import models as m
 
-EXAMPLES_SHOWN = 12
-EXPECTED_MINORS = 23  # Bulletin 2025-26; a different count after re-extraction means the minors parser broke  # unresolved codes printed per source; the rest are in the report file
+EXAMPLES_SHOWN = 12  # unresolved codes printed per source; the rest are in the report file
+EXPECTED_MINORS = 23  # Bulletin 2025-26; a different count after re-extraction means the minors parser broke
 DEFAULT_POLICY = re.compile(r"as per (the )?(institute|augs|agsr|academic|university)|(augs|agsr)\w*\s*(division\s*)?(guidelines|rules|norms)"
                             r"|institute (rules|norms|guidelines)|see part[- ]i\b", re.I)
 CODE = re.compile(r"^[A-Z]{2,5} [A-Z]\d{3}[A-Z]?(-\d+)?$")
@@ -371,7 +371,7 @@ class Command(BaseCommand):
         self.timetable_checks(timetable, bulletin)
 
     def timetable_checks(self, timetable, bulletin):
-        """Facts timetable intelligence relies on (ideation 2.1 / Part 8), plus the expected minor count."""
+        """Facts the timetable search relies on, plus the expected minor count."""
         courses = timetable["courses"]
         sections = [s for c in courses for group in (c.get("sections") or {}).values() for s in group.values()]
         practicals = [s for c in courses for s in (c.get("sections") or {}).get("practical", {}).values()]

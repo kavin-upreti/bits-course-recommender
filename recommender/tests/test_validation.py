@@ -1,4 +1,4 @@
-"""validate_call (todo.md 9.3)."""
+"""validate_call."""
 from django.test import SimpleTestCase
 
 from recommender.validation import validate_call

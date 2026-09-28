@@ -1,4 +1,4 @@
-"""All CoursePiece embeddings of the current model, in memory (todo.md section 4.5).
+"""All CoursePiece embeddings of the current model, in memory.
 
 Loaded once per process; `invalidate_piece_index` (called by build_embeddings) forces a reload.
 """

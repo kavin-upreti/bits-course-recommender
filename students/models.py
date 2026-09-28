@@ -1,4 +1,4 @@
-"""Per-student data (ideation Part 5, 'Student data'). Not from PDFs; never touched by `manage.py ingest`.
+"""Per-student data. Not from PDFs; never touched by `manage.py ingest`.
 
 why PROTECT on catalog FKs: ingest clears and reloads the catalog; PROTECT makes it refuse instead of silently
 deleting students' courses and plans (see the ingest command's --wipe-students).
@@ -38,7 +38,7 @@ class Student(models.Model):
     campus = models.CharField(max_length=30, default="Pilani")
     admission_year = models.PositiveSmallIntegerField()
     programme = models.ForeignKey(Programme, on_delete=models.PROTECT, related_name="+")
-    current_year = models.PositiveSmallIntegerField()  # the semester being planned (ideation 6.1)
+    current_year = models.PositiveSmallIntegerField()  # the semester being planned
     current_semester = models.PositiveSmallIntegerField()
     minor = models.ForeignKey(Minor, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     minor_registered = models.BooleanField(default=False)

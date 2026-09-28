@@ -64,6 +64,13 @@ class ProfileBoostTests(Catalog):
         self.update(did_well=["XX F111"], grade_oriented=True, strengths="neural networks")
         self.assertEqual(self.codes(self.result(category="DEL", about="language")), ["XX F411"])
 
+    def test_personal_is_in_the_score_only_when_it_counts(self):
+        self.assertNotIn("personal", self.result(category="DEL")["courses"][0]["score"])
+        self.update(did_well=["XX F111"])
+        score = self.result(category="DEL")["courses"][0]["score"]
+        self.assertGreater(score["personal"], 0)
+        self.assertAlmostEqual(score["final"], score["personal"] + score["penalty"], delta=0.011)
+
     def test_sop_plan_reminder(self):
         self.assertFalse(any("SOP" in warning for warning in self.result(category="DEL")["warnings"]))
         self.update(sop_plan=True)

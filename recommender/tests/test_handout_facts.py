@@ -1,4 +1,4 @@
-"""handout_facts: every rule of todo.md 3.2, on unsaved Handout objects (no database needed)."""
+"""handout_facts: every rule, on unsaved Handout objects (no database needed)."""
 from django.test import SimpleTestCase
 
 from catalog.models import Handout

@@ -1,4 +1,4 @@
-"""Provider-neutral chat call with fallback across free providers (todo.md section 8, extended).
+"""Provider-neutral chat call with fallback across free providers.
 
 LLM_PROVIDERS in .env lists provider:model pairs, tried in order:
     LLM_PROVIDERS=groq:llama-3.3-70b-versatile,openrouter:<model>:free,gemini:gemini-3.5-flash

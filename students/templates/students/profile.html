@@ -20,7 +20,7 @@
     <section class="panel">
       <h2>Where you are</h2>
       <p class="going-into">Going into <span class="code">{{ planning }}</span></p>
-      <p class="lede">From your batch and this semester's timetable. Every semester before it counts as done, and your compulsory courses come from your programme's chart.</p>
+      <p class="lede">From your batch and this semester's timetable. Earlier semesters count as done; compulsory courses come from your chart.</p>
       {% if form.second_degree_code or form.minor %}
       <div class="fields">
         {% if form.second_degree_code %}<div>{{ form.second_degree_code.as_field_group }}</div>{% endif %}
@@ -36,7 +36,7 @@
       <h2>How suggestions are picked</h2>
       <p class="lede">The assistant uses these unless your message says otherwise.</p>
       <div class="fields">
-        <div class="wide">{{ form.interests.as_field_group }}<p class="helptext">Orders suggestions when you don't name a topic, and nudges them a little when you do.</p></div>
+        <div class="wide">{{ form.interests.as_field_group }}<p class="helptext">Orders suggestions when you don't name a topic, and nudges them when you do.</p></div>
         <div class="check">{{ form.default_avoid_8am.as_field_group }}</div>
         <div>{{ form.default_avoid_day.as_field_group }}</div>
         <div class="wide checks">{{ form.avoid_eval_styles.as_field_group }}</div>
@@ -45,7 +45,7 @@
 
     <section class="panel">
       <h2>About you</h2>
-      <p class="lede">Optional. Suggestions lean towards courses like your strengths and the ones you did well in; nothing is removed because of these.</p>
+      <p class="lede">Optional. These change the order of suggestions, never what you're allowed to take.</p>
       <div class="fields">
         <div class="wide">{{ form.sop_plan.as_field_group }}</div>
         <div class="wide">{{ form.strengths.as_field_group }}</div>
@@ -53,7 +53,7 @@
         <div class="check wide">{{ form.grade_oriented.as_field_group }}</div>
         <details class="wide grades-box" id="grades-box"{% if form.grade_oriented.value or form.did_well.value or form.struggled.value or form.did_well.errors or form.struggled.errors %} open{% endif %}>
           <summary>Courses you did well in or struggled with <span class="muted">· for grade-focused students</span></summary>
-          <p class="helptext">Courses like the ones you did well in rank higher, so you're more likely to score well again; courses like the ones you struggled with rank a little lower (never removed). With "Grades matter a lot" ticked, the courses you did well in count twice. If grades aren't a priority, this just means "more of the same", so you can skip it.</p>
+          <p class="helptext">Courses like the ones you did well in move up, so you're likelier to score well again; ones like those you struggled with move down a little. "Grades matter a lot" doubles the first. If grades aren't a priority, skip this: it just means "more of the same".</p>
           <div class="picker">{{ form.did_well.as_field_group }}</div>
           <div class="picker">{{ form.struggled.as_field_group }}</div>
         </details>

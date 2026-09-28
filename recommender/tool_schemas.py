@@ -1,4 +1,4 @@
-"""The tool definitions sent with every LLM request (todo.md 9.1). Kept short: they cost tokens on every call.
+"""The tool definitions sent with every LLM request. Kept short: they cost tokens on every call.
 Also the source of truth for argument validation (recommender/validation.py)."""
 from . import config
 

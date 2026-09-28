@@ -1,4 +1,4 @@
-"""A course's text, cut into short clean pieces for embedding (todo.md section 4.2).
+"""A course's text, cut into short clean pieces for embedding.
 
 One embedding per piece (not per handout): a query about "transformers" matches the one topic line about
 transformers instead of being diluted by a whole handout.

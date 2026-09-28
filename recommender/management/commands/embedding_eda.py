@@ -1,4 +1,4 @@
-"""`python manage.py embedding_eda`: tune the retrieve-then-rerank ranking on real queries (todo.md section 13).
+"""`python manage.py embedding_eda`: tune the retrieve-then-rerank ranking on real queries.
 
 Grid: embedding model x reranker (or none) x RERANK_CANDIDATES, using the same code as the
 app (recommender/ranking.py). Pieces are embedded in memory per model; stored CoursePiece rows are not touched.

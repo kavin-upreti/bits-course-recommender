@@ -52,14 +52,6 @@ class Models:
         ranked = sorted(zip(sentences, scores), key=lambda pair: pair[1], reverse=True)
         return [Located(sentence, score) for sentence, score in ranked[:top_k]]
 
-    def max_similarity(self, texts: list[str], examples: list[str]) -> list[float]:
-        """For each text, its highest cosine similarity to any example sentence."""
-        if not texts:
-            return []
-        left = self.embedder.encode(texts, convert_to_tensor=True, normalize_embeddings=True)
-        right = self.embedder.encode(examples, convert_to_tensor=True, normalize_embeddings=True)
-        return util.cos_sim(left, right).max(dim=1).values.tolist()
-
     def decide(self, premises: list[Sentence], hypotheses: list[tuple[str, bool | None, bool | None]]) -> Decision:
         """Most confident non-neutral NLI result over every (premise, hypothesis) pair.
 

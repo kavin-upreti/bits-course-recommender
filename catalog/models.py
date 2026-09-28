@@ -1,4 +1,4 @@
-"""Course, programme and rule data (ideation Part 5). Filled only by `manage.py ingest`.
+"""Course, programme and rule data. Filled only by `manage.py ingest`.
 
 `sources` = {field_name: {doc, section, page, quote}}; `needs_verification` + `note` flag anything uncertain.
 """
@@ -34,9 +34,8 @@ class Course(Flagged):
     description = models.TextField(blank=True, default="")
     prerequisites = models.JSONField(null=True, blank=True)  # AND of OR-groups: [["CE F231", "ME F212"], ["MATH F211"]]
     is_project_course = models.BooleanField(default=False)  # number matches the Bulletin's XXX F266/F366/... patterns
-    # ponytail: "G" level letter = higher degree (BITS numbering); not stated as a rule in our PDFs (ideation Part 10)
+    # ponytail: "G" level letter = higher degree (BITS numbering); not stated as a rule in our PDFs
     is_higher_degree = models.BooleanField(default=False)
-    llm_tags = models.JSONField(null=True, blank=True)  # filled later (ideation 4.7)
 
     def __str__(self) -> str:
         return f"{self.code} {self.title}"

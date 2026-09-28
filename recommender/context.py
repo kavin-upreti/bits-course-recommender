@@ -1,4 +1,4 @@
-"""Everything the tools need about the logged-in student, built once per chat message (todo.md section 5.1).
+"""Everything the tools need about the logged-in student, built once per chat message.
 
 Nothing in here is ever sent to the LLM: the tools read it and return only small results.
 """

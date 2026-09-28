@@ -1,4 +1,4 @@
-"""Retrieve-then-rerank ranking with a relevance cutoff (todo.md 6.4, tests 1-9). Fake embedder + fake reranker."""
+"""Retrieve-then-rerank ranking with a relevance cutoff. Fake embedder + fake reranker."""
 import json
 from unittest.mock import patch
 
@@ -103,8 +103,7 @@ class RerankTests(Catalog):
         self.assertEqual([course["code"] for course in result["courses"]], ["XX F411"])
         self.assertIn("the same class is also offered as XX F412 (DEL); take only one", result["courses"][0]["note"])
         self.assertEqual(result["courses"][0]["also_offered_as"], [{"code": "XX F412", "title": "Deep Learning", "category": "DEL"}])
-        self.assertEqual(result["shortfall"], "Only 1 of the 3 courses you asked for match 'linguistics' well and fit "
-                                              "your timetable; no other course this semester does.")
+        self.assertEqual(result["shortfall"], "Only 1 of the 3 courses you asked for match 'linguistics' and fit your timetable.")
 
     def test_same_class_shows_the_code_that_counts_best(self):
         opel = make_course("YY F411", "Natural Language Processing")
@@ -238,8 +237,7 @@ class NeighbourTests(Catalog):
         self.assertEqual(self.codes(result), ["XX F412"])
         self.assertEqual(result["courses"][0]["score"]["similar_to"], "XX F499 Video Production")
         self.assertIn("no direct match for 'video editing'", result["courses"][0]["score"]["why"])
-        self.assertIn("Nothing this semester matches 'video editing' directly; the courses listed for it are the closest "
-                      "in content to the catalogue's best matches.", result["warnings"])
+        self.assertIn("Nothing this semester matches 'video editing' directly; the ones listed are the closest in content.", result["warnings"])
 
     def test_no_anchor_no_neighbours(self):
         self.reranker.scores["Video Production"] = 0.2  # "cooking": nothing in the catalogue is about it

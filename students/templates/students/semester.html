@@ -8,7 +8,7 @@
     <div>
       <p class="kicker">This semester</p>
       <h1>{{ planning }}</h1>
-      <p class="lede"><b class="tnum">{{ load.fixed_units }}</b> credits so far{% if load.max_units %} of the {{ load.max_units }}-credit cap{% endif %}. Electives appear here once you add them from the assistant.</p>
+      <p class="lede"><b class="tnum">{{ load.fixed_units }}</b> credits so far{% if load.max_units %} of the {{ load.max_units }}-credit cap{% endif %}. Electives you add from the assistant show up here.</p>
     </div>
     <div class="page-head-actions">
       {% if exams %}<button type="button" class="btn ghost" id="open-exams">Exam calendar</button>{% endif %}
@@ -72,7 +72,7 @@
     </div>
     {% else %}<p class="empty">No {{ cal.kind|lower }} dates in the timetable for these courses.</p>{% endif %}
     {% for warning in cal.warnings %}<p class="notice" style="margin-top:12px">{{ warning }}</p>{% endfor %}
-    {% if cal.undated %}<p class="muted small" style="margin-top:12px">No date in the timetable (lab courses' compres are set by the instructor): {{ cal.undated|join:", " }}.</p>{% endif %}
+    {% if cal.undated %}<p class="muted small" style="margin-top:12px">No date in the timetable (lab compres are set by the instructor): {{ cal.undated|join:", " }}.</p>{% endif %}
   </div>
   {% endfor %}
 </dialog>

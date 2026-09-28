@@ -1,4 +1,4 @@
-"""Stage C of get_eligible_courses (todo.md 6.4): retrieve with embeddings, then rerank with a cross-encoder.
+"""Stage C of get_eligible_courses: retrieve with embeddings, then rerank with a cross-encoder.
 
 C1 retrieval: a course's embedding score is its BEST piece similarity (not an average: one strongly matching
     title beats many vaguely related topics). The top `candidates` courses go on, each with its best

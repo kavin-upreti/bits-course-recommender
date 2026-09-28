@@ -25,7 +25,7 @@
 {% if formsets %}
 <section class="live-needs" aria-live="polite">
   <h2>Remaining as per academic requirements</h2>
-  <p class="muted small" style="margin:4px 0 12px">Updates as you type. Pick the kind first and the course list narrows to match.</p>
+  <p class="muted small" style="margin:4px 0 12px">Updates as you type. Pick the kind first to narrow the course list.</p>
   <div id="needs-live" data-url="{% url 'remaining_preview' %}">{% include "students/_needs.html" %}</div>
 </section>
 {% endif %}

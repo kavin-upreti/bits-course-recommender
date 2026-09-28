@@ -1,4 +1,4 @@
-"""Pieces, build_embeddings and the piece index (todo.md section 4)."""
+"""Pieces, build_embeddings and the piece index."""
 from io import StringIO
 
 import numpy as np

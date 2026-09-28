@@ -1,4 +1,4 @@
-"""Check the LLM's tool arguments against TOOL_SCHEMAS (todo.md 9.3). Never raises: a problem comes back as an
+"""Check the LLM's tool arguments against TOOL_SCHEMAS. Never raises: a problem comes back as an
 error string, which the agent returns to the LLM as the tool result so it can fix its call."""
 import json
 import re

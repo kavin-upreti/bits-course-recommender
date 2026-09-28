@@ -25,14 +25,14 @@
 
   {% if not grid %}
     <div class="empty">
-      {% if is_2026_batch %}Your batch's curriculum isn't in the Bulletin yet, so your courses couldn't be filled in. The assistant can still suggest courses from this semester's timetable.{% else %}Nothing done yet: you're starting 1-1.{% endif %}
+      {% if is_2026_batch %}Your batch's curriculum isn't in the Bulletin yet, so we couldn't fill in your courses. The assistant still works.{% else %}Nothing done yet: you're starting 1-1.{% endif %}
     </div>
   {% else %}
   <div class="home-top">
     <section class="week-card" aria-labelledby="week-title">
       <div class="section-head">
         <h2 id="week-title">This week</h2>
-        <p>{% if week_grid %}The best clash-free timetable for your {{ planning }} courses. <a href="{% url 'semester' %}">See every option</a>{% else %}None of your {{ planning }} courses are in this semester's timetable.{% endif %}</p>
+        <p>{% if week_grid %}Your best clash-free week. <a href="{% url 'semester' %}">See every option</a>{% else %}None of your {{ planning }} courses are in the timetable.{% endif %}</p>
       </div>
       {% if week_grid %}{% include "students/_week.html" with tt=week_grid highlight=None %}{% else %}<div class="empty">No timetable to show.</div>{% endif %}
     </section>
@@ -42,7 +42,7 @@
       <div class="panel stat">
         <span class="n">{% if load.max_units is None %}?{% else %}{{ load.free_units }}{% endif %}</span>
         <div><b>credits free for electives in {{ planning }}</b>
-          <p>{% if load.max_units is None %}Your batch's per-semester cap isn't stated yet; {{ load.fixed_units }} credits are compulsory courses.{% else %}{{ load.fixed_units }} of the {{ load.max_units }}-credit cap go to compulsory courses.{% endif %}</p></div>
+          <p>{% if load.max_units is None %}Your batch's cap isn't published; {{ load.fixed_units }} credits are compulsory.{% else %}{{ load.fixed_units }} of the {{ load.max_units }}-credit cap are compulsory courses.{% endif %}</p></div>
       </div>
       {% if load.over %}<p class="notice bad">This semester's compulsory courses alone are over the {{ load.max_units }}-credit cap.</p>{% endif %}
       {% include "students/_needs.html" %}
@@ -92,7 +92,7 @@
             {% for row in sem.rows %}{% include "students/_tile.html" %}{% endfor %}
             {% for slot in sem.electives %}<li class="tile placeholder" data-cat="{{ slot.cat }}"><div class="code">{{ slot.label }}<small class="tag">elective</small></div><div class="title">To be picked</div></li>{% endfor %}
           </ul>{% elif sem.is_future %}<p class="note">No courses in your chart for this semester.</p>{% endif %}
-          {% if sem.label == "1-1" %}<p class="note">First-year courses follow the current chart; older batches may have had different ones.</p>{% endif %}
+          {% if sem.label == "1-1" %}<p class="note">From the current chart; older batches may have had different first-year courses.</p>{% endif %}
         </div>
         {% endfor %}
       </div>

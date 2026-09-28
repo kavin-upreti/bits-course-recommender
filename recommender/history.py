@@ -1,7 +1,7 @@
-"""Infer a student's compulsory courses from their programme chart (ideation 6.2) and store them as StudentCourse rows.
+"""Infer a student's compulsory courses from their programme chart and store them as StudentCourse rows.
 
 Everything named in the chart before the planned semester = completed; named in the planned semester = current.
-Elective slots are skipped (the student types those in). PS-I / PS-II / thesis are skipped for now.
+Elective slots are skipped (the student types those in), and so are PS-I / PS-II / thesis.
 """
 from catalog.models import CodeMapping, Course, CourseEquivalent, PatternSlot, Programme
 from students.models import Student, StudentCourse

@@ -7,7 +7,7 @@
   <div>
     <p class="kicker">Course assistant</p>
     <h1>What do you want to take?</h1>
-    <p class="lede">Ask for HUELs, DELs or OPELs: a topic, handout wishes like no midsem or lenient makeups, or timetable ones like no 8 AM. Select what you like, check it in a timetable, then add it.</p>
+    <p class="lede">Ask for HUELs, DELs or OPELs by topic, handout wishes (no midsem, lenient makeups) or timetable ones (no 8 AM). Select what you like, preview it in a timetable, then add it.</p>
   </div>
 </header>
 
@@ -18,7 +18,7 @@
       <textarea id="message" name="message" rows="3" maxlength="1000" placeholder="I need a HUEL and a DEL on machine learning, no 8 AM classes" required></textarea>
       <div class="chips">{% for example in examples %}<button type="button" class="chip">{{ example }}</button>{% endfor %}</div>
       <div class="chat-actions">
-        <p>Each question is answered on its own. Include everything you want in one message.</p>
+        <p>Each message is answered on its own, so put everything you want in one.</p>
         <button class="btn" id="send">Send</button>
       </div>
     </form>
@@ -56,7 +56,7 @@
   <div class="sheet-head"><h2 id="confirm-title">Add these to this semester?</h2>
     <form method="dialog"><button class="btn link">Cancel</button></form></div>
   <table class="confirm-table"><thead><tr><th>Code</th><th>Title</th><th>Category</th></tr></thead><tbody id="confirm-rows"></tbody></table>
-  <p class="muted small">They'll count towards your requirements and show in your semester's timetables. You can remove them there.</p>
+  <p class="muted small">They'll count towards your requirements and show on the semester page, where you can remove them.</p>
   <p id="confirm-error" class="notice bad" hidden></p>
   <div class="actions" style="margin-top:16px"><button type="button" class="btn" id="confirm">Add to my semester</button></div>
 </dialog>
@@ -132,7 +132,8 @@
     const box = el("details", "rec-score small");
     const summary = el("summary");
     // a neighbour has no direct match: its number is content similarity, not topic relevance
-    summary.append(el("strong", null, (score.similar_to ? "Similar content " : "Relevance ") + score.final.toFixed(2)));
+    const label = score.similar_to ? "Similar content " : score.relevance == null ? "Profile fit " : "Relevance ";
+    summary.append(el("strong", null, label + score.final.toFixed(2)));
     // why on the summary line: with several topics, 1.00 alone reads as "matches everything you asked"
     if (score.topic) summary.append(el("span", "rec-topic", `for '${score.topic}'`));
     summary.append(el("span", "breakdown-link", "See breakdown"));
@@ -142,13 +143,17 @@
     if (score.similar_to) {
       rows.push(["No direct match; content close to", score.similar_to]);
       rows.push(["Content similarity (0 to 1)", score.relevance.toFixed(2)]);
-    } else {
+    } else if (score.relevance != null) {
       const [kind, ...text] = (score.why || "").replace(/^matches /, "").split(";")[0].split(": ");
       if (text.length) rows.push(["Best match in the course", `${kind}: ${text.join(": ")}`]);
       rows.push(["Topic relevance (0 to 1)", score.relevance.toFixed(2)]);
     }
-    const penalised = (score.why || "").split("; ").filter((part) => !part.startsWith("matches ") && !part.startsWith("no direct match"));
-    if (score.penalty) rows.push(["Penalty", `${score.penalty.toFixed(2)} (${penalised.join("; ")})`]);
+    // why sorted by wording: `why` mixes the match, profile reasons and dislikes in one "; "-joined line
+    const parts = (score.why || "").split("; ");
+    const profile = parts.filter((part) => /your interest|your strength|you did well in|you struggled with/.test(part));
+    const disliked = parts.filter((part) => part.includes("rather avoid"));
+    if (score.personal) rows.push(["Profile", `${score.personal > 0 ? "+" : ""}${score.personal.toFixed(2)} (${profile.join("; ")})`]);
+    if (score.penalty) rows.push(["Penalty", `${score.penalty.toFixed(2)}${disliked.length ? ` (${disliked.join("; ")})` : ""}`]);
     rows.push(["Final score", score.final.toFixed(2)]);
     const list = el("dl", "breakdown");
     rows.forEach(([label, value]) => { const item = el("div"); item.append(el("dt", null, label), el("dd", null, value)); list.append(item); });
@@ -169,7 +174,7 @@
     if (c.units != null) meta.append(el("span", null, c.units + " credits"));
     if (c.sections) meta.append(el("span", null, Object.entries(c.sections).map(([type, id]) => type + " " + id).join(", ")));
     node.append(meta);
-    if (c.score && c.score.relevance != null) node.append(scoreBreakdown(c.score));
+    if (c.score && (c.score.relevance != null || c.score.personal)) node.append(scoreBreakdown(c.score));
     if (c.note) node.append(el("p", "rec-note small", c.note));
     if (c.also_offered_as.length) {
       // why buttons like the section picker: the same class under another code may count differently for you

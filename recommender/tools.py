@@ -1,10 +1,11 @@
-"""The four tools the LLM can call (todo.md sections 5-7). Each takes the StudentContext plus the LLM's (already
+"""The four tools the LLM can call. Each takes the StudentContext plus the LLM's (already
 validated) arguments and returns a small JSON-serialisable dict. Academic rules live here and in the modules these
 call, never in the LLM."""
 from catalog.models import Course
 from students.templatetags.text import course_title
 
 from . import config
+from .categories import display_category
 from .codes import normalise_code, resolve_course
 from .context import StudentContext
 from .eligible import run
@@ -12,11 +13,10 @@ from .handout_facts import CourseFacts, attendance_text, get_course_facts, makeu
 from .pieces import split_sentences
 from .plan import check_plan, offered  # noqa: F401  (check_plan is one of the four tools)
 
-DISPLAY_CATEGORY = {"CHART": "CDC"}  # compulsory chart courses read as CDCs (same as the UI)
 DUAL_DEL_NOTE = "dual degree: DEL counts are for both degrees combined"
 
 
-# ---------------------------------------------------------------- 5.2
+# ---------------------------------------------------------------- get_remaining_requirements
 
 def get_remaining_requirements(ctx: StudentContext) -> dict:
     """Remaining HUEL / DEL / OPEL courses and units."""
@@ -30,7 +30,7 @@ def get_remaining_requirements(ctx: StudentContext) -> dict:
     return result
 
 
-# ---------------------------------------------------------------- 5.3
+# ---------------------------------------------------------------- get_course_details
 
 def summary(course: Course) -> str:
     """First sentences of the first handout description, else of the Bulletin description."""
@@ -71,7 +71,7 @@ def get_course_details(ctx: StudentContext, code: str) -> dict:
     category = ctx.category_map.get(course.code, "")
     return {
         "code": course.code, "title": course_title(course.title),
-        "category": DISPLAY_CATEGORY.get(category, category), "units": course.units,
+        "category": display_category(category), "units": course.units,
         "prerequisites": [" or ".join(group) for group in course.prerequisites or []],
         "prerequisites_met": prerequisites_met(course, ctx),
         "offered_this_semester": offered(course, ctx.semester_tag),
@@ -80,7 +80,6 @@ def get_course_details(ctx: StudentContext, code: str) -> dict:
     }
 
 
-# ---------------------------------------------------------------- 6
 
 def get_eligible_courses(ctx: StudentContext, category: str | None = None, about: list[str] | str | None = None,
                          filters: dict | None = None, avoid_8am: bool | None = None, avoid_day: str | None = None,

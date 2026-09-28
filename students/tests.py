@@ -63,7 +63,7 @@ class ProfileFlowTests(TestCase):
         self.assertEqual(inferred.get("MATH F211"), "completed")   # CS, 2-1 (dual chart)
         self.assertIn("BITS F103", inferred)                       # year 1 (first degree's chart)
         self.assertTrue(all(status in ("completed", "current") for status in inferred.values()))
-        self.assertNotIn("BITS F221", inferred)                    # PS-I skipped for now
+        self.assertNotIn("BITS F221", inferred)                    # PS-I isn't a chart course
         self.assertTrue(StudentCourse.objects.filter(source="pattern", status="current").exists())
         self.assertFalse(StudentCourse.objects.filter(source="pattern", category="").exists())
         # anything the chart names is compulsory, never an elective
@@ -323,7 +323,7 @@ class SecondDegreeTests(TestCase):
 
 
 class RecommenderPreferenceTests(TestCase):
-    """The profile's recommender defaults: 8 AM, a free day and evaluation styles to avoid (todo section 2)."""
+    """The profile's recommender defaults: 8 AM, a free day and evaluation styles to avoid ."""
 
     @classmethod
     def setUpTestData(cls):

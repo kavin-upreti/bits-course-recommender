@@ -1,145 +1,141 @@
-# BITS elective planner and course assistant
+# BITS Academic Course Recommender
 
-A Django app for BITS Pilani students: it works out what a student has done and still needs (CDCs, HUEL / DEL /
-OPEL electives, minors), builds clash-free timetables for the semester, and has a chat assistant that recommends
-electives ("Suggest DELs related to AI", "an OPEL with no attendance requirement") and can add them to the plan.
+A Django dashboard where a BITS Pilani student sets up a profile, sees what their degree still needs, plans a
+clash-free timetable, and asks a chat assistant for electives ("Suggest DELs related to AI", "an OPEL with no
+attendance requirement"). Every academic decision comes from the supplied BITS documents, processed into a database.
+The LLM only reads the question and writes the answer.
 
-All course data comes from three PDFs (the timetable, the Bulletin, 540 course handouts), turned into JSON by the
-extractors in `extractors/` and loaded into SQLite by `manage.py ingest`.
+How we got here, and why each piece is built the way it is: [`ideation_guide.md`](ideation_guide.md).
+
+## The task
+
+Postman Round 2 asks for an agentic course recommender that:
+
+1. **Uses the supplied data as the source of truth**: Academic Regulations, the Bulletin, this semester's timetable,
+   540 course handouts, and a student profile. No invented rules or course properties.
+2. **Pre-processes the PDFs into a clean, structured dataset** (courses, programme rules, handout facts, timetable,
+   source references), flagging anything that can't be extracted reliably instead of guessing.
+3. **Lets a student create and update a profile**: campus, batch, single / dual degree, semester, completed and
+   current courses, minor, interests.
+4. **Works out requirements first, then recommends**: remaining CDC / DEL / HUEL / OPEL, prerequisites and rules
+   decide what is *allowed*; interests and the question only decide the *order*.
+5. **Answers natural-language questions** and explains why each course fits. If a handout doesn't state something,
+   it says "couldn't verify".
+6. **Brownie points: timetable intelligence**: clash-free sections, exam clashes, no 8 AM, a free weekday, compact days.
+
+How each point is met:
+
+| Asked | Where |
+|---|---|
+| Structured dataset from the PDFs | `extractors/` → `dataset/code processed/*.json`, hand-checked rules in `dataset/manually processed/`, loaded by `manage.py ingest` into `catalog/models.py`. Every record keeps `sources` (document, page) and `needs_verification`. |
+| Profile | `/profile/`: the BITS ID gives batch, campus and degree(s); the programme chart fills in compulsory courses; electives, minor, interests and strengths are added by hand. |
+| Requirements before recommendations | `recommender/requirements.py`, `recommender/eligible.py` stage A (offered, category, not done, prerequisites, batch rules). |
+| Natural-language queries | `/chat/`: the LLM turns the message into tool calls; `recommender/eligible.py` does the rest. |
+| Handout preferences, "couldn't verify" | `recommender/handout_facts.py`: tri-state facts (yes / no / unknown with a reason). |
+| Timetable intelligence | `recommender/timetable.py` and `plan.py`: section search, lunch hour, exam and unit checks; the `/semester/` page and every recommendation use it. |
 
 ## Run it
 
+Needs Python 3.11 or newer (built on 3.14). About 2 GB of disk for the local models.
+
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-cp .env.example .env          # then fill in the keys below
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+cp .env.example .env                      # then add at least one free LLM key (below)
 .venv/bin/python manage.py migrate
-.venv/bin/python manage.py ingest          # loads the catalog, builds course pieces + embeddings (~20 s)
-.venv/bin/python manage.py runserver       # register, fill the profile, then "Ask the course assistant"
+.venv/bin/python manage.py ingest         # loads dataset/ into SQLite, builds embeddings (~20 s + a one-time model download)
+.venv/bin/python manage.py runserver      # open http://127.0.0.1:8000, register with your BITS ID
 ```
 
-| `.env` | What |
+`.env` keys (see `.env.example`):
+
+| Key | What |
 |---|---|
-| `DJANGO_SECRET_KEY`, `DJANGO_DEBUG` | Django basics (`DJANGO_DEBUG=1` also shows the chat page's Debug panel) |
-| `LLM_PROVIDERS` | `provider:model` list tried in order; a rate-limited or failing provider falls through to the next. Default: `groq:openai/gpt-oss-120b,openrouter:nvidia/nemotron-3-super-120b-a12b:free,gemini:gemini-3.5-flash` |
-| `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY` | free keys (console.groq.com, openrouter.ai, aistudio.google.com); a provider without a key is skipped |
-| `BITS_DATA_DIR` | optional; defaults to `./dataset` |
+| `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY` | Free keys from console.groq.com, openrouter.ai, aistudio.google.com. One is enough; a provider without a key is skipped. |
+| `LLM_PROVIDERS` | `provider:model` list, tried in order. A rate-limited provider falls through to the next. |
+| `DJANGO_SECRET_KEY`, `DJANGO_DEBUG` | Django basics. `DJANGO_DEBUG=1` also shows a debug panel on the chat page. |
 
 Everything is free: the embedding and reranking models run locally (Apple MPS or CPU), and the LLMs are free tiers.
 
-Tests: `.venv/bin/python manage.py test` (no network: sockets are blocked, the embedder, reranker and LLM are
-fakes, see `recommender/testing.py`) and `.venv/bin/python -m pytest tests/` (extractor rules).
+The processed data is committed, so the steps above don't need the PDFs. To rebuild the data from scratch, put the
+PDFs in `dataset/raw/` (`timetable.pdf`, `bulletin.pdf`, `Academic-Regulations-2023.pdf`, `handouts/*.pdf`) and run,
+in order:
 
-## How the course assistant works
-
-The LLM never decides what a student can take. It reads the message, calls tools with arguments, and writes the
-reply from what the tools return. Every academic decision is Python and local models:
-
-```
-message ──> LLM picks tools + arguments ──> get_eligible_courses / check_plan / ... (Python, no LLM)
-                                                │
-          reply <── LLM writes it from the results; cards and the "not shown, and why" list come from the
-                    database and the tool results, never from the LLM's text
+```bash
+.venv/bin/python extractors/timetable.py
+.venv/bin/python extractors/bulletin.py
+.venv/bin/python extractors/build_handout_overrides.py
+.venv/bin/python extractors/handouts.py   # ~1.5 min, two small local models
+.venv/bin/python manage.py ingest
 ```
 
-**get_eligible_courses** (`recommender/eligible.py`), one stage per function:
+Tests: `.venv/bin/python manage.py test` (no network; the models and LLM are fakes) and `.venv/bin/python -m pytest tests/`.
 
-1. **Rules**: offered this semester, in the asked category (a DEL counts as an OPEL once DELs are complete),
-   not done (including equivalent codes), prerequisites met, batch rules, the student's exclusions.
-2. **Handout filters** the student asked for (no midsem, at most N quizzes, open book, …), from facts parsed out
-   of the handouts. Unknown facts don't fail a course; it goes to "couldn't verify" with the reason.
-3. **Ranking** (ML, below).
-4. **Soft preferences**: courses whose every section has an 8 AM class (or meets on the day to keep free), or with
-   evaluation styles the student dislikes, stay in, a little lower (−0.05 each), with a note.
-5. **Fit**: every returned course is checked against the student's current courses with the same timetable
-   search the timetable page uses (classes, the lunch hour, midsem / compre dates, the unit limit, the
-   higher-degree limit). A course that can't fit is listed under the cards with the exact reason.
+## Using it
 
-**check_plan** checks several new courses together; the chat page runs it again when a course is ticked and when the
-selection is finalised, so a clash is refused with its reason instead of being saved.
+1. **Register** with your BITS ID (e.g. `2024A7PS0832P`, dual `2024B3A7PS0832P`) and a password.
+2. **Profile**: the semester you're going into is worked out from your batch and the loaded timetable. Add a minor,
+   interests, strengths, and optionally the courses you did well in or struggled with.
+3. **Electives you've taken** (from 2-1 on). Compulsory courses are already filled in from your chart.
+4. **Home**: credits done, what's left (DEL / HUEL / OPEL, minor), and your chart semester by semester.
+5. **Semester**: every clash-free timetable for this semester's courses, with filters and an exam calendar.
+6. **Assistant**: ask in plain words. Each suggestion is a card with its handout facts and why it matches. Tick
+   courses to preview them in your timetable, then add them to your semester.
 
-### Where machine learning is used
+## How it works
 
-| Part | Model / method | Tuned on |
-|---|---|---|
-| Matching a topic to courses | Every course is split into short pieces (handout topics, objectives, Bulletin text; 15,506 pieces for 2,131 courses). `intfloat/e5-small-v2` embeds them; the 30 closest courses per topic of a question are rescored by the cross-encoder `cross-encoder/ms-marco-MiniLM-L-6-v2`. A course's relevance = the mean of its best 3 piece scores, or 1.0 if its title contains the topic. Each topic of a question is scored on its own. | `embedding_eda`: 3 embedders × 3 rerankers (incl. none) on 14 labelled queries; picks the model pair; the cutoff (0.75) is explained under Evaluation |
-| Vocabulary gaps ("video editing": no handout uses the words) | **Course neighbours**: the catalogue's best matches for the topic (offered or not, reranker score ≥ 0.3, e.g. GS F343 Short Film and Video Production) are anchors; the offered courses whose content is closest to them (cosine of centred mean piece vectors) fill the places the direct matches leave, at most 3 per topic, labelled as "no direct match; content close to …". No anchor above 0.3 → nothing (cooking, fashion design, marine biology) | anchor floor and cap from a probe of real and nonsense topics |
-| Personalisation (profile) | Interests and strengths phrases (split on commas / "and") are searched exactly like a topic; a real match (relevance ≥ 0.75) adds 0.15 × relevance, and a branch word ("maths") boosts that department. "Did well in" / "struggled with" courses: the cosine of centred mean piece vectors (as for neighbours); above a floor it adds 0.3 × (cosine − floor), "struggled" subtracts, "grades matter a lot" doubles "did well". Never removes a course; with a topic it only reorders courses past the cutoff, with a stricter floor (0.3 vs 0.2). The card says why ("matches your strength 'programming'", "close to EEE F243 Signals & Systems, which you did well in"). A topic that is only a branch word limits the search to that department | probe on the 14 labelled queries × 5 profiles: hit@5 unchanged, MRR within ±0.015; the floors from should-match course pairs (mostly 0.25–0.75) vs random pairs (p90 0.18) |
-| One class under two codes (EEE F434 = ECE F434) | Pieces whose embeddings are ≥ 0.99 similar are "twins"; two courses sharing twins for ≥ 90 % of the smaller one's pieces are one class. The student sees one card and takes only one | `equivalence_eda`: precision 0.87, recall 0.62 on 126 listed equivalents |
-| Attendance / make-up wording in handouts | local `nli-deberta-v3-small` + MiniLM (extractor only) | hand-checked handouts |
+```
+message ─> LLM picks a tool + arguments ─> get_eligible_courses (Python, no LLM)
+                                            A  rules: offered, category, not done, prerequisites, batch
+                                            B  handout filters (no midsem, open book, ...) → unknown = "couldn't verify"
+                                            C  ranking: embeddings + reranker, relevance cutoff, profile boost
+                                            D  soft preferences (8 AM, free day, disliked evaluation styles)
+                                            E  fit with the current courses (sections, exams, units)
+        reply <─ LLM writes it from the results; cards and "not shown, and why" come from the tool results
+```
 
-What the LLM does: turns "suggest 2 DELs on VLSI and keep Friday free" into
-`get_eligible_courses(category="DEL", about=["VLSI design"], count=2, avoid_day="F")`, and writes the reply.
-Guards around it: arguments are validated against the tool schemas (errors go back to the model); a reply naming a
-course no tool returned is rewritten once, then those sentences are dropped; if the student named a category the
-model didn't search, it is reminded once; no student data is sent to the LLM, only tool results.
+The LLM never decides what a student can take, never sees the student's data, and can't name a course no tool
+returned (a guardrail checks every code in the reply). Machine learning is used for topic matching (`e5-small-v2`
+embeddings + `ms-marco-MiniLM` reranker), for finding the same class under two codes, and for reading attendance /
+make-up wording in handouts. Details in the ideation guide.
 
 ## Evaluation
 
-Two separate checks, so a miss can be blamed on the right part.
+**Ranking, no LLM** (`manage.py embedding_eda` → `docs/eda/embedding_eda.md`): 14 topic queries with hand-picked
+correct courses, over the 539 offered courses, using the app's own code.
 
-**Ranking, no LLM** (`python manage.py embedding_eda`, report in `docs/eda/embedding_eda.md`): 14 topic queries
-with hand-picked correct courses (`recommender/eda/queries.json`, 3 of them should match nothing), ranked over the
-539 offered courses with exactly the app's code, for 3 embedders × (no reranker, ms-marco, bge-reranker-base).
-
-| | hit@5 | MRR | latency / query |
+| | hit@5 | MRR | per query |
 |---|---|---|---|
-| **e5-small-v2 + ms-marco reranker (used)** | **0.80** | **0.82** | 0.15 s |
+| **e5-small-v2 + ms-marco reranker (used)** | **0.80** | **0.82** | 0.2 s |
 | best without a reranker (bge-small) | 0.79 | 0.84 | 0.01 s |
-| e5-small-v2 + bge-reranker-base | 0.63 | 0.78 | 0.77 s |
+| e5-small-v2 + bge-reranker-base | 0.63 | 0.78 | 0.8 s |
 
-hit@5 = share of a query's correct courses in its top 5; MRR = 1 / rank of the first correct one. All 3 nonsense
-queries find no real match. The F1-best cutoff on these queries is 0.58; the app keeps 0.75 (more precise, and course
-neighbours fill a short list), since 14 queries are too few to tune it finely. These numbers are for direct
-matches only: "video editing" has no direct match, and its neighbours (Cinematic Art, Mass Media Content & Design,
-Reporting and Writing for Media) are checked in the chat evaluation.
+The profile boost was checked on the same queries under 5 different student profiles: hit@5 never dropped.
 
-**The whole assistant, real LLM** (`python manage.py chat_eval`, report in `docs/eda/chat_eval.md`): 30 messages
-from three students (CS, EEE, Mech), including the four examples from the brief, filters, counts, two-category asks,
-"I've already finished my HUELs", vocabulary gaps (video editing, journalism) and topics no course covers (cooking,
-marine biology). Each message has the tool call a person would make; the pipeline's answer to that call is the
-reference, so this measures only the LLM's part. Run of 2026-09-28, after the personalisation changes (case 30 left out: no free provider was reachable):
-
-| | |
-|---|---|
-| tool called with the right category / filters / count / preferences | 28 of 30 calls (the two others were reasonable: "a HUEL" read as count 1, twice) |
-| reference courses that reached the student's cards | 69 of 82 (84 %; 81 % before); the rest the model left out of its answer |
-| topics nothing matches: no cards, "nothing matches" said | 3 of 3 |
-| courses invented by the model / tool errors | 0 / 0 |
-| median time per message | 9.0 s (free tiers, rate-limited during the run; up to ~70 s when every provider is busy and it backs off) |
-
-The first run found two things that were then fixed: the model dropped filters the student asked for ("no
-attendance requirement", "open book") in 3 of 30 cases, fixed by naming those phrases in the prompt (0 since); and a
-provider answering "200 OK" with an error body crashed the request instead of falling through to the next one.
+**The whole assistant, real LLM** (`manage.py chat_eval` → `docs/eda/chat_eval.md`): 30 messages from three
+students, including the brief's four examples. Latest run: the right tool call in 28 of 30 (the other two read
+"a HUEL" as count 1), 69 of 82 expected courses reached the cards, 0 invented courses, 0 tool errors, and all 3
+topics nothing covers (cooking, marine biology) answered with "nothing matches".
 
 ## Limitations
 
-- **The LLM is the weakest link, and it is a free tier.** It can still pick the wrong category or filter, skip a
-  search, or leave a returned course out of its reply; the guards above catch invented courses and missed
-  categories, not every misreading. Groq's free tier allows about one question a minute; beyond that the next
-  provider answers, so replies can vary in style.
-- Ranking quality depends on handout text: 113 of the 539 offered courses have no handout and are matched on their title and
-  Bulletin description only. The tuning set is small (14 queries), so the cutoff is a reasonable value, not a
-  precise one.
-- Course neighbours are "similar content", not "about the topic"; they are labelled that way and ranked after
-  direct matches.
-- One message at a time: no chat history ("swap the second one" is answered with a question).
-- The profile boost is content similarity, not a grade prediction. Strengths are
-  searched like topics, so abbreviations other than branch words ("ML", "DSA") find nothing: write them out.
-- Branch cases (`chat_cases.json` 31-39, e.g. "maths courses related to probability") were added but not fully run:
-  the free quotas ran out. Before the prompt line naming branch words, the model dropped the branch in 2 of 5
-  (searching only "probability"); the search still worked, without the department filter. Not re-measured since.
-- Old-curriculum courses (e.g. MATH F111 Mathematics I, CHEM F111 General Chemistry) can be suggested to newer batches
-  who did the new-code version (MATH F101, CHEM F101): the data has no mapping saying they're the same course.
+- **The LLM is a free tier and the weakest link.** It can misread a category or leave a course out of its reply;
+  the guards catch invented courses and missed categories, not every misreading.
+- 113 of the 539 offered courses have no handout, so they're matched on the title and Bulletin text only.
+- One message at a time: no chat history.
+- The profile boost is content similarity, not a grade prediction. Strengths are searched like topics, so write them
+  out ("machine learning", not "ML").
+- The 9 branch cases in `chat_cases.json` ("maths courses on probability") weren't fully re-run after the last prompt
+  change (free quotas ran out).
+- Old-curriculum codes (e.g. MATH F111 Mathematics I) can be suggested to newer batches who did the new code
+  (MATH F101): the data has no mapping saying they're the same course.
 - 2+2 International Collaborative Programmes (two years at BITS, then RMIT, Iowa State, Buffalo or RPI) aren't
-  supported; the brief names only single and dual degrees. The bulletin (IV-142 to IV-223) gives them different rules:
-  their own split of HUEL / DEL / OPEL counts between BITS and the partner, two Capstone Projects instead of Practice
-  School II or thesis, some first-year courses replaced (e.g. BITS F235 Digital Fundamentals for CS F111 at RMIT),
-  partner courses counting as BITS electives, and (for Iowa State) HUELs only from a pool "defined for BITS-ISU
-  students" that the bulletin never lists. A 2+2 student would get a regular B.E. plan here.
-- A prerequisite satisfied by a current course blocks the course this semester (the Regulations may allow
-  concurrent registration).
-- Caches (handout facts, piece index) are per process: after a separate `ingest`, restart the server.
-- The first chat message in a process loads the models (~5–8 s).
+  supported; the brief names only single and dual degrees. The Bulletin (IV-142 to IV-223) gives them their own
+  rules: a separate HUEL / DEL / OPEL split, capstones instead of PS-II or thesis, swapped first-year courses, and
+  (for Iowa State) HUELs from a pool the Bulletin never lists. A 2+2 student would get a regular B.E. plan.
+- A prerequisite met by a current course blocks the course this semester (the Regulations may allow concurrent
+  registration).
+- After a separate `ingest`, restart the server (caches are per process).
 
 ## Commands
 
@@ -147,56 +143,20 @@ All `.venv/bin/python manage.py ...`:
 
 | Command | What |
 |---|---|
-| `ingest [--skip-embeddings] [--wipe-students]` | clear and reload the catalog from `dataset/`, then build pieces, embeddings and same-class pairs |
-| `build_embeddings` | rebuild pieces, embeddings and content-detected same-class pairs only |
-| `embedding_eda [--models …] [--rerankers …] [--candidates …]` | ranking evaluation on `recommender/eda/queries.json` → `docs/eda/embedding_eda.md` |
-| `equivalence_eda` | same-class detection thresholds → `docs/eda/equivalence_eda.md` |
-| `chat_eval [--only N …] [--pause S]` | the whole assistant with the real LLM on `recommender/eda/chat_cases.json` → `docs/eda/chat_eval.md` |
-| `handout_facts_report` | how many courses have each handout fact unknown |
-| `llm_smoke_test` | "Say hello" to each provider on its own (checks keys and model names) |
+| `ingest [--skip-embeddings] [--wipe-students]` | Reload the catalog from `dataset/`, then build pieces, embeddings and same-class pairs |
+| `build_embeddings` | Rebuild pieces, embeddings and same-class pairs only |
+| `embedding_eda`, `equivalence_eda` | Ranking and same-class evaluations → `docs/eda/` |
+| `chat_eval [--only N ...]` | The whole assistant with the real LLM → `docs/eda/chat_eval.md` |
+| `handout_facts_report` | How many courses have each handout fact unknown |
+| `llm_smoke_test` | Say hello to each LLM provider (checks keys and model names) |
 
-## Data curation notes
+## Layout
 
-Setup is the same venv. The handout extractor runs two small local models (all-MiniLM-L6-v2 and
-nli-deberta-v3-small, Apple MPS or CPU, downloaded once; no API calls).
-
-Run order: `.venv/bin/python extractors/timetable.py`, `.venv/bin/python extractors/handouts.py`,
-`.venv/bin/python extractors/bulletin.py`. `handouts.py <file.pdf> ...` runs on a few files only and writes
-`handouts_sample.json`. The rule-vs-model decision for every handout field, and all thresholds, are in the config
-block at the top of `extractors/handouts.py`. Outputs go to `dataset/code processed/`; hand-curated files are in
-`dataset/manually processed/`, named after the PDF they came from.
-
-`extractors/handouts.py` is deliberately small (~500 lines): it reads the common handout layouts (labelled header
-lines, numbered section headings, ruled plan and evaluation tables) and flags everything else instead of
-special-casing it. Attendance and make-up wording is decided by two local models (`handout_models.py`); everything
-else is rules. A full run takes about 1.5 minutes.
-
-Each handout record has two lists:
-
-- `issues`: things a person should check. `needs_verification` is true exactly when `issues` is non-empty (3 of 540
-  handouts: PDFs that are really another course's handout).
-- `notes`: things noticed and handled, so not flagged: `printed_code_differs` (a cross-listed or old/new code whose
-  title matches the timetable's title for the file's code), `weightage_in_marks_converted`,
-  `no_course_plan_in_handout` (project/thesis/study courses).
-
-Scanned handouts (`348_MAC_F214.pdf`, `362_MATH_F214.pdf`) have no text layer; their pages were typed into
-`dataset/manually processed/handouts.json` and go through the same code. `course_no` always comes from the file
-name. Handouts the rules couldn't read (113: unusual table layouts, plans without table lines, project-course
-templates) were checked by hand. Their values are written in `extractors/build_handout_overrides.py` and
-`extractors/handout_overrides_text.py`, built into `dataset/manually processed/handout_overrides.json`
-(`.venv/bin/python extractors/build_handout_overrides.py`), and applied by the extractor; those records carry the
-note `manually_checked`. Where a handout's own printed weights don't add up to 100, they are kept as printed with
-the note `handout_weights_add_up_to: <total>`.
-
-Still flagged: `017_BIO_G523.pdf` (really the BIO F212 handout), `160_CS_F111.pdf` (the CS U111 handout),
-`344_INSTR_F491.pdf` (the ECE F366 lab-project handout). The right PDFs are needed for these courses.
-
-### CDCs (bulletin)
-
-Each discipline's CDCs are the `core` courses of its entry in `course_lists` (`dataset/code processed/bulletin.json`),
-read by code from the Bulletin's "List of Courses". Every programme has `cdc_lists` naming the list(s) that apply
-(dual degrees: one per component). All 28 lists were checked against the "Discipline Core - N Units (M Courses)"
-footer of the programme charts; where the Bulletin contradicts itself, `CDC_CORRECTIONS` in `extractors/bulletin.py`
-fixes it and the list's `note` says why (Environmental & Sustainability: 13 -> 16 courses from the chart; ECE:
-ECE F331 -> ECE F314; Pharmacy: PHA F243 replaced by PHA F215 per the Bulletin's own footnote). The BBA list's
-heading is an image in the PDF, so it is named `BUSINESS ADMINISTRATION` from its courses.
+```
+extractors/     PDF -> JSON (timetable, Bulletin, handouts) + hand-checked handout values
+dataset/        code processed/ (extractor output), manually processed/ (hand-curated rules)
+catalog/        course / programme / rule models and the ingest command
+students/       registration, profile, home, semester and course pages
+recommender/    requirements, eligibility, ranking, timetable search, the LLM agent and chat page
+docs/eda/       evaluation reports
+```

@@ -5,7 +5,7 @@ dashed), filters, filter_notes, teacher_options, chosen_teachers, avoid_keys, pe
     <div>
       <h2>{{ heading }}</h2>
       {% if blocked %}<p class="notice bad small" role="alert">Can't be added: {{ blocked }}</p>{% endif %}
-      <p class="muted small">Every option keeps a lunch hour free each day. Best first: your sort choices, then fewest free hours between classes, fewest 8 AMs, fewest days on campus.</p>
+      <p class="muted small">Each keeps a lunch hour free. Sorted by your choices, then fewest gaps, 8 AMs and days on campus.</p>
     </div>
     {% if timetables|length > 1 %}
     <div class="pager">
@@ -52,7 +52,7 @@ dashed), filters, filter_notes, teacher_options, chosen_teachers, avoid_keys, pe
   {% if not timetables %}
     <div class="empty">
       {% if clashes %}No clash-free timetable: {% for first, second in clashes %}{{ first }} and {{ second }}{% if not forloop.last %}; {% endif %}{% endfor %} always overlap.
-      {% else %}Nothing to lay out yet: none of these courses are in the timetable.{% endif %}
+      {% else %}None of these courses are in the timetable.{% endif %}
     </div>
   {% else %}
   <ul class="tt-legend">
@@ -65,7 +65,7 @@ dashed), filters, filter_notes, teacher_options, chosen_teachers, avoid_keys, pe
     {% include "students/_week.html" %}
     <details class="tt-sections">
       <summary>Sections in this timetable</summary>
-      {% if tt.has_alternatives %}<p class="muted small">"+n" in the grid and "n more at this time" here are other sections at exactly the same times (another teacher or room). Pick one to see it in the grid.</p>{% endif %}
+      {% if tt.has_alternatives %}<p class="muted small">"+n" means other sections at the same time (another teacher or room). Pick one to show it in the grid.</p>{% endif %}
       <table>
         {% for pick in tt.picks %}
         <tr data-pick="{{ pick.code }}|{{ pick.type }}"><td class="code">{{ pick.code }}</td><td class="sec-id">{{ pick.section.section_id }}</td>

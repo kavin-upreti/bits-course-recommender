@@ -1,4 +1,4 @@
-"""The chat page and its endpoint (todo.md section 11). No history: each message is answered on its own."""
+"""The chat page, its endpoint and course picking (select -> preview -> finalise). No history: each message is answered on its own."""
 import json
 import logging
 import threading
@@ -19,13 +19,12 @@ from students.views import read_filters, timetable_context
 
 from . import config
 from .agent import run_agent
-from .categories import category_map
+from .categories import category_map, display_category
 from .context import build_context
 from .codes import normalise_code, resolve_course
 from .embeddings import embed_query
 from .history import done_codes
 from .plan import check_plan, offered
-from .tools import DISPLAY_CATEGORY
 
 logger = logging.getLogger(__name__)
 _warmed = threading.Event()
@@ -41,9 +40,9 @@ EXAMPLES = [  # from the brief
 
 @login_required
 def chat(request: HttpRequest) -> HttpResponse:
-    if not Student.objects.filter(user=request.user).exists():
+    student = logged_in_student(request)
+    if student is None:
         return redirect("profile")
-    student = Student.objects.get(user=request.user)
     if not _warmed.is_set():
         _warmed.set()
         # why: loading the embedding model takes seconds; do it while the student is still typing
@@ -65,7 +64,7 @@ def warm_up() -> None:
 @require_POST
 def recommend(request: HttpRequest) -> JsonResponse:
     """POST {"message": "..."} -> {"reply", "cards"} (+ "debug" when settings.DEBUG)."""
-    student = Student.objects.filter(user=request.user).select_related("programme", "minor").first()
+    student = logged_in_student(request)
     if student is None:
         return JsonResponse({"error": "Please create your profile first."}, status=400)
     try:
@@ -96,7 +95,7 @@ def selection_items(student: Student, codes: list[str]) -> list[dict]:
     categories = category_map(student.programme)
     courses = {course.code: course for course in Course.objects.filter(code__in=codes)}
     return [{"code": code, "title": course_title(courses[code].title),
-             "category": DISPLAY_CATEGORY.get(categories.get(code, ""), categories.get(code, ""))}
+             "category": display_category(categories.get(code, ""))}
             for code in codes if code in courses]
 
 
@@ -121,7 +120,7 @@ def plan_problem(student: Student, codes: list[str]) -> str:
 
 
 def logged_in_student(request: HttpRequest) -> Student | None:
-    return Student.objects.filter(user=request.user).select_related("programme").first()
+    return Student.objects.filter(user=request.user).select_related("programme", "minor").first()
 
 
 @login_required

@@ -1,4 +1,4 @@
-"""Test doubles and the test runner (todo.md section 12). Not imported by app code.
+"""Test doubles and the test runner. Not imported by app code.
 
 - `NoNetworkRunner` (settings.TEST_RUNNER): any socket connect during tests fails, and the process-wide embedder is a
   `FakeEmbedder`, so no test can call Gemini or download a model (ingest builds embeddings with the fake).

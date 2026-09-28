@@ -1,4 +1,4 @@
-"""What's left to finish (ideation 6.4, first cut): elective counts per category and minor progress.
+"""What's left to finish: elective counts per category, minor progress and the semester's unit load.
 
 Counts use the courses done *and* this semester's compulsory ones. Electives are allocated greedily, in the
 regulation's order: DEL up to its requirement, then HUEL up to its requirement, anything beyond overflows into OPEL.

@@ -1,7 +1,6 @@
 import json
 import logging
 import re
-import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -352,42 +351,6 @@ def save(timetable: Timetable, path: Path) -> None:
     path.write_text(json.dumps(asdict(timetable), indent=2))
 
 
-def normalise_code(text: str) -> str:
-    """'cs f111', 'CSF111' and 'CS  F111' all become 'CSF111'."""
-    return re.sub(r"\s+", "", text).upper()
-
-
-def find_courses(courses: list[Course], query: str) -> list[Course]:
-    """Match by course number first; if nothing matches, search titles."""
-    code = normalise_code(query)
-    by_code = [course for course in courses if normalise_code(course.course_no) == code]
-    if by_code:
-        return by_code
-    words = query.upper().split()
-    return [course for course in courses if all(word in course.title for word in words)]
-
-
-def ask_loop(courses: list[Course]) -> None:
-    """Keep asking for a course until the user enters nothing."""
-    while True:
-        query = input("\nCourse number or title (Enter to quit): ").strip()
-        if not query:
-            return
-
-        matches = find_courses(courses, query)
-        # why: a title search can match several courses; list them instead of guessing.
-        # A course-number match can also return 2 entries (same course, different COM COD).
-        if not matches:
-            print("No course found.")
-        elif len({course.course_no for course in matches}) > 1:
-            print("Several courses match, type the course number:")
-            for course in matches:
-                print(f"  {course.course_no:<12} {course.title}")
-        else:
-            for course in matches:
-                print(json.dumps(asdict(course), indent=2))
-
-
 if __name__ == "__main__":
     if not PDF_PATH.exists():
         raise SystemExit(f"PDF not found: {PDF_PATH}")
@@ -397,5 +360,3 @@ if __name__ == "__main__":
     save(Timetable(printed_semester, semester_tag, campus, {"doc": PDF_PATH.name}, all_courses), OUTPUT_PATH)
     flagged = sum(course.needs_verification for course in all_courses)
     log.info("Saved %d course entries (%d flagged for verification) to %s", len(all_courses), flagged, OUTPUT_PATH)
-    if sys.stdin.isatty():
-        ask_loop(all_courses)

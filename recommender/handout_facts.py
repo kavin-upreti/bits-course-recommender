@@ -1,4 +1,4 @@
-"""Handout rows -> one set of clean, tri-state facts per course (todo.md section 3).
+"""Handout rows -> one set of clean, tri-state facts per course.
 
 Every handout filter, dislike penalty and card reads handouts only through `get_course_facts`. A value the handouts
 don't state is None ("couldn't verify"), never False. A course with several handouts gets a value only when they agree.
@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 
 from catalog.models import Course, Handout
 
-# the extractor's component kinds (checked on the real data, todo 0.3)
+# the extractor's component kinds (checked on the real data)
 MIDSEM, COMPRE, QUIZ, PROJECT = "midsem", "compre", "quiz", "project"
 OPEN_BOOK = "OB"
 NUMBER_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
@@ -208,7 +208,7 @@ def _combine(values: list, notes: list[str]) -> tuple[object, str]:
 
 
 def compute_course_facts(code: str, handouts: list[Handout]) -> CourseFacts:
-    """Combine the facts of a course's handouts (step 3 of todo 3.2)."""
+    """Combine the facts of a course's handouts."""
     if not handouts:
         return CourseFacts(code=code, evaluation_parsed=False, notes={"all": "no handout"})
     per_handout = [handout_facts(handout) for handout in sorted(handouts, key=lambda handout: handout.file)]

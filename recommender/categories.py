@@ -1,11 +1,13 @@
-"""Per-programme course categories (ideation Part 6.3, first cut): what each course is *for this programme*.
+"""Per-programme course categories: what each course is *for this programme*.
 
 The same course is a CDC for one programme and an OPEL for another, so this is always computed per programme.
-Dual-degree layer, minor tags and the "not classifiable" flag come later with the full `classify`.
 """
 from catalog.models import AuditCourse, Course, GirCourse, HuelPoolCourse, PatternSlot, Programme, ProgrammeCourse
 
 ELECTIVE_CATEGORIES = ("DEL", "HUEL", "OPEL")
+# CHART courses (named in the chart but in no Bulletin list) are compulsory, so students see them as CDCs; the
+# requirement counts keep them apart.
+DISPLAY_CATEGORY = {"CHART": "CDC"}
 # The Bulletin's "Mathematics Foundation" GIR heading names no courses; students' degree audits list it as these
 # 4 courses / 12 units (checked on an A7 and a B5A8 audit, 2026-09-26).
 MATHS_FOUNDATION = {"MATH F101", "MATH F102", "MATH F113", "MATH F211"}
@@ -18,6 +20,11 @@ def _with_alternatives(links) -> set[str]:
         codes.add(course_code)
         codes.update(alternatives)
     return codes
+
+
+def display_category(category: str) -> str:
+    """The category as students see it (CHART -> CDC)."""
+    return DISPLAY_CATEGORY.get(category, category)
 
 
 def own_disciplines(programme: Programme) -> set[str]:
@@ -41,7 +48,7 @@ def chart_slots(programme: Programme, slot_type: str = "named") -> list[PatternS
 
 def category_map(programme: Programme) -> dict[str, str]:
     """code -> AUDIT / GIR / CDC / CHART / DEL / HUEL / OPEL for every course in the catalog. First match wins,
-    in the order of ideation 6.3.
+    in that order.
 
     CHART = named in the programme's chart but in neither the GIR nor the CDC list (a long tail: code-mapping
     leftovers, programme-specific foundation courses). Compulsory, so never an elective; which requirement it

@@ -1,4 +1,4 @@
-"""Catch course codes in the LLM's reply that no tool returned (todo.md 10.2)."""
+"""Catch course codes in the LLM's reply that no tool returned."""
 import re
 
 from .codes import find_codes

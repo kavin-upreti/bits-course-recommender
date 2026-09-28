@@ -1,4 +1,4 @@
-"""Register -> profile -> past electives -> home (profile summary). Recommendations come later."""
+"""Student pages: register -> profile -> past electives -> home, the semester timetable page and course pages."""
 import re
 from difflib import SequenceMatcher
 
@@ -15,7 +15,7 @@ from django.views.decorators.http import require_POST
 from catalog.models import Course, KnownGap, PatternSlot, Programme
 from recommender.config import DAY_NAMES
 from recommender.context import requirement_status
-from recommender.categories import category_map, chart_slots, elective_choices
+from recommender.categories import category_map, chart_slots, display_category, elective_choices
 from recommender.history import alternative_slots, course_slots, rebuild_inferred_courses
 from recommender.requirements import compulsory_left, elective_needs, minor_progress, semester_load
 from recommender.timetable import (
@@ -100,7 +100,7 @@ def completed_choices(student: Student | None, programme: Programme, planning: t
     if student is not None:
         rows = StudentCourse.objects.filter(student=student, status="completed").select_related("course")
         found = {row.course.code: (row.course, row.semester_taken) for row in rows}
-    else:  # why: the chart comes from the ID, so the first screen can ask too (typed-in electives come later)
+    else:  # why: the chart comes from the ID, so the first screen can ask too (typed-in electives are added later)
         found = {}
         # same rule as rebuild_inferred_courses: no chart for the 2026+ curriculum
         for slot in course_slots(programme) if admission_year < 2026 else []:
@@ -280,24 +280,17 @@ def applicable_gaps(student: Student) -> list[str]:
 
 
 CATEGORY_ORDER = ("CDC", "GIR", "DEL", "HUEL", "OPEL", "AUDIT")
-# why: CHART courses (named in the chart but in no Bulletin list) are compulsory for the degree, so they read as
-# CDCs; recommender/ keeps them apart for the requirement counts
-DISPLAY_CATEGORY = {"CHART": "CDC"}
 # (short form, full form, meaning). "GIR" (General Institutional Requirement) is shown as "Foundation": students
 # didn't recognise the acronym (2026-09-26)
 CATEGORIES = {
     "CDC": ("CDC", "Compulsory Disciplinary Course", "Core courses your degree requires."),
-    "GIR": ("Foundation", "Institute foundation course", "Taken by every BITS student, whatever the branch: the science, maths, engineering and technical-arts basics, plus courses like Environmental Studies. Officially the General Institutional Requirement (GIR). HUELs officially belong to it too, but you choose those, so they're listed on their own."),
+    "GIR": ("Foundation", "Institute foundation course", "Basics every BITS student takes (science, maths, engineering, technical arts, Environmental Studies). Officially the General Institutional Requirement (GIR); HUELs are part of it too but listed on their own."),
     "DEL": ("DEL", "Disciplinary Elective", "Electives from your discipline's list."),
     "HUEL": ("HUEL", "Humanities Elective", "Electives from the humanities pool."),
     "OPEL": ("OPEL", "Open Elective", "Any other course; extra DELs and HUELs count here too."),
     "AUDIT": ("Audit", "Audit course", "No credit; never counted."),
 }
 KEY = [(code, *CATEGORIES[code]) for code in CATEGORY_ORDER]
-
-
-def display_category(category: str) -> str:
-    return DISPLAY_CATEGORY.get(category, category)
 
 
 def semester_key(label: str) -> tuple[int, int]:
@@ -519,10 +512,11 @@ def timetable_context(codes: list[str], highlight: set[str] | None = None, filte
     offerings = offerings_for(codes)
     offered = [offerings[code] for code in codes if code in offerings]
     timetables = generate(offered, order=filters.key)
-    filters.prefer_teachers(list({id(pick): pick for tt in timetables for pick in tt.picks}.values()))
+    picks = list({id(pick): pick for tt in timetables for pick in tt.picks}.values())  # a pick is shared by timetables
+    filters.prefer_teachers(picks)
     last_period = max([10] + [period for tt in timetables for _, period in tt.by_slot])
     times = period_times()
-    for pick in {id(pick): pick for tt in timetables for pick in tt.picks}.values():
+    for pick in picks:
         pick.when = timing_text(pick.section.timings, times)
         pick.cat = display_category((categories or {}).get(pick.code, ""))
         pick.letter = pick.type[0].upper()  # L / T / P

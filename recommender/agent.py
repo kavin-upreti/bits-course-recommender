@@ -1,4 +1,4 @@
-"""One chat message -> reply + course cards (todo.md section 10). No history: every message starts fresh.
+"""One chat message -> reply + course cards. No history: every message starts fresh.
 
 The LLM only picks tools and arguments and writes the reply; every academic decision is made by the tools.
 Nothing about the student is sent to the LLM.

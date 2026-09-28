@@ -1,4 +1,4 @@
-"""run_agent with a scripted FakeLLM (todo.md 10.4, tests 1-12). No network."""
+"""run_agent with a scripted FakeLLM. No network."""
 import json
 from unittest.mock import patch
 
@@ -204,7 +204,7 @@ class EndpointTests(Catalog):
     def test_chat_page(self):
         page = self.client.get("/chat/")
         self.assertContains(page, "Suggest DELs related to AI")
-        self.assertContains(page, "Each question is answered on its own.")
+        self.assertContains(page, "Each message is answered on its own")
 
 
 class PickingTests(Catalog):

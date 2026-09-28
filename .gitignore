@@ -18,3 +18,12 @@ dataset/code processed/handouts_old.json
 # Django
 db.sqlite3
 dataset/ingest_report.json
+
+# personal notes and tooling, kept local
+ideation_final.md
+ideation_raw.txt
+ideas.txt
+stufftomentionlater.txt
+todo.md
+code_guide.html
+.claude/

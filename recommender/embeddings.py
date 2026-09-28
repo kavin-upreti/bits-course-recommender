@@ -1,4 +1,4 @@
-"""Sentence embeddings for retrieval and a cross-encoder for reranking (todo.md sections 4.3 and 6.4).
+"""Sentence embeddings for retrieval and a cross-encoder for reranking.
 
 Embedding rows are float32 and L2-normalised, so a dot product is the cosine similarity. Each model gets the
 query / passage prefix it was trained with (config.EMBEDDING_PREFIXES): pieces are passages, the student's topic

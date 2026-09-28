@@ -1,4 +1,4 @@
-"""check_plan (todo.md section 7): do these courses fit with the student's current ones? Also used by
+"""check_plan: do these courses fit with the student's current ones? Also used by
 get_eligible_courses to drop courses that can't fit at all. The section search is timetable.generate, the same one
 the timetable page uses."""
 from catalog.models import Course, Offering, Rule

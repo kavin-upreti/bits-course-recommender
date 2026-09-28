@@ -1,4 +1,4 @@
-"""get_remaining_requirements, get_course_details (todo 5.2 / 5.3) and get_eligible_courses (todo 6.8, tests 1-20)."""
+"""get_remaining_requirements, get_course_details and get_eligible_courses."""
 import math
 from io import StringIO
 from unittest.mock import patch
@@ -160,7 +160,7 @@ class StageATests(Catalog):
         compiler.save()
         result = self.result(category="DEL")
         self.assertNotIn("XX F413", self.codes(result))
-        self.assertIn("XX F413 needs XX F211, which you're taking this semester, so you'll be eligible next semester",
+        self.assertIn("XX F413 needs XX F211 (you're taking it now), so you can take it next semester",
                       result["warnings"])
 
     def test_04_unparseable_prerequisite_kept(self):
@@ -191,7 +191,7 @@ class StageATests(Catalog):
         self.student.minor = minor_with("Test minor", [], [self.courses["XX F412"]])
         self.student.save()
         entries = {course["code"]: course for course in self.result(category="DEL")["courses"]}
-        self.assertEqual(entries["XX G511"]["note"], "higher-degree course: at most 1 per semester, needs a minimum CGPA set by the AGC (the number isn't published)")
+        self.assertEqual(entries["XX G511"]["note"], "higher-degree course: max 1 per semester, needs a minimum CGPA (set by the AGC, not published)")
         self.assertEqual(entries["XX F412"]["minor"], "elective")
         self.assertNotIn("minor", entries["XX F411"])
 
@@ -272,7 +272,7 @@ class RankingTests(Catalog):
         self.student.save()
         result = self.result(category="DEL")
         self.assertEqual((result["settings_used"]["ranked_by"], self.codes(result)[0]), ("profile_interests", "XX F412"))
-        self.assertTrue(result["courses"][0]["score"]["why"].startswith("related to your profile interests"))
+        self.assertTrue(result["courses"][0]["score"]["why"].startswith("fits your interests"))
         self.student.interests = []
         self.student.save()
         add_handout(self.courses["XX F413"], attendance_required=True, makeup_allowed=True)
@@ -293,12 +293,11 @@ class RankingTests(Catalog):
         entries = {c["code"]: c for c in self.result(category="DEL", about="nlp")["courses"]}
         score = entries["XX F411"]["score"]
         self.assertEqual((score["relevance"], score["penalty"], score["final"]), (1.0, -0.25, 0.75))
-        self.assertEqual(score["why"], "matches title: Natural Language Processing; 4 quizzes (you'd rather avoid many quizzes); "
-                         "no open-book exams (you'd rather avoid closed-book exams); attendance required (you'd rather avoid "
-                         "strict attendance); compre is 50% (you'd rather avoid a heavy compre); no makeups (you'd rather "
-                         "avoid courses without makeups)")
+        self.assertEqual(score["why"], "matches title: Natural Language Processing; 4 quizzes (you'd rather avoid many); "
+                         "closed-book exams (you'd rather avoid them); attendance required (you'd rather avoid it); "
+                         "compre is 50% (you'd rather avoid a heavy compre); no makeups (you'd rather avoid that)")
         self.assertEqual(entries["XX F412"]["score"]["penalty"], 0.0)  # no handout: unknown facts never penalise
-        self.assertIn("no handout, matched on the Bulletin description only", entries["XX F412"]["score"]["why"])
+        self.assertIn("no handout; matched on the Bulletin text only", entries["XX F412"]["score"]["why"])
 
     def test_12_tie_break_category_then_code(self):
         self.embed({"anything": [1, 0], "Natural Language Processing": [1, 0], "Deep Learning": [1, 0],
@@ -390,8 +389,8 @@ class RequirementStateTests(Catalog):
         self.fill("OPEL", 5)
         result = self.result()
         self.assertEqual((result["searched"], result["courses"]), ([], []))
-        self.assertEqual(result["warnings"], ["Your HUEL, DEL and OPEL requirements are all complete. Any further elective "
-                                              "would be an extra elective (the regulations allow at most 4 extra)."])
+        self.assertEqual(result["warnings"], ["Your HUEL, DEL and OPEL requirements are done. More electives would be "
+                                              "extras (at most 4 allowed)."])
 
     def test_17_opel_includes_dels_once_del_is_complete(self):
         self.fill("DEL", 2)
@@ -459,7 +458,7 @@ class TopicQualityTests(Catalog):
             self.courses[code].save()
         self.embed({"neural networks": [1, 0], "Deep Learning": [1, 0], "Compiler Construction": [-1, 0]})
         warnings = self.result(category="DEL", about="neural networks")["warnings"]
-        self.assertIn("XX F412 needs XX F211, which you're taking this semester, so you'll be eligible next semester", warnings)
+        self.assertIn("XX F412 needs XX F211 (you're taking it now), so you can take it next semester", warnings)
         self.assertFalse(any(warning.startswith("XX F413") for warning in warnings))  # unrelated to the topic
 
 

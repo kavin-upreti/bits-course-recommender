@@ -1,4 +1,4 @@
-"""Every tunable number of the recommender (todo.md section 1). Nothing tunable is hardcoded anywhere else.
+"""Every tunable number of the recommender. Nothing tunable is hardcoded anywhere else.
 
 LLM_PROVIDERS and the API keys come from .env (recommender/llm.py), not from here. The maximum units per semester
 comes from the Rule table (regulations), not from here.
@@ -83,7 +83,7 @@ PROFILE_FLOOR = 0.2                     # without a topic: the profile is what o
 PROFILE_WEIGHT = 0.3                    # boost = weight x (cosine - floor); weights 0.2-0.4 gave the same probe numbers
 GRADE_ORIENTED_FACTOR = 2               # "grades matter a lot": the "did well" part counts this many times
 
-# Evaluation-style dislikes (profile checkboxes) — placeholders, confirm with the user
+# Evaluation-style dislikes (profile checkboxes): each one found lowers a course by DISLIKE_PENALTY
 DISLIKE_PENALTY = 0.05                  # subtracted from the score once per matching dislike
 MANY_QUIZZES_THRESHOLD = 4              # "many quizzes" means quiz_count >= this
 HEAVY_COMPRE_PERCENT = 45               # "heavy compre" means compre_percent >= this

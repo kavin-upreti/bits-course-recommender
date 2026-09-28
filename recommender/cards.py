@@ -1,4 +1,4 @@
-"""Course cards shown under the reply (todo.md 10.3). Built from the database, never from the LLM's text."""
+"""Course cards shown under the reply. Built from the database, never from the LLM's text."""
 from catalog.models import Course
 from students.templatetags.text import course_title
 
@@ -6,7 +6,8 @@ from . import config
 from .codes import find_codes
 from .context import StudentContext
 from .handout_facts import CourseFacts, attendance_text, get_course_facts, makeup_text, number
-from .tools import DISPLAY_CATEGORY, summary
+from .categories import display_category
+from .tools import summary
 
 
 def recommended_codes(reply: str, plans: list[dict], listed: dict[str, dict]) -> list[str]:
@@ -18,9 +19,13 @@ def recommended_codes(reply: str, plans: list[dict], listed: dict[str, dict]) ->
     return codes[:config.MAX_CARDS]
 
 
+def _first_upper(text: str) -> str:
+    """Capitalise the first letter only (str.capitalize would lowercase "BITS")."""
+    return text[:1].upper() + text[1:]
+
+
 def _unknown(facts: CourseFacts, name: str) -> str:
-    text = facts.unknown_text(name)
-    return text[0].upper() + text[1:]
+    return _first_upper(facts.unknown_text(name))
 
 
 def _yes_no(value: bool | None) -> str:
@@ -50,8 +55,8 @@ def card_facts(facts: CourseFacts) -> list[dict]:
         {"label": "Quizzes", "value": quizzes or _unknown(facts, "quiz_count")},
         {"label": "Project", "value": show("project_percent", f"{number(facts.project_percent or 0)}%" if facts.project_percent else "None")},
         {"label": "Open book", "value": show("open_book", _yes_no(facts.open_book))},
-        {"label": "Attendance", "value": attendance.capitalize() if attendance else _unknown(facts, "attendance_required")},
-        {"label": "Makeup", "value": makeup[0].upper() + makeup[1:] if makeup else _unknown(facts, "makeup_allowed")},
+        {"label": "Attendance", "value": _first_upper(attendance) if attendance else _unknown(facts, "attendance_required")},
+        {"label": "Makeup", "value": _first_upper(makeup) if makeup else _unknown(facts, "makeup_allowed")},
     ]
 
 
@@ -75,7 +80,7 @@ def build_card(ctx: StudentContext, course: Course, listed: dict | None, section
     category = ctx.category_map.get(course.code, "")
     card = {
         "code": course.code, "title": course_title(course.title),
-        "category": (listed or {}).get("category") or DISPLAY_CATEGORY.get(category, category),
+        "category": (listed or {}).get("category") or display_category(category),
         "counts_as": (listed or {}).get("counts_as"), "note": (listed or {}).get("note"),
         "units": course.units, "ltpu": ltpu(course),
         "facts": card_facts(get_course_facts(course)), "description": summary(course), "sources": sources(course),

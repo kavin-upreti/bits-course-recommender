@@ -1,4 +1,4 @@
-"""check_plan (todo.md 7.6, tests 1-14)."""
+"""check_plan."""
 from recommender.context import build_context
 from recommender.tools import check_plan
 
