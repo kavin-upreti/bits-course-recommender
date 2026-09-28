@@ -6,7 +6,7 @@ pipeline's answer to the ideal calls is the reference, so the two error sources 
   (topics aren't compared word for word: the next number says whether its topics found the same courses)
 - reference recall: share of the reference courses that reach the student's cards.
 - invented codes: the guardrail had to act. Ranking quality itself is measured without any LLM by embedding_eda.
-Writes docs/eda/chat_eval.md. Uses the free LLM quota: ~2-4 calls per case.
+Writes eda/chat_eval.md. Uses the free LLM quota: ~2-4 calls per case.
 """
 import json
 import time
@@ -22,7 +22,7 @@ from recommender.validation import validate_call
 from students.models import Student
 
 CASES = Path(__file__).resolve().parents[2] / "eda" / "chat_cases.json"
-OUT = settings.BASE_DIR / "docs" / "eda" / "chat_eval.md"
+OUT = settings.BASE_DIR / "eda" / "chat_eval.md"
 COMPARED = ("category", "filters", "count", "avoid_8am", "avoid_day")
 
 

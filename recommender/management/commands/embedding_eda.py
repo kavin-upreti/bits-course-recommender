@@ -6,7 +6,7 @@ Courses ranked = every offered course a pre-2026 student can take (category igno
 
 Per configuration: hit@5, MRR, recall@candidates, median latency per query, and the relevance cutoff that best
 separates expected courses from other candidates (max F1), checked on the no_match queries.
-Writes docs/eda/embedding_eda.md and docs/eda/pieces_per_course.png.
+Writes eda/embedding_eda.md and eda/pieces_per_course.png.
 """
 import json
 import statistics
@@ -27,7 +27,7 @@ from recommender.pieces import build_pieces
 from recommender.ranking import rerank, retrieve
 
 QUERIES = Path(__file__).resolve().parents[2] / "eda" / "queries.json"
-OUT_DIR = settings.BASE_DIR / "docs" / "eda"
+OUT_DIR = settings.BASE_DIR / "eda"
 TOP_K = 5
 MAX_LATENCY = 1.5  # seconds, median per query
 HISTOGRAM_BUCKETS = [(1, 1), (2, 5), (6, 10), (11, 20), (21, 40), (41, 80), (81, 10_000)]

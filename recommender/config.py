@@ -15,7 +15,7 @@ EMBEDDING_PREFIXES = {
 }
 
 # Reranking (stage C2) and the relevance cutoff (C3)
-# EDA 2026-09-28 (docs/eda/embedding_eda.md): e5 + this reranker won (hit@5 0.80, MRR 0.82, 0.15 s per query).
+# EDA 2026-09-28 (eda/embedding_eda.md): e5 + this reranker won (hit@5 0.80, MRR 0.82, 0.15 s per query).
 RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 RERANK_CANDIDATES = 30                  # courses (by embedding score) that reach the reranker
 RERANK_PIECES_PER_COURSE = 3            # best pieces per candidate by embedding, plus its title piece
@@ -36,7 +36,7 @@ NEIGHBOUR_ANCHOR_FLOOR = 0.3            # an anchor needs at least this relevanc
 # Random course pairs: p95 0.28.
 NEIGHBOUR_MIN_SIMILARITY = 0.3
 
-# Same class under two codes (recommender/equivalents.py). EDA 2026-09-27 (docs/eda/equivalence_eda.md): best F1 on
+# Same class under two codes (recommender/equivalents.py). EDA 2026-09-27 (eda/equivalence_eda.md): best F1 on
 # listed pairs (precision 0.87, recall 0.62; the 12 "wrong" pairs above it are renamed titles of the same course)
 EQUIVALENT_TWIN_SIM = 0.99              # two pieces this similar are the same sentence
 EQUIVALENT_OVERLAP = 0.9                # share of the smaller course's pieces with a twin in the other

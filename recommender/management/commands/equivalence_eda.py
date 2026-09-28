@@ -7,7 +7,7 @@ Solids" are separate classes, BIO F243 and BIOT F243 "Genetics" are one) and are
 Pairs the timetable shows as separate classes (lectures never at the same time) are dropped, as in the app.
 Grid: overlap measure x twin similarity x threshold; the best F1 wins, ties to the HIGHER threshold (a false match hides
 a course as "already done", which is worse than showing a duplicate).
-Writes docs/eda/equivalence_eda.md. Uses the stored pieces (run build_embeddings first).
+Writes eda/equivalence_eda.md. Uses the stored pieces (run build_embeddings first).
 """
 import re
 from collections import defaultdict
@@ -24,7 +24,7 @@ from recommender.piece_index import get_piece_index
 TWIN_SIMS = [0.95, 0.97, 0.99]
 MEASURES = ["smaller", "both"]
 THRESHOLDS = [round(0.05 * step, 2) for step in range(1, 21)]
-OUT = settings.BASE_DIR / "docs" / "eda" / "equivalence_eda.md"
+OUT = settings.BASE_DIR / "eda" / "equivalence_eda.md"
 SHOWN = 20
 
 

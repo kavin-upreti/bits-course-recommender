@@ -101,7 +101,7 @@ make-up wording in handouts. Details in the ideation guide.
 
 ## Evaluation
 
-**Ranking, no LLM** (`manage.py embedding_eda` → `docs/eda/embedding_eda.md`): 14 topic queries with hand-picked
+**Ranking, no LLM** (`manage.py embedding_eda` → `eda/embedding_eda.md`): 14 topic queries with hand-picked
 correct courses, over the 539 offered courses, using the app's own code.
 
 | | hit@5 | MRR | per query |
@@ -112,7 +112,7 @@ correct courses, over the 539 offered courses, using the app's own code.
 
 The profile boost was checked on the same queries under 5 different student profiles: hit@5 never dropped.
 
-**The whole assistant, real LLM** (`manage.py chat_eval` → `docs/eda/chat_eval.md`): 30 messages from three
+**The whole assistant, real LLM** (`manage.py chat_eval` → `eda/chat_eval.md`): 30 messages from three
 students, including the brief's four examples. Latest run: the right tool call in 28 of 30 (the other two read
 "a HUEL" as count 1), 69 of 82 expected courses reached the cards, 0 invented courses, 0 tool errors, and all 3
 topics nothing covers (cooking, marine biology) answered with "nothing matches".
@@ -145,18 +145,20 @@ All `.venv/bin/python manage.py ...`:
 |---|---|
 | `ingest [--skip-embeddings] [--wipe-students]` | Reload the catalog from `dataset/`, then build pieces, embeddings and same-class pairs |
 | `build_embeddings` | Rebuild pieces, embeddings and same-class pairs only |
-| `embedding_eda`, `equivalence_eda` | Ranking and same-class evaluations → `docs/eda/` |
-| `chat_eval [--only N ...]` | The whole assistant with the real LLM → `docs/eda/chat_eval.md` |
+| `embedding_eda`, `equivalence_eda` | Ranking and same-class evaluations → `eda/` |
+| `chat_eval [--only N ...]` | The whole assistant with the real LLM → `eda/chat_eval.md` |
 | `handout_facts_report` | How many courses have each handout fact unknown |
 | `llm_smoke_test` | Say hello to each LLM provider (checks keys and model names) |
 
 ## Layout
 
 ```
-extractors/     PDF -> JSON (timetable, Bulletin, handouts) + hand-checked handout values
-dataset/        code processed/ (extractor output), manually processed/ (hand-curated rules)
-catalog/        course / programme / rule models and the ingest command
-students/       registration, profile, home, semester and course pages
-recommender/    requirements, eligibility, ranking, timetable search, the LLM agent and chat page
-docs/eda/       evaluation reports
+extractors/        PDF -> JSON (timetable, Bulletin, handouts) + hand-checked handout values
+dataset/           code processed/ (extractor output), manually processed/ (hand-curated rules)
+bits_recommender/  the Django project: settings and URLs (the three apps below do the work)
+catalog/           app: course / programme / rule models and the ingest command
+students/          app: registration, profile, home, semester and course pages
+recommender/       app: requirements, eligibility, ranking, timetable search, the LLM agent and chat page
+eda/               evaluation reports (ranking, same-class detection, the chat assistant)
+tests/             extractor rule tests (app tests live in each app's tests/)
 ```
