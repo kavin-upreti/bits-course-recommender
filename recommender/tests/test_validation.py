@@ -28,7 +28,7 @@ class ValidationTests(SimpleTestCase):
     def test_errors(self):
         cases = [
             ("nope", {}, "Unknown tool nope. Available: get_remaining_requirements, get_eligible_courses, check_plan, get_course_details."),
-            ("get_eligible_courses", {"topic": "x"}, "Unknown argument topic. Allowed: category, about, filters, count, avoid_8am, avoid_day, exclude."),
+            ("get_eligible_courses", {"topic": "x"}, "Unknown argument topic. Allowed: category, about, branch, filters, count, avoid_8am, avoid_day, exclude."),
             ("get_eligible_courses", {"category": "CDC"}, "category must be one of: HUEL, DEL, OPEL."),
             ("get_eligible_courses", {"about": ["x" * 101]}, "each item of about is too long (at most 100 characters)."),
             ("get_eligible_courses", {"about": ["a"] * 9}, "about must have between 0 and 8 items."),

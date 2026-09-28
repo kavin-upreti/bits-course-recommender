@@ -23,7 +23,7 @@ from students.models import Student
 
 CASES = Path(__file__).resolve().parents[2] / "eda" / "chat_cases.json"
 OUT = settings.BASE_DIR / "eda" / "chat_eval.md"
-COMPARED = ("category", "filters", "count", "avoid_8am", "avoid_day")
+COMPARED = ("category", "filters", "count", "avoid_8am", "avoid_day", "branch")
 
 
 def reference(student: Student, ideal: list[dict]) -> list[str]:
@@ -32,7 +32,7 @@ def reference(student: Student, ideal: list[dict]) -> list[str]:
     codes = []
     for call in ideal:
         result, _ = run(ctx, call.get("category"), call.get("about"), call.get("filters"), call.get("avoid_8am"),
-                        call.get("avoid_day"), None, call.get("count"))
+                        call.get("avoid_day"), None, call.get("count"), call.get("branch"))
         codes += [course["code"] for course in result["courses"] if course["code"] not in codes]
     return codes
 

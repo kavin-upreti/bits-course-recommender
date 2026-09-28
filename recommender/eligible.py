@@ -133,12 +133,15 @@ def plural(categories: list[str]) -> str:
 
 
 def split_branches(about: list[str] | None) -> tuple[list[str], list[str]]:
-    """(department codes, remaining topics). A topic that is only a branch word (config.BRANCH_ALIASES, filler like
-    "courses" ignored) becomes a department filter; anything longer ("financial markets", "maths for ML") stays a topic.
-    why whole-topic only: matching words inside topics would turn "financial markets" into a finance filter."""
+    """(department codes, remaining topics). A phrase that is only a branch word (config.BRANCH_ALIASES, filler like
+    "courses" ignored) gives its departments; anything longer ("financial markets", "maths for ML") stays a topic.
+    Blank and generic phrases ("courses") are dropped. Used for the `branch` argument and for profile phrases."""
     branches, topics = [], []
     for topic in about or []:
-        key = " ".join(word for word in re.findall(r"[a-z]+", topic.lower()) if word not in config.BRANCH_FILLER)
+        words = re.findall(r"[a-z]+", topic.lower())
+        if set(words) <= config.GENERIC_TOPIC_WORDS:  # "" or "courses": nothing to search for
+            continue
+        key = " ".join(word for word in words if word not in config.BRANCH_FILLER)
         codes = config.BRANCH_ALIASES.get(key)
         if codes:
             branches += [code for code in codes if code not in branches]
@@ -397,9 +400,10 @@ def profile_phrases(ctx: StudentContext, ranked_by: str) -> list[tuple[str, str]
     phrases = [(interest, f"matches your interest in {interest}") for interest in
                ([] if ranked_by == "profile_interests" else ctx.interests)]
     for part in re.split(r"[,;/&\n]|\band\b", ctx.strengths):
-        if part.strip():
-            phrases.append((part.strip(), f"matches your strength '{part.strip()}'"))
-    return phrases
+        part = part.strip()[:config.MAX_TOPIC_CHARS]
+        if len(part) >= 2:  # why: "R&D" splits into "R" and "D", which match nothing useful
+            phrases.append((part, f"matches your strength '{part}'"))
+    return phrases[:config.MAX_QUERY_TOPICS]  # each phrase is a search; a long list would slow every question
 
 
 def text_boosts(ctx: StudentContext, ranked_by: str, codes: list[str]) -> dict[str, tuple[float, str]]:
@@ -407,7 +411,7 @@ def text_boosts(ctx: StudentContext, ranked_by: str, codes: list[str]) -> dict[s
     matches (relevance >= RELEVANCE_CUTOFF) count, by their best phrase."""
     found, searched = {}, []
     for phrase, why in profile_phrases(ctx, ranked_by):
-        # a branch word ("maths") is a department, as in a query; the search can't match the abbreviation
+        # a branch word ("maths") boosts that department: the search can't match the abbreviation
         departments, _ = split_branches([phrase])
         for code in codes if departments else []:
             if code.split()[0] in departments and code not in found:
@@ -807,15 +811,21 @@ def course_entry(ctx: StudentContext, candidate: Candidate, verify: bool = False
 
 def run(ctx: StudentContext, category: str | None, about: list[str] | str | None, filters: dict | None,
         avoid_8am: bool | None, avoid_day: str | None, exclude: list[str] | None,
-        count: int | None = None) -> tuple[dict, Pipeline]:
-    """The whole pipeline; returns the tool result and the pipeline (for tests / debug)."""
+        count: int | None = None, branch: str | None = None) -> tuple[dict, Pipeline]:
+    """The whole pipeline; returns the tool result and the pipeline (for tests / debug).
+    why branch is its own argument: most branch words are also ordinary topics ("finance", "physics"), so reading
+    them out of `about` turned "courses on ML and finance" into a finance-only search."""
     settings = resolve_preferences(ctx, avoid_8am, avoid_day)
     exclude_codes, warnings = resolve_exclude(exclude)
     searched, search_warnings, stop = categories_to_search(ctx, category)
     pipeline = Pipeline(ctx, settings, searched, exclude_codes, dict(filters or {}), warnings + search_warnings)
     courses, unknown, not_offered, unverified_more = [], [], [], 0
     about = [about] if isinstance(about, str) else about  # one topic given as plain text
-    pipeline.branches, about = split_branches(about)
+    about = [topic for topic in about or [] if not set(re.findall(r"[a-z]+", topic.lower())) <= config.GENERIC_TOPIC_WORDS]
+    if branch:
+        pipeline.branches, leftover = split_branches([branch])
+        if not pipeline.branches and leftover:
+            pipeline.warnings.append(f"Unknown subject '{branch}', so the search isn't limited to it.")
     pipeline.topics, ranked_by = query_topics(ctx, about)
     places = 0
     if not stop:
@@ -834,6 +844,10 @@ def run(ctx: StudentContext, category: str | None, about: list[str] | str | None
             not_offered = unoffered_matches(pipeline, courses)
         if ctx.sop_plan and courses:
             pipeline.warnings.append(SOP_NOTE)
+        if not courses and pipeline.removed.get("filters"):
+            # why: otherwise the model sees an empty list and may answer as if nothing exists at all
+            pipeline.warnings.append(f"No course meets every filter you asked for ({len(pipeline.removed['filters'])} were ruled out by them)"
+                                     + ("; the ones under couldn't-verify might, but their handouts don't say." if unknown else "."))
     result = {
         "searched": searched,
         "settings_used": {**settings, "ranked_by": ranked_by, **({"branches": pipeline.branches} if pipeline.branches else {})},

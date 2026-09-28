@@ -5,7 +5,7 @@ from recommender import config
 from recommender.context import build_context
 from recommender.eligible import profile_phrases, split_branches
 
-from .fixtures import make_course, take
+from .fixtures import add_handout, make_course, take
 from .test_eligible import Catalog
 
 # XX F412 Deep Learning sits next to the "neural networks" texts; the other DELs point elsewhere
@@ -88,13 +88,25 @@ class BranchTests(Catalog):
 
     def test_branch_limits_the_search(self):
         with patch.dict(config.BRANCH_ALIASES, {"humanities": ["HSS"], "soil": ["ZZ"]}):
-            result = self.result(about=["humanities courses"])
+            result = self.result(branch="humanities courses")
             self.assertEqual(sorted(self.codes(result)), ["HSS F201", "HSS F202"])
             self.assertEqual(result["settings_used"]["branches"], ["HSS"])
-            self.assertEqual(result["settings_used"]["ranked_by"], "handout_completeness")  # no topic left, no interests
-            result = self.result(category="DEL", about=["soil"])
+            self.assertEqual(result["settings_used"]["ranked_by"], "handout_completeness")  # no topic, no interests
+            result = self.result(category="DEL", branch="soil")
             self.assertEqual(result["courses"], [])
             self.assertIn("No DELs from ZZ are offered this semester.", result["warnings"])
+
+    def test_a_branch_word_in_about_is_just_a_topic(self):
+        # the bug this prevents: "courses on ML and finance" searched only finance departments
+        with patch.dict(config.BRANCH_ALIASES, {"humanities": ["HSS"]}):
+            result = self.result(about=["humanities", "language"])
+        self.assertNotIn("branches", result["settings_used"])
+        self.assertEqual(result["settings_used"]["ranked_by"], "about")
+
+    def test_unknown_branch_is_said_and_ignored(self):
+        result = self.result(category="DEL", branch="astrology")
+        self.assertIn("Unknown subject 'astrology', so the search isn't limited to it.", result["warnings"])
+        self.assertEqual(len(result["courses"]), 3)
 
 
 class ProjectCourseTests(Catalog):
@@ -114,3 +126,26 @@ class BranchStrengthTests(Catalog):
         top = result["courses"][0]
         self.assertTrue(top["code"].startswith("HSS "))
         self.assertIn("matches your strength 'humanities'", top["score"]["why"])
+
+
+class EdgeCaseTests(Catalog):
+    def test_blank_and_generic_topics_are_dropped(self):
+        self.assertEqual(split_branches(["", "  ", "courses", "any electives"]), ([], ["any electives"]))
+        result = self.result(category="DEL", about=[""])
+        self.assertEqual(result["settings_used"]["ranked_by"], "handout_completeness")
+        self.assertFalse(any("matches ''" in warning for warning in result["warnings"]))
+
+    def test_strength_phrases_skip_single_letters_and_are_capped(self):
+        self.student.strengths = "R&D, " + ", ".join(f"topic {n}" for n in range(20)) + ", " + "x" * 300
+        phrases = [phrase for phrase, _ in profile_phrases(build_context(self.student), "profile_interests")]
+        self.assertNotIn("R", phrases)
+        self.assertEqual(len(phrases), config.MAX_QUERY_TOPICS)
+        self.assertTrue(all(len(phrase) <= config.MAX_TOPIC_CHARS for phrase in phrases))
+
+    def test_filters_that_rule_out_everything_are_explained(self):
+        midsem = [{"kind": "midsem", "name": "Midsem", "weightage_percent": 30, "nature": "CB"}]
+        for code in ("XX F411", "XX F412", "XX F413"):
+            add_handout(self.courses[code], evaluation=midsem, file=f"{code}.pdf")
+        result = self.result(category="DEL", filters={"no_midsem": True})
+        self.assertEqual(result["courses"], [])
+        self.assertIn("No course meets every filter you asked for (3 were ruled out by them).", result["warnings"])

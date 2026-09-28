@@ -42,8 +42,8 @@ EQUIVALENT_TWIN_SIM = 0.99              # two pieces this similar are the same s
 EQUIVALENT_OVERLAP = 0.9                # share of the smaller course's pieces with a twin in the other
 EQUIVALENT_MEASURE = "smaller"          # beat "both" at every threshold (F1 0.72 vs 0.47)
 
-# Branch words (eligible.split_branches): a topic that is exactly one of these ("maths", "maths courses") limits the
-# search to those Course.department codes instead of being searched for. Codes checked against the catalogue 2026-09-28.
+# Branch words (eligible.split_branches) -> Course.department codes. Used for get_eligible_courses' `branch` argument
+# ("maths courses on probability") and for profile strengths like "maths". Codes checked against the catalogue 2026-09-28.
 BRANCH_ALIASES = {
     "math": ["MATH"], "maths": ["MATH"], "mathematics": ["MATH"], "mathematical": ["MATH"],
     "eco": ["ECON"], "econ": ["ECON"], "economics": ["ECON"], "finance": ["FIN", "ECON"],
@@ -57,6 +57,9 @@ BRANCH_ALIASES = {
     "humanities": ["HSS"], "general studies": ["GS"], "management": ["MGTS"],
 }
 BRANCH_FILLER = {"course", "courses", "elective", "electives", "subject", "subjects", "department", "branch", "engineering"}
+# A topic made only of these words ("courses", "electives") says nothing to search for, so it's dropped.
+GENERIC_TOPIC_WORDS = {"course", "courses", "elective", "electives", "subject", "subjects"}
+MAX_TOPIC_CHARS = 100                   # a longer profile phrase is cut (the tool schema caps topics at the same length)
 
 # Results
 MAX_RESULTS = 5                         # courses returned per get_eligible_courses call, unless the student asks for a number

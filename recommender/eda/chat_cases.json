@@ -29,13 +29,13 @@
   {"student": "2025A4PS0137P", "message": "project based courses on sustainable energy", "ideal": [{"about": ["sustainable energy"], "filters": {"project_based": true}}]},
   {"student": "2025A4PS0137P", "message": "suggest electives on journalism", "ideal": [{"about": ["journalism"]}]},
   {"student": "2025A4PS0137P", "message": "give me 4 OPELs, no 8 am", "ideal": [{"category": "OPEL", "count": 4, "avoid_8am": true}]},
-  {"student": "2025A7PS0832P", "message": "Suggest some maths courses", "ideal": [{"about": ["maths"]}]},
-  {"student": "2025A7PS0832P", "message": "Maths courses related to probability?", "ideal": [{"about": ["maths", "probability"]}]},
-  {"student": "2025A7PS0832P", "message": "suggest me a course related to media in maths", "ideal": [{"about": ["maths", "media"]}]},
-  {"student": "2024A3PS0832P", "message": "Any economics electives I can take?", "ideal": [{"about": ["economics"]}]},
-  {"student": "2025A4PS0137P", "message": "electrical courses on power systems", "ideal": [{"about": ["electrical", "power systems"]}]},
+  {"student": "2025A7PS0832P", "message": "Suggest some maths courses", "ideal": [{"branch": "maths"}]},
+  {"student": "2025A7PS0832P", "message": "Maths courses related to probability?", "ideal": [{"branch": "maths", "about": ["probability"]}]},
+  {"student": "2025A7PS0832P", "message": "suggest me a course related to media in maths", "ideal": [{"branch": "maths", "about": ["media"]}]},
+  {"student": "2024A3PS0832P", "message": "Any economics electives I can take?", "ideal": [{"branch": "economics"}]},
+  {"student": "2025A4PS0137P", "message": "electrical courses on power systems", "ideal": [{"branch": "electrical", "about": ["power systems"]}]},
   {"student": "2025A7PS0932P", "message": "Finance OPELs please", "ideal": [{"category": "OPEL", "about": ["finance"]}]},
-  {"student": "2024A3PS0832P", "message": "suggest physics courses", "ideal": [{"about": ["physics"]}]},
-  {"student": "2024A3PS0832P", "message": "I want a HUEL in maths", "ideal": [{"category": "HUEL", "about": ["maths"]}]},
-  {"student": "2025A7PS0832P", "message": "computer science courses on machine learning", "ideal": [{"about": ["computer science", "machine learning"]}]}
+  {"student": "2024A3PS0832P", "message": "suggest physics courses", "ideal": [{"branch": "physics"}]},
+  {"student": "2024A3PS0832P", "message": "I want a HUEL in maths", "ideal": [{"category": "HUEL", "branch": "maths"}]},
+  {"student": "2025A7PS0832P", "message": "computer science courses on machine learning", "ideal": [{"branch": "computer science", "about": ["machine learning"]}]}
 ]
