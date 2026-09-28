@@ -48,6 +48,8 @@ cp .env.example .env                      # then add at least one free LLM key (
 .venv/bin/python manage.py runserver      # open http://127.0.0.1:8000, register with your BITS ID
 ```
 
+On Windows, use `py -m venv .venv`, `.venv\Scripts\pip` and `.venv\Scripts\python` in the same commands, and `copy` instead of `cp`.
+
 `.env` keys (see `.env.example`):
 
 | Key | What |
