@@ -78,7 +78,23 @@ Two separate checks, so a miss can be blamed on the right part.
 
 **Ranking, no LLM** (`python manage.py embedding_eda`, report in `docs/eda/embedding_eda.md`): RANKING_RESULTS
 
-**The whole assistant, real LLM** (`python manage.py chat_eval`, report in `docs/eda/chat_eval.md`): CHAT_RESULTS
+**The whole assistant, real LLM** (`python manage.py chat_eval`, report in `docs/eda/chat_eval.md`): 30 messages
+from three students (CS, EEE, Mech), including the four examples from the brief, filters, counts, two-category asks,
+"I've already finished my HUELs", vocabulary gaps (video editing, journalism) and topics no course covers (cooking,
+marine biology). Each message has the tool call a person would make; the pipeline's answer to that call is the
+reference, so this measures only the LLM's part. Run of 2026-09-28:
+
+| | |
+|---|---|
+| tool called with the right category / filters / count / preferences | 29 of 31 calls (the two others were reasonable: "a HUEL" read as count 1; "what suits me" split into one search per category) |
+| reference courses that reached the student's cards | 69 of 85 (81 %); the rest the model left out of its answer (e.g. listing 1 of 5 finance OPELs) |
+| topics nothing matches: no cards, "nothing matches" said | 3 of 3 |
+| courses invented by the model / tool errors | 0 / 0 |
+| median time per message | 6.2 s (free tiers; up to ~70 s when every provider is rate-limited and it backs off) |
+
+The first run found two things that were then fixed: the model dropped filters the student asked for ("no
+attendance requirement", "open book") in 3 of 30 cases, fixed by naming those phrases in the prompt (0 since); and a
+provider answering "200 OK" with an error body crashed the request instead of falling through to the next one.
 
 ## Limitations
 
